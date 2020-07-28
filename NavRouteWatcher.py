@@ -8,7 +8,7 @@ from watchdog.events import PatternMatchingEventHandler
 
 class NavRouteWatcher:
 
-    def _extract_nav_route_from_file(nav_route):
+    def _extract_nav_route_from_file(nav_route: str):
         with open(nav_route, 'r') as read_file:
             content = read_file.read()
             if len(content) is 0:
@@ -20,7 +20,7 @@ class NavRouteWatcher:
 
     class _NewRouteHandler(PatternMatchingEventHandler):
 
-        def __init__(self, patterns=None):
+        def __init__(self):
             super(NavRouteWatcher._NewRouteHandler, self).__init__(
                 patterns=['*NavRoute.json'],
                 ignore_patterns=[],
@@ -36,7 +36,6 @@ class NavRouteWatcher:
             new_route = NavRouteWatcher._extract_nav_route_from_file(nav_route_file)
             if new_route:
                 self.on_new_route(new_route)
-
 
 
     def __init__(self):
