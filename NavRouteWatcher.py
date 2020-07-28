@@ -20,7 +20,12 @@ class NavRouteWatcher:
 
     class _NewRouteHandler(PatternMatchingEventHandler):
 
-        def __init__(self):
+        def __init__(self, patterns=None):
+            super(NavRouteWatcher._NewRouteHandler, self).__init__(
+                patterns=['*NavRoute.json'],
+                ignore_patterns=[],
+                ignore_directories=True)
+
             self.on_new_route = None
 
         def set_callback(self, on_new_route):
@@ -29,15 +34,15 @@ class NavRouteWatcher:
         def on_modified(self, event):
             nav_route_file = str(event.src_path)
             new_route = NavRouteWatcher._extract_nav_route_from_file(nav_route_file)
-            self.on_new_route(new_route)
+            if new_route:
+                self.on_new_route(new_route)
+
+
 
     def __init__(self):
         home = str(Path.home())
         path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous"
-        self.event_handler = NavRouteWatcher._NewRouteHandler(
-            patterns=['*NavRoute.json'],
-            ignore_patterns=[],
-            ignore_directories=True)
+        self.event_handler = NavRouteWatcher._NewRouteHandler()
 
         self.observer = Observer()
         self.observer.schedule(self.event_handler, path, recursive=False)
@@ -52,7 +57,12 @@ class NavRouteWatcher:
 
 
 if __name__ == '__main__':
+
+    def ReportRoute(new_route):
+        print('New route detected:'+str(new_route))
+
     navWatcher = NavRouteWatcher()
+    navWatcher.set_callback(ReportRoute)
 
     print('running')
 
