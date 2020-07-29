@@ -6,6 +6,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 
+
 class NavRouteWatcher:
 
     def _extract_nav_route_from_file(nav_route: str):
