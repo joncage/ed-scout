@@ -2,15 +2,16 @@ import time
 
 from NavRouteWatcher import NavRouteWatcher
 import EDSMInterface
-
+from NavRouteForwarder import Sender
 
 class EDScout:
 
     def __init__(self):
         self.navWatcher = NavRouteWatcher()
-        self.navWatcher.set_callback(EDScout.report_route)
+        self.navWatcher.set_callback(self.report_route)
+        self.sender = Sender()
 
-    def report_route(nav_route):
+    def report_route(self, nav_route):
         print('New route: ')
         for jump_dest in nav_route:
             #print(jump_dest)
@@ -23,13 +24,18 @@ class EDScout:
             if unchartedCheck:
                 chartedCheck = "Uncharted!"
             else:
-                chartedCheck = "Charted: "
+                chartedCheck = "Charted   "
 
             value = None
             if estimatedValue:
-                value = estimatedValue['estimatedValueMapped']
+                value = ": value: "+str(estimatedValue['estimatedValueMapped'])
+            else:
+                value = ""
 
-            print('\t'+jump_dest['StarSystem'] + " (" + jump_dest['StarClass'] + ") "+chartedCheck+" value: "+str(value))
+            message = '\t(%s) %s %s%s'%(jump_dest['StarClass'], chartedCheck, jump_dest['StarSystem'], value)
+            print(message)
+
+            self.sender.send(message)
 
             if not unchartedCheck:
                 for body in estimatedValue['valuableBodies']:

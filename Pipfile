@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 watchdog = "*"
 requests = "*"
+flask-socketio = "*"
+eventlet = "*"
+pyzmq = "*"
 
 [dev-packages]
 
