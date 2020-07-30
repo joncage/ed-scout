@@ -14,6 +14,7 @@
         .system {
             margin-top: 4px;
             padding-left: 10px;
+            text-shadow: 0px 0px 5px,0px 0px 15px;
         }
         .charted {
             color: #9f9f9f;
@@ -70,14 +71,14 @@
                 }
             }
 
-            /*
+            /**
             var exampleData = [
                 {'data': {'type': 'System', 'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}},
                 {'data': {'type': 'System', 'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}}]
 
             postData(exampleData[0])
             postData(exampleData[1])
-            */
+            /**/
 
             socket.on('log', postData)
 
