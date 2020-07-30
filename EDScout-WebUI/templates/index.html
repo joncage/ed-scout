@@ -2,27 +2,89 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <title>Working with Flask and SocketIO</title>
+    <meta charset="utf-8">
+    <title>Working with Flask and SocketIO</title>
+    <style>
+        body {
+            background-color:black;
+            font: 30px Eurostile, sans-serif;
+            text-transform: uppercase;
+        }
+
+        .system {
+            margin-top: 4px;
+            padding-left: 10px;
+        }
+        .charted {
+            color: #9f9f9f;
+            background: #333333;
+        }
+        .uncharted {
+            color: #EAA529;
+            background: #370C03;
+        }
+        .highlighted {
+            color: #370C03;
+            background: #F5A804;
+        }
+    </style>
 </head>
 
-<body style="background-color:black;color:orange">
-  <div id="logger"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
-  <script>
-    (function init() {
-      var socket = io()
-      var loggerElement = document.getElementById('logger')
+<body style="">
+    <div id="logger"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
+    <script>
+        (function init() {
+            var socket = io()
+            var loggerElement = document.getElementById('logger')
 
-      socket.on('log', function(payload) {
-        console.log("Got it!");
-        console.log(payload);
-        var dataElement = document.createElement('pre')
-        dataElement.innerHTML = payload.data
-        loggerElement.appendChild(dataElement)
-      })
-    })()
-  </script>
+            function postData(payload) {
+                console.log(payload);
+                //console.log(payload.data.type);
+                if (payload.data.type == 'NewRoute')
+                {
+                    console.log('Clearing')
+                    loggerElement.innerHTML = ''
+                }
+                else
+                {
+                    var dataElement = document.createElement('div')
+                    systemInfo = payload.data
+                    row = systemInfo.StarClass+' | ' + systemInfo.StarSystem
+
+                    if (systemInfo.charted == true)
+                    {
+                        dataElement.className = "charted system"
+                        console.log('CHARTED')
+                        row += ' | ' + systemInfo.estimatedValueMapped
+                    }
+                    else
+                    {
+                        dataElement.className = "uncharted system"
+                    }
+                    dataElement.innerHTML = row
+
+                    loggerElement.appendChild(dataElement)
+
+
+                }
+            }
+
+            /*
+            var exampleData = [
+                {'data': {'type': 'System', 'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}},
+                {'data': {'type': 'System', 'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}}]
+
+            postData(exampleData[0])
+            postData(exampleData[1])
+            */
+
+            socket.on('log', postData)
+
+
+
+        })()
+    </script>
 </body>
 
 </html>
