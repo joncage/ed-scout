@@ -1,4 +1,5 @@
 import time
+import json
 
 from NavRouteWatcher import NavRouteWatcher
 import EDSMInterface
@@ -13,6 +14,9 @@ class EDScout:
 
     def report_route(self, nav_route):
         print('New route: ')
+
+        self.sender.send(json.dumps({'type':'NewRoute'}))
+
         for jump_dest in nav_route:
             #print(jump_dest)
 
@@ -32,14 +36,25 @@ class EDScout:
             else:
                 value = ""
 
-            message = '\t(%s) %s %s%s'%(jump_dest['StarClass'], chartedCheck, jump_dest['StarSystem'], value)
+            message = 'RouteItem: (%s) %s %s%s'%(jump_dest['StarClass'], chartedCheck, jump_dest['StarSystem'], value)
             print(message)
 
-            self.sender.send(message)
+            report_content = {'type': 'System'}
+            report_content.update(jump_dest)
+            report_content.update(estimatedValue)
+            report_content['charted'] = not unchartedCheck
+
+            #print("type="+str(type(json_report)))
+
+            self.sender.send(json.dumps(report_content))
 
             if not unchartedCheck:
                 for body in estimatedValue['valuableBodies']:
                     print("\t\t"+str(body))
+
+            # RouteItem: (F) Charted    Sifeae QE-Q d5-8: value: 1242216
+            # 		{'bodyId': 226637348, 'bodyName': 'Sifeae QE-Q d5-8 4', 'distance': 847, 'valueMax': 505027}
+            # 		{'bodyId': 226637338, 'bodyName': 'Sifeae QE-Q d5-8 5', 'distance': 1263, 'valueMax': 510505}
 
             # {'StarSystem': 'Wregoe JS-K d8-38', 'SystemAddress': 1316231366987, 'StarPos': [380.375, 215.84375, -299.46875], 'StarClass': 'F'}
             # {'StarSystem': 'Wregoe YI-L b36-2', 'SystemAddress': 5073565066553, 'StarPos': [350.125, 199.0625, -272.78125], 'StarClass': 'M'}
