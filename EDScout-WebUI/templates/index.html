@@ -4,6 +4,9 @@
 <head>
     <meta charset="utf-8">
     <title>Working with Flask and SocketIO</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
     <style>
         body {
             background-color:black;
@@ -12,9 +15,10 @@
         }
 
         .system {
-            margin-top: 4px;
+            margin-top: 2px;
             padding-left: 10px;
-            text-shadow: 0px 0px 5px,0px 0px 15px;
+            text-shadow: 0px 0px 3px;
+            margin-left: 2px;
         }
         .charted {
             color: #9f9f9f;
@@ -31,13 +35,45 @@
     </style>
 </head>
 
-<body style="">
-    <div id="logger"></div>
+<body>
+
+    <div class="container highlighted">
+        <hr>
+    </div>
+    <div id="navroute" class="container">
+        <!--
+      <div class="row">
+        <div class="col-1 system charted text-center">
+          F
+        </div>
+        <div class="col  system charted">
+          PRO EURL YJ-Q D5-18
+        </div>
+        <div class="col-auto system charted text-center">
+          127197 CR
+        </div>
+      </div>
+      <div class="row ">
+        <div class="col-1 system uncharted text-center">
+          K
+        </div>
+        <div class="col system uncharted">
+          EURL DV-E C12-2
+        </div>
+      </div>
+      -->
+        <div class="row">
+            <div class="col system highlighted text-center">Waiting for nav data...</div>
+        </div>
+    </div>
+    <div class="container highlighted">
+        <hr>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
     <script>
         (function init() {
             var socket = io()
-            var loggerElement = document.getElementById('logger')
+            var loggerElement = document.getElementById('navroute')
 
             function postData(payload) {
                 console.log(payload);
@@ -51,18 +87,20 @@
                 {
                     var dataElement = document.createElement('div')
                     systemInfo = payload.data
-                    row = systemInfo.StarClass+' | ' + systemInfo.StarSystem
+
+                    row = '<div class="row">'
 
                     if (systemInfo.charted == true)
                     {
-                        dataElement.className = "charted system"
+                        row += '<div class="col-1 system charted text-center">'+systemInfo.StarClass+'</div><div class="col system charted">'+systemInfo.StarSystem+'</div><div class="col-auto system charted text-center">'+systemInfo.estimatedValueMapped+'</div>'
                         console.log('CHARTED')
-                        row += ' | ' + systemInfo.estimatedValueMapped
                     }
                     else
                     {
-                        dataElement.className = "uncharted system"
+                        row += '<div class="col-1 system uncharted text-center">'+systemInfo.StarClass+'</div><div class="col system uncharted">'+systemInfo.StarSystem+'</div>'
                     }
+                    row += '</div>'
+
                     dataElement.innerHTML = row
 
                     loggerElement.appendChild(dataElement)
