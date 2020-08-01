@@ -89,7 +89,7 @@
                     var dataElement = document.createElement('div')
                     systemInfo = payload.data
 
-                    row = '<div class="row">'
+                    var row = '<div class="row">'
 
                     if (systemInfo.charted == true)
                     {
@@ -105,13 +105,25 @@
                     dataElement.innerHTML = row
 
                     loggerElement.appendChild(dataElement)
-
-
+                    console.log(systemInfo.valuableBodies)
+                    var body;
+                    for (body of systemInfo.valuableBodies)
+                    {
+                        console.log(body)
+                        var dataElement2 = document.createElement('div')
+                        var row2 = '<div class="row">'
+                        row2 += '<div class="col-1 system"></div><div class="col-1 system charted text-center">'+'P'+'</div><div class="col system charted">'+body.bodyName+'</div><div class="col-3 system charted text-center">'+body.valueMax+'</div>'
+                        row2 += '</div>'
+                        console.log('BODY')
+                        dataElement2.innerHTML = row2
+                        loggerElement.appendChild(dataElement2)
+                    }
                 }
             }
 
             /**
             var exampleData = [
+                {'data': {'type': 'System', 'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}},
                 {'data': {'type': 'System', 'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}},
                 {'data': {'type': 'System', 'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}}]
 
