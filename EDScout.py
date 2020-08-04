@@ -55,6 +55,7 @@ class EDScout:
             # RouteItem: (F) Charted    Sifeae QE-Q d5-8: value: 1242216
             # 		{'bodyId': 226637348, 'bodyName': 'Sifeae QE-Q d5-8 4', 'distance': 847, 'valueMax': 505027}
             # 		{'bodyId': 226637338, 'bodyName': 'Sifeae QE-Q d5-8 5', 'distance': 1263, 'valueMax': 510505}
+            # {'data': {'type': 'System', 'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': True}}
 
             # {'StarSystem': 'Wregoe JS-K d8-38', 'SystemAddress': 1316231366987, 'StarPos': [380.375, 215.84375, -299.46875], 'StarClass': 'F'}
             # {'StarSystem': 'Wregoe YI-L b36-2', 'SystemAddress': 5073565066553, 'StarPos': [350.125, 199.0625, -272.78125], 'StarClass': 'M'}
