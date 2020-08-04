@@ -2,6 +2,7 @@ import json
 
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
+from flaskwebgui import FlaskUI #get the FlaskUI class
 
 from NavRouteForwarder import Receiver
 from EDScout import EDScout
@@ -10,6 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 
 socketio = SocketIO(app)
+ui = FlaskUI(app, socketio=socketio)
 thread = None
 
 
@@ -42,4 +44,4 @@ def on_connect():
 
 if __name__ == '__main__':
     scout = EDScout()
-    socketio.run(app)
+    ui.run()

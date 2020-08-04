@@ -9,6 +9,8 @@ requests = "*"
 flask-socketio = "*"
 eventlet = "*"
 pyzmq = "*"
+pyinstaller = "*"
+flaskwebgui = "*"
 
 [dev-packages]
 
