@@ -1,18 +1,49 @@
 import json
 import os
 import sys
+import logging
 
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
-from flaskwebgui import FlaskUI #get the FlaskUI class
+from flaskwebgui import FlaskUI
 
 from EDScoutCore.NavRouteForwarder import Receiver
 from EDScoutCore.EDScout import EDScout
 
+# Check if this has been packaged up for distribution
+is_deployed = hasattr(sys, '_MEIPASS')
+
+# Configure logging
+log = logging.getLogger("EDScoutLogger")
+log.setLevel(logging.DEBUG)
+# create file handler which logs even debug messages
+logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout')
+if not os.path.isdir(logging_dir):
+    os.mkdir(logging_dir)
+logging_path = os.path.join(logging_dir, 'EDScout.log')
+fh = logging.FileHandler(logging_path)
+if is_deployed:
+    log_level = logging.INFO
+else:
+    log_level = logging.DEBUG
+fh.setLevel(log_level)
+formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s',
+                              datefmt='%Y-%m-%d %H:%M:%S')
+fh.setFormatter(formatter)
+log.addHandler(fh)
+if not is_deployed:
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+
+
+log.info("EDScount Started")
+
 # Fudge where the templates are located so they're still found after packaging
 # See https://stackoverflow.com/questions/32149892/flask-application-built-using-pyinstaller-not-rendering-index-html
 base_dir = '.'
-if hasattr(sys, '_MEIPASS'):
+if is_deployed:
     base_dir = os.path.join(sys._MEIPASS)
 
 # Setup the app
@@ -28,19 +59,24 @@ ui = FlaskUI(app, socketio=socketio)
 # Make the global thread used to forward data.
 thread = None
 
-
 def receive_and_forward():
-    welcome_message = "Waiting for nav data.."
-    print(welcome_message)
-    #socketio.emit('log', dict(data=welcome_message), broadcast=True)
+    """
+    Waits for messages sent over the ZMQ link and emits each one via the socketIO link.
+    Runs until the thread it runs on is killed.
+    """
+
+    log.info("Background thread launched and awaiting data..")
     r = Receiver()
 
     while True:
         message = r.receive().decode('ascii')
-        print("Forwarding '"+message+"'")
-        content = dict(data=json.loads(message))
-        print("Forwarding " + str(content))
-        socketio.emit('log', content, broadcast=True)
+        try:
+            log.debug("Received:   '" + message + "'")
+            content = dict(data=json.loads(message))
+            log.debug("Forwarding: '" + str(content) + "'")
+            socketio.emit('log', content, broadcast=True)
+        except Exception as pass_on_failure:
+            log.exception(pass_on_failure)
 
 
 @app.route('/')
@@ -50,8 +86,7 @@ def index():
 
 @socketio.on('connect')
 def on_connect():
-    print("Client connected.")
-    #emit('log', dict(data='Connected'), broadcast=True)
+    log.debug("Client connected.")
 
     global thread
     if thread is None:
@@ -59,5 +94,10 @@ def on_connect():
 
 
 if __name__ == '__main__':
-    scout = EDScout()
-    ui.run()
+    try:
+        scout = EDScout()
+        ui.run()
+    except Exception as e:
+        log.exception(e)
+        raise
+
