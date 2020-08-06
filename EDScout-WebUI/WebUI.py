@@ -1,5 +1,6 @@
 import json
-#import os, sys
+import os
+imtport sys
 
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
@@ -10,21 +11,22 @@ from EDScout import EDScout
 
 # Fudge where the templates are located so they're still found after packaging
 # See https://stackoverflow.com/questions/32149892/flask-application-built-using-pyinstaller-not-rendering-index-html
-import os, sys
 base_dir = '.'
 if hasattr(sys, '_MEIPASS'):
     base_dir = os.path.join(sys._MEIPASS)
 
+# Setup the app
 app = Flask(__name__,
         static_folder=os.path.join(base_dir, 'static'),
         template_folder=os.path.join(base_dir, 'templates'))
 app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 
+# Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
 ui = FlaskUI(app, socketio=socketio)
+
+# Make the global thread used to forward data.
 thread = None
-
-
 
 
 def receive_and_forward():
@@ -40,9 +42,11 @@ def receive_and_forward():
         print("Forwarding " + str(content))
         socketio.emit('log', content, broadcast=True)
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @socketio.on('connect')
 def on_connect():
@@ -55,13 +59,5 @@ def on_connect():
 
 
 if __name__ == '__main__':
-
-    import os, sys
-
-    base_dir = '.'
-    if hasattr(sys, '_MEIPASS'):
-        base_dir = os.path.join(sys._MEIPASS)
-    print('Running from: '+str(base_dir))
-
     scout = EDScout()
     ui.run()
