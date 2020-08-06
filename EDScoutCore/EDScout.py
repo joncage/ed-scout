@@ -1,9 +1,9 @@
 import time
 import json
 
-from NavRouteWatcher import NavRouteWatcher
-import EDSMInterface
-from NavRouteForwarder import Sender
+from EDScoutCore.NavRouteWatcher import NavRouteWatcher
+import EDScoutCore.EDSMInterface as EDSMInterface
+from EDScoutCore.NavRouteForwarder import Sender
 
 class EDScout:
 

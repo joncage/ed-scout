@@ -6,8 +6,8 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 from flaskwebgui import FlaskUI #get the FlaskUI class
 
-from NavRouteForwarder import Receiver
-from EDScout import EDScout
+from EDScoutCore.NavRouteForwarder import Receiver
+from EDScoutCore.EDScout import EDScout
 
 # Fudge where the templates are located so they're still found after packaging
 # See https://stackoverflow.com/questions/32149892/flask-application-built-using-pyinstaller-not-rendering-index-html

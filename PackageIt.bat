@@ -1,3 +1,4 @@
+REM pipenv run pyinstaller EDScout-WebUI\WebUI.py
 pipenv run pyinstaller ^
     --hidden-import=eventlet.hubs.epolls ^
     --hidden-import=eventlet.hubs.kqueue ^
@@ -16,6 +17,7 @@ pipenv run pyinstaller ^
     --hidden-import=engineio.async_drivers.eventlet ^
     --hidden-import=engineio.server ^
     --hidden-import=flaskwebgui ^
-    --onedir EDScout-WebUI\WebUI.py 
-	
-PAUSE
+	--add-data "EDScoutWebUI\templates;templates" ^
+	-y ^
+	--noconsole ^
+    --onefile EDScoutWebUI\EDScout.py 
