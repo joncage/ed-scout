@@ -72,7 +72,17 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
     <script>
+
+
+
         (function init() {
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var url = 'http://127.0.0.1:5001/GUI-is-still-open';
+                fetch(url, { mode: 'no-cors'});
+                setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000)();
+            });
+
             var socket = io()
             var loggerElement = document.getElementById('navroute')
 

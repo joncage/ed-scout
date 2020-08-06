@@ -17,9 +17,9 @@ pipenv run pyinstaller ^
     --hidden-import=engineio.async_drivers.eventlet ^
     --hidden-import=engineio.server ^
     --hidden-import=flaskwebgui ^
-    --add-data "EDScout-WebUI\templates;templates" ^
-    -y ^
-    --console
+	--add-data "EDScout-WebUI\templates;templates" ^
+	-y ^
+	--noconsole ^
     --onefile EDScout-WebUI\WebUI.py 
 
 IF %ERRORLEVEL% NEQ 0 GOTO END
