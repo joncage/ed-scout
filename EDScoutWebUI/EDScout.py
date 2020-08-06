@@ -10,17 +10,22 @@ from flaskwebgui import FlaskUI
 from EDScoutCore.NavRouteForwarder import Receiver
 from EDScoutCore.EDScout import EDScout
 
+__version__ = "1.0.0"
+
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
 
-# Configure logging
-log = logging.getLogger("EDScoutLogger")
-log.setLevel(logging.DEBUG)
-# create file handler which logs even debug messages
+# Work out where to stick the logs and make sure it exists
 logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout')
 if not os.path.isdir(logging_dir):
     os.mkdir(logging_dir)
 logging_path = os.path.join(logging_dir, 'EDScout.log')
+
+# Configure logging
+log = logging.getLogger("EDScoutLogger")
+log.setLevel(logging.DEBUG)
+
+# Logging to file
 fh = logging.FileHandler(logging_path)
 if is_deployed:
     log_level = logging.INFO
@@ -31,14 +36,16 @@ formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s - %(levelname)
                               datefmt='%Y-%m-%d %H:%M:%S')
 fh.setFormatter(formatter)
 log.addHandler(fh)
+
+# More detailed logging to console if not deployed
 if not is_deployed:
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(formatter)
     log.addHandler(ch)
 
-
-log.info("EDScount Started")
+# Lets go!
+log.info("ED Scout Started")
 
 # Fudge where the templates are located so they're still found after packaging
 # See https://stackoverflow.com/questions/32149892/flask-application-built-using-pyinstaller-not-rendering-index-html
@@ -81,7 +88,7 @@ def receive_and_forward():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', version=__version__)
 
 
 @socketio.on('connect')
