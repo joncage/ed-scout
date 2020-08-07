@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import logging
+import argparse
 
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
@@ -11,6 +12,13 @@ from EDScoutCore.NavRouteForwarder import Receiver
 from EDScoutCore.EDScout import EDScout
 
 __version__ = "1.0.0"
+
+
+parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
+parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
+parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
+
+args = parser.parse_args()
 
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
@@ -61,10 +69,12 @@ app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
-ui = FlaskUI(app, socketio=socketio)
+ui = FlaskUI(app, socketio=socketio, host=args.host, port=args.port)
 
 # Make the global thread used to forward data.
 thread = None
+zmq_port_test = None
+
 
 def receive_and_forward():
     """
@@ -73,7 +83,8 @@ def receive_and_forward():
     """
 
     log.info("Background thread launched and awaiting data..")
-    r = Receiver()
+    global zmq_port_test
+    r = Receiver(port=zmq_port_test)
 
     while True:
         message = r.receive().decode('ascii')
@@ -103,6 +114,7 @@ def on_connect():
 if __name__ == '__main__':
     try:
         scout = EDScout()
+        zmq_port_test = scout.port
         ui.run()
     except Exception as e:
         log.exception(e)

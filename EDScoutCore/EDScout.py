@@ -14,6 +14,7 @@ class EDScout:
         self.navWatcher = NavRouteWatcher()
         self.navWatcher.set_callback(self.report_route)
         self.sender = Sender()
+        self.port = self.sender.port
 
     def report_route(self, nav_route):
         logger.debug('New route: ')
