@@ -23,6 +23,16 @@ Note that many systems out there have already been discovered by commanders who 
 * Main star types for each system are listed in the first column.
 * Mapped value of systems (for those that have already been discovered) are displayed in the right-most column.
 
+## Command line options
+
+If you want to make the web UI available to other devices on your network, you can specify a host (set this to [the IP address](https://www.google.com/search?q=how+to+find+the+ip+address+of+a+windows+computer) of the machine running EDSCout) and port as follows:
+
+`EDScout.exe -port 12345 -host 192.168.1.31`
+
+Assuming your computer's firewall allows it, you should then be able to access it from other devices on the local network. For example here it is displaying on my mobile:
+
+![Connecting From Another Device On The Local Network](Images/RunningOnMobile.png)
+
 ## Troubleshooting
 
 * No GUI appears.
