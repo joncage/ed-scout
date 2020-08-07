@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import logging
+import argparse
 
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
@@ -11,6 +12,13 @@ from EDScoutCore.NavRouteForwarder import Receiver
 from EDScoutCore.EDScout import EDScout
 
 __version__ = "1.0.0"
+
+
+parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
+parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
+parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
+
+args = parser.parse_args()
 
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
@@ -61,9 +69,7 @@ app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
-host = "192.168.1.31"
-port = 5000
-ui = FlaskUI(app, socketio=socketio, host=host, port=port)
+ui = FlaskUI(app, socketio=socketio, host=args.host, port=args.port)
 
 # Make the global thread used to forward data.
 thread = None
