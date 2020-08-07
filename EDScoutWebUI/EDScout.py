@@ -61,10 +61,14 @@ app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
-ui = FlaskUI(app, socketio=socketio)
+host = "192.168.1.31"
+port = 5000
+ui = FlaskUI(app, socketio=socketio, host=host, port=port)
 
 # Make the global thread used to forward data.
 thread = None
+zmq_port_test = None
+
 
 def receive_and_forward():
     """
@@ -73,7 +77,8 @@ def receive_and_forward():
     """
 
     log.info("Background thread launched and awaiting data..")
-    r = Receiver()
+    global zmq_port_test
+    r = Receiver(port=zmq_port_test)
 
     while True:
         message = r.receive().decode('ascii')
@@ -103,6 +108,7 @@ def on_connect():
 if __name__ == '__main__':
     try:
         scout = EDScout()
+        zmq_port_test = scout.port
         ui.run()
     except Exception as e:
         log.exception(e)

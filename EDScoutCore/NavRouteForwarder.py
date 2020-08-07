@@ -6,7 +6,8 @@ class Sender:
     def __init__(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.bind("tcp://*:5555")
+        self.port = self.socket.bind_to_random_port("tcp://*")
+
 
     def send(self, message):
         self.socket.send_string(message)
@@ -14,10 +15,10 @@ class Sender:
 
 class Receiver:
 
-    def __init__(self):
+    def __init__(self, port=5555):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect("tcp://127.0.0.1:5555")
+        self.socket.connect("tcp://127.0.0.1:"+str(port))
         self.socket.setsockopt(zmq.SUBSCRIBE, b"")  # b"" allows us to receive all
 
     def receive(self):

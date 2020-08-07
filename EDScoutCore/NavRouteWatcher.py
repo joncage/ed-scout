@@ -6,18 +6,16 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 
-
 class NavRouteWatcher:
 
-    def _extract_nav_route_from_file(nav_route: str):
-        with open(nav_route, 'r') as read_file:
-            content = read_file.read()
-            if len(content) is 0:
-                return {}
+    def __init__(self):
+        home = str(Path.home())
+        path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous"
+        self.event_handler = NavRouteWatcher._NewRouteHandler()
 
-            nav_route = json.loads(content)
-
-            return nav_route['Route']
+        self.observer = Observer()
+        self.observer.schedule(self.event_handler, path, recursive=False)
+        self.observer.start()
 
     class _NewRouteHandler(PatternMatchingEventHandler):
 
@@ -39,14 +37,16 @@ class NavRouteWatcher:
                 self.on_new_route(new_route)
 
 
-    def __init__(self):
-        home = str(Path.home())
-        path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous"
-        self.event_handler = NavRouteWatcher._NewRouteHandler()
+    def _extract_nav_route_from_file(nav_route: str):
+        with open(nav_route, 'r') as read_file:
+            content = read_file.read()
+            if len(content) is 0:
+                return {}
 
-        self.observer = Observer()
-        self.observer.schedule(self.event_handler, path, recursive=False)
-        self.observer.start()
+            nav_route = json.loads(content)
+
+            return nav_route['Route']
+
 
     def set_callback(self, on_new_route):
         self.event_handler.set_callback(on_new_route)
