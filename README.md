@@ -10,7 +10,7 @@ Note that many systems out there have already been discovered by commanders who 
 ## Usage
  
 1. If you don't already have it, install [Google Chrome browser](https://www.google.com/intl/en_uk/chrome/)
-1. Download [the latest release of ED Scout](https://github.com/joncage/ed-scout/releases/tag/v1.0.0)
+1. Download [the latest release of ED Scout](https://github.com/joncage/ed-scout/releases/tag/v1.1.0)
 1. Run `EDScout.exe`
 1. Plot a new route in Galaxy Map and watch EDScout work it's magic; Scouting out which systems in your route have already been explored and how much mapping them is worth.
 
