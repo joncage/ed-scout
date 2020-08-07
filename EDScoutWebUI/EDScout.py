@@ -11,7 +11,7 @@ from flaskwebgui import FlaskUI
 from EDScoutCore.NavRouteForwarder import Receiver
 from EDScoutCore.EDScout import EDScout
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
