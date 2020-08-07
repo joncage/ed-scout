@@ -1,5 +1,6 @@
 import json
 import time
+import os
 
 from pathlib import Path
 from watchdog.observers import Observer
@@ -10,12 +11,16 @@ class NavRouteWatcher:
 
     def __init__(self):
         home = str(Path.home())
-        path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous"
+        self.path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous"
         self.event_handler = NavRouteWatcher._NewRouteHandler()
 
         self.observer = Observer()
-        self.observer.schedule(self.event_handler, path, recursive=False)
+        self.observer.schedule(self.event_handler, self.path, recursive=False)
         self.observer.start()
+
+    def initiate_manually_triggered_event(self):
+        nav_route_file = os.path.join(self.path, "NavRoute.json")
+        self.event_handler.process_nav_file(nav_route_file)
 
     class _NewRouteHandler(PatternMatchingEventHandler):
 
@@ -31,7 +36,10 @@ class NavRouteWatcher:
             self.on_new_route = on_new_route
 
         def on_modified(self, event):
-            nav_route_file = str(event.src_path)
+            self.process_nav_file(str(event.src_path))
+
+        def process_nav_file(self, nav_file):
+            nav_route_file = nav_file
             new_route = NavRouteWatcher._extract_nav_route_from_file(nav_route_file)
             if new_route:
                 self.on_new_route(new_route)
@@ -63,6 +71,7 @@ if __name__ == '__main__':
 
     navWatcher = NavRouteWatcher()
     navWatcher.set_callback(ReportRoute)
+    navWatcher.initiate_manually_triggered_event() # Populate the current route on startup
 
     print('running')
 
