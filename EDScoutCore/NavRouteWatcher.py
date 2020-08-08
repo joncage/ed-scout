@@ -44,9 +44,8 @@ class NavRouteWatcher:
             if new_route:
                 self.on_new_route(new_route)
 
-
-    def _extract_nav_route_from_file(nav_route: str):
-        with open(nav_route, 'r') as read_file:
+    def _extract_nav_route_from_file(nav_route_file: str):
+        with open(nav_route_file, 'r') as read_file:
             content = read_file.read()
             if len(content) is 0:
                 return {}
@@ -54,7 +53,6 @@ class NavRouteWatcher:
             nav_route = json.loads(content)
 
             return nav_route['Route']
-
 
     def set_callback(self, on_new_route):
         self.event_handler.set_callback(on_new_route)
