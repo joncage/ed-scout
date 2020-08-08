@@ -1,72 +1,112 @@
 import json
 import time
 import os
+import glob
 
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
+default_journal_path = os.path.join(str(Path.home()),"Saved Games\\Frontier Developments\\Elite Dangerous")
+journal_file_pattern = "journal.*.log"
+
+
+class JournalChangeIdentifier:
+
+    def __init__(self, journal_path=default_journal_path):
+        pass
+        self.journals = {}
+        self.journal_path = journal_path
+
+        self._init_journal_lists()
+        self._new_journal_entry_callback = None
+
+    def process_journal_change(self, changed_file):
+        new_size = os.stat(changed_file).st_size
+        new_data = None
+        if new_size > 0:  # Don't  try and read it if this is the first notification (we seem to get two; one from the file being cleared).
+
+            # If the game was loaded after the scout it will start a new journal which we need to treat as unscanned.
+            if changed_file not in self.journals:
+                self.journals[changed_file] = 0
+
+            # Check how much it has grown and read the excess
+            size_diff = new_size - self.journals[changed_file]
+            with open(changed_file, 'rb') as file:
+                file.seek(-size_diff, os.SEEK_END)  # Note minus sign
+                new_data = file.read()
+
+        if new_data:
+            new_journal_lines = JournalChangeIdentifier.binary_file_data_to_lines(new_data)
+
+            for line in new_journal_lines:
+                entry = json.loads(line)
+                if entry["event"] != "NavRoute":
+                    entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.
+                    yield entry
+
+    @staticmethod
+    def binary_file_data_to_lines(binary_data):
+        as_ascii = binary_data.decode('UTF-8')
+        all_lines = as_ascii.split("\r\n")
+        all_lines.pop()  # Drop the last empty line
+        return all_lines
+
+
+    def _init_journal_lists(self):
+        journal_files = glob.glob(os.path.join(self.journal_path, journal_file_pattern))
+        for journal_file in journal_files:
+            self.journals[journal_file] = os.stat(journal_file).st_size
+
+
+
 
 class JournalWatcher:
 
-    def _extract_nav_route_from_file(journal_file: str):
+    def __init__(self, path=default_journal_path):
+        self.path = path
+        self._configure_watchers()
 
-        # Check the file size
-        fsize = os.stat(journal_file).st_size
-
-        with open(journal_file, 'r') as read_file:
-            content = read_file.read()
-            if len(content) is 0:
-                return {}
-
-            nav_route = json.loads(content)
-
-            return nav_route['Route']
-
-    class _EntriesChangeHandler(PatternMatchingEventHandler):
-
-        def __init__(self):
-            super(JournalWatcher._EntriesChangeHandler, self).__init__(
-                patterns=['journal*.log'],
-                ignore_patterns=[],
-                ignore_directories=True)
-
-            self.on_new_route = None
-
-        def set_callback(self, on_new_route):
-            self.on_new_route = on_new_route
-
-        def on_modified(self, event):
-            nav_route_file = str(event.src_path)
-            new_route = NavRouteWatcher._extract_nav_route_from_file(nav_route_file)
-            if new_route:
-                self.on_new_route(new_route)
-
-
-    def __init__(self):
-        home = str(Path.home())
-        path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous"
-        self.event_handler = NavRouteWatcher._NewRouteHandler()
-
-        self.observer = Observer()
-        self.observer.schedule(self.event_handler, path, recursive=False)
-        self.observer.start()
-
-    def set_callback(self, on_new_route):
-        self.event_handler.set_callback(on_new_route)
+    def set_callback(self, on_journal_change):
+        self.event_handler.set_callback(on_journal_change)
 
     def stop(self):
         self.observer.stop()
         self.observer.join()
 
+    class _EntriesChangeHandler(PatternMatchingEventHandler):
+
+        def __init__(self):
+            super(JournalWatcher._EntriesChangeHandler, self).__init__(
+                patterns=['*Journal*.log'],
+                ignore_patterns=[],
+                ignore_directories=True)
+
+            self.on_journal_change = None
+
+        def set_callback(self, on_new_journal_entry):
+            self.on_journal_change = on_new_journal_entry
+
+        def on_modified(self, event):
+            changed_file = str(event.src_path)
+            self.on_journal_change(changed_file)
+
+    def _configure_watchers(self):
+        self.event_handler = JournalWatcher._EntriesChangeHandler()
+
+        self.observer = Observer()
+        self.observer.schedule(self.event_handler, self.path, recursive=False)
+        self.observer.start()
+
+
 
 if __name__ == '__main__':
 
-    def ReportRoute(new_route):
-        print('New route detected:'+str(new_route))
+    def ReportJournalChange(journal_hange):
+        print('New route detected:'+str(journal_hange))
 
-    navWatcher = NavRouteWatcher()
-    navWatcher.set_callback(ReportRoute)
+    journalWatcher = JournalWatcher()
+    journalWatcher.set_callback(ReportJournalChange)
 
     print('running')
 
@@ -76,4 +116,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print('done')
 
-    navWatcher.stop()
+    journalWatcher.stop()

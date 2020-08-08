@@ -5,18 +5,32 @@ import logging
 from EDScoutCore.NavRouteWatcher import NavRouteWatcher
 import EDScoutCore.EDSMInterface as EDSMInterface
 from EDScoutCore.NavRouteForwarder import Sender
+from EDScoutCore.JournalWatcher import JournalWatcher, JournalChangeIdentifier
 
 logger = logging.getLogger("EDScoutLogger")
 
 class EDScout:
 
     def __init__(self):
+        # Set up the nav route watcher
         self.navWatcher = NavRouteWatcher()
-        self.navWatcher.set_callback(self.report_route)
+        self.navWatcher.set_callback(self.on_new_route)
+
+        # Setup the journal watcher
+        self.journalWatcher = JournalWatcher()
+        self.journalWatcher.set_callback(self.on_journal_change)
+        self.journalChangeIdentifier = JournalChangeIdentifier()
+
+        # Setup the ZMQ forwarder that'll pass on the log file changes
         self.sender = Sender()
         self.port = self.sender.port
 
-    def report_route(self, nav_route):
+    def on_journal_change(self, altered_journal):
+        for new_entry in self.journalChangeIdentifier.process_journal_change(altered_journal):
+            self.sender.send(json.dumps(new_entry))
+
+
+    def on_new_route(self, nav_route):
         logger.debug('New route: ')
 
         self.sender.send(json.dumps({'type':'NewRoute'}))

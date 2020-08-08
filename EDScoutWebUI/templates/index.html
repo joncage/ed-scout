@@ -16,10 +16,12 @@
         }
 
         .system {
-            margin-top: 2px;
+            margin-top: 1px;
+            margin-bottom: 1px;
             padding-left: 10px;
             text-shadow: 0px 0px 3px;
-            margin-left: 2px;
+            margin-left: 1px;
+            margin-right: 1px;
         }
         .charted {
             color: #9f9f9f;
@@ -33,6 +35,12 @@
             color: #370C03;
             background: #F5A804;
         }
+
+        .current_location {
+            border-style: dotted;
+            border-color: #17EFF9;
+            border-width: 1px;
+        }
     </style>
 </head>
 
@@ -41,28 +49,16 @@
     <div class="container highlighted">
         <hr>
     </div>
+    <div id="location" class="container highlighted">
+        Location: Unknown
+    </div>
+    <div id="targetsys" class="container highlighted">
+        FSD Target: Not Set
+    </div>
+    <div class="container highlighted">
+        <hr>
+    </div>
     <div id="navroute" class="container">
-        <!--
-      <div class="row">
-        <div class="col-1 system charted text-center">
-          F
-        </div>
-        <div class="col  system charted">
-          PRO EURL YJ-Q D5-18
-        </div>
-        <div class="col-auto system charted text-center">
-          127197 CR
-        </div>
-      </div>
-      <div class="row ">
-        <div class="col-1 system uncharted text-center">
-          K
-        </div>
-        <div class="col system uncharted">
-          EURL DV-E C12-2
-        </div>
-      </div>
-      -->
         <div class="row">
             <div class="col system highlighted text-center">Waiting for nav data...</div>
         </div>
@@ -85,6 +81,7 @@
 
             var socket = io()
             var loggerElement = document.getElementById('navroute')
+            const isFirstElemnth = loggerElement.childElementCount === 0
 
             function postData(payload) {
                 console.log(payload);
@@ -93,6 +90,29 @@
                 {
                     console.log('Clearing')
                     loggerElement.innerHTML = ''
+                }
+                else if (payload.data.type == 'JournalEntry')
+                {
+                    if (payload.data.event == "FSDTarget")
+                    {
+                        var loggerElement1 = document.getElementById('targetsys')
+                        loggerElement1.innerHTML = "FSD Target: "+payload.data.Name
+                    }
+                    else if (payload.data.event == "Location")
+                    {
+                        var loggerElement1 = document.getElementById('location')
+                        loggerElement1.innerHTML = "Location: "+payload.data.StarSystem
+                    }
+                    else if (payload.data.event == "StartJump")
+                    {
+                        var loggerElement1 = document.getElementById('location')
+                        loggerElement1.innerHTML = "Starting jump to: "+payload.data.StarSystem
+                    }
+                    else if (payload.data.event == "FSDJump")
+                    {
+                        var loggerElement1 = document.getElementById('location')
+                        loggerElement1.innerHTML = "Location: "+payload.data.StarSystem
+                    }
                 }
                 else
                 {
