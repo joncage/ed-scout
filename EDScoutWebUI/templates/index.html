@@ -177,7 +177,7 @@
 
                 let systemValue = document.createElement('div');
                 systemValue.classList.add("col-3", "system", chartedSpecificStyle, "text-center");
-                systemValue.innerText = systemInfo.estimatedValueMapped;
+                systemValue.innerText = mappedValue;
 
                 row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
 
@@ -185,8 +185,6 @@
             }
 
             function createBodyEntry(body) {
-                let row = document.createElement('div');
-                row.classList.add("row");
 
                 let spacer = document.createElement('div');
                 spacer.classList.add("col-1", "system");
@@ -203,6 +201,8 @@
                 bodyValue.classList.add("col-3", "system", "charted", "text-center");
                 bodyValue.innerText = body.valueMax;
 
+                let row = document.createElement('div');
+                row.classList.add("row");
                 row.innerHTML = spacer.outerHTML+planetSymbol.outerHTML+bodyName.outerHTML+bodyValue.outerHTML;
 
                 return row;
