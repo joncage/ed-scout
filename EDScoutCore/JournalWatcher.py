@@ -2,6 +2,7 @@ import json
 import time
 import os
 import glob
+import logging
 
 from pathlib import Path
 from watchdog.observers import Observer
@@ -10,6 +11,7 @@ from watchdog.events import PatternMatchingEventHandler
 default_journal_path = os.path.join(str(Path.home()),"Saved Games\\Frontier Developments\\Elite Dangerous")
 journal_file_pattern = "journal.*.log"
 
+logger = logging.getLogger("EDScoutLogger")
 
 class JournalChangeIdentifier:
 
@@ -24,26 +26,31 @@ class JournalChangeIdentifier:
     def process_journal_change(self, changed_file):
         new_size = os.stat(changed_file).st_size
         new_data = None
+
+        # If the game was loaded after the scout it will start a new journal which we need to treat as unscanned.
+        if changed_file not in self.journals:
+            self.journals[changed_file] = 0
+
+        logger.debug(f'{changed_file}: {self.journals[changed_file]} ==> {new_size}')
         if new_size > 0:  # Don't  try and read it if this is the first notification (we seem to get two; one from the file being cleared).
-
-            # If the game was loaded after the scout it will start a new journal which we need to treat as unscanned.
-            if changed_file not in self.journals:
-                self.journals[changed_file] = 0
-
             # Check how much it has grown and read the excess
             size_diff = new_size - self.journals[changed_file]
-            with open(changed_file, 'rb') as file:
-                file.seek(-size_diff, os.SEEK_END)  # Note minus sign
-                new_data = file.read()
+            if size_diff > 0:
+                with open(changed_file, 'rb') as f:
+                    f.seek(-size_diff, os.SEEK_END)  # Note minus sign
+                    new_data = f.read()
+                self.journals[changed_file] = new_size
 
         if new_data:
             new_journal_lines = JournalChangeIdentifier.binary_file_data_to_lines(new_data)
 
             for line in new_journal_lines:
+                logger.debug(f'New journal entry detected: {line}')
+
                 try:
                     entry = json.loads(line)
                 except json.decoder.JSONDecodeError as e:
-                    raise Exception("Error decoding '"+line+"'") from e
+                    raise Exception(f"Error decoding '{line}'") from e
 
                 if entry["event"] != "NavRoute":
                     entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.

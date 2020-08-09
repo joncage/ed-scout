@@ -8,7 +8,7 @@ import json
 from EDScoutCore.JournalWatcher import JournalChangeIdentifier, JournalWatcher
 
 
-class TestFatUpdates(unittest.TestCase):
+class TestFastUpdates(unittest.TestCase):
 
     def setUp(self):
         # Create a temporary directory
@@ -53,7 +53,8 @@ class TestFatUpdates(unittest.TestCase):
         return file_chunks
 
     def on_journal_change(self, altered_journal):
-        updates = self.jci.process_journal_change(altered_journal)
+        updates = list(self.jci.process_journal_change(altered_journal))
+        print(f"got: {len(updates)}")
         self.entries_identified.extend(updates)
 
     def test_extract_new_entries_from_file(self):
@@ -63,7 +64,7 @@ class TestFatUpdates(unittest.TestCase):
 
         # simulate a file change event
         for data_chunk in test_data_chunks:
-            with open(self.path_to_watch, "w") as output_file:
+            with open(self.path_to_watch, "a") as output_file:
                 output_file.write(data_chunk)
 
         # Check we captured it all
