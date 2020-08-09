@@ -141,41 +141,26 @@
             }
 
             function createSystemEntry(systemInfo) {
-                var row = document.createElement('div');
+                let row = document.createElement('div');
                 row.classList.add("row");
                 row.id = systemInfo.SystemAddress;
-                if (systemInfo.charted == true)
-                {
-                    var starClass = document.createElement('div');
-                    starClass.classList.add("col-1", "system", "charted","text-center");
-                    starClass.innerText = systemInfo.StarClass;
+                let chartedSpecificStyle = systemInfo.charted?"charted":"uncharted";
+                let mappedValue = systemInfo.charted?systemInfo.estimatedValueMapped:"?";
 
-                    var systemName = document.createElement('div');
-                    systemName.className = "col system charted";
-                    systemName.innerText = systemInfo.StarSystem;
+                let starClass = document.createElement('div');
+                starClass.classList.add("col-1", "system", chartedSpecificStyle,"text-center");
+                starClass.innerText = systemInfo.StarClass;
 
-                    var systemValue = document.createElement('div');
-                    systemValue.className = "col-3 system charted text-center";
-                    systemValue.innerText = systemInfo.estimatedValueMapped;
+                let systemName = document.createElement('div');
+                systemName.classList.add("col", "system", chartedSpecificStyle);
+                systemName.innerText = systemInfo.StarSystem;
 
-                    row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
-                }
-                else
-                {
-                    var starClass = document.createElement('div');
-                    starClass.classList.add("col-1", "system", "uncharted","text-center");
-                    starClass.innerText = systemInfo.StarClass;
+                let systemValue = document.createElement('div');
+                systemValue.classList.add("col-3", "system", chartedSpecificStyle, "text-center");
+                systemValue.innerText = systemInfo.estimatedValueMapped;
 
-                    var systemName = document.createElement('div');
-                    systemName.className = "col system uncharted";
-                    systemName.innerText = systemInfo.StarSystem;
+                row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
 
-                    var systemValue = document.createElement('div');
-                    systemValue.className = "col-3 system uncharted text-center";
-                    systemValue.innerText = "?";
-
-                    row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
-                }
                 return row;
             }
 
