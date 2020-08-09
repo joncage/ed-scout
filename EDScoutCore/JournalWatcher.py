@@ -40,7 +40,11 @@ class JournalChangeIdentifier:
             new_journal_lines = JournalChangeIdentifier.binary_file_data_to_lines(new_data)
 
             for line in new_journal_lines:
-                entry = json.loads(line)
+                try:
+                    entry = json.loads(line)
+                except json.decoder.JSONDecodeError as e:
+                    raise Exception("Error decoding '"+line+"'") from e
+
                 if entry["event"] != "NavRoute":
                     entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.
                     yield entry
