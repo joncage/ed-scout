@@ -141,18 +141,41 @@
             }
 
             function createSystemEntry(systemInfo) {
-                var row = '<div class="row">'
-
+                var row = document.createElement('div');
+                row.classList.add("row");
+                row.id = systemInfo.SystemAddress;
                 if (systemInfo.charted == true)
                 {
-                    row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system charted text-center">'+systemInfo.StarClass+'</div><div class="col system charted">'+systemInfo.StarSystem+'</div><div class="col-3 system charted text-center">'+systemInfo.estimatedValueMapped+'</div>'
-                    console.log('CHARTED')
+                    var starClass = document.createElement('div');
+                    starClass.classList.add("col-1", "system", "charted","text-center");
+                    starClass.innerText = systemInfo.StarClass;
+
+                    var systemName = document.createElement('div');
+                    systemName.className = "col system charted";
+                    systemName.innerText = systemInfo.StarSystem;
+
+                    var systemValue = document.createElement('div');
+                    systemValue.className = "col-3 system charted text-center";
+                    systemValue.innerText = systemInfo.estimatedValueMapped;
+
+                    row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
                 }
                 else
                 {
-                    row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system uncharted text-center">'+systemInfo.StarClass+'</div><div class="col system uncharted">'+systemInfo.StarSystem+'</div>'
+                    var starClass = document.createElement('div');
+                    starClass.classList.add("col-1", "system", "uncharted","text-center");
+                    starClass.innerText = systemInfo.StarClass;
+
+                    var systemName = document.createElement('div');
+                    systemName.className = "col system uncharted";
+                    systemName.innerText = systemInfo.StarSystem;
+
+                    var systemValue = document.createElement('div');
+                    systemValue.className = "col-3 system uncharted text-center";
+                    systemValue.innerText = "?";
+
+                    row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
                 }
-                row += '</div>'
                 return row;
             }
 
@@ -198,17 +221,17 @@
                 }
                 else
                 {
-                    var dataElement = document.createElement('div')
-                    systemInfo = payload.data
+                    var dataElement = document.createElement('div');
+                    systemInfo = payload.data;
 
-                    row = createSystemEntry(systemInfo)
+                    row = createSystemEntry(systemInfo);
 
-                    dataElement.innerHTML = row
+                    dataElement.innerHTML = row.outerHTML;
 
                     loggerElement.appendChild(dataElement)
                     if (systemInfo.valuableBodies)
                     {
-                        console.log("valuableBodies: "+systemInfo.valuableBodies)
+                        console.log("valuableBodies: "+systemInfo.valuableBodies);
                         var body;
                         for (body of systemInfo.valuableBodies)
                         {
