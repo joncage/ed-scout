@@ -31,6 +31,10 @@
             color: #EAA529;
             background: #370C03;
         }
+        .statusInfo {
+            color: #EAA529;
+            background: #370C03;
+        }
         .highlighted {
             color: #370C03;
             background: #F5A804;
@@ -41,31 +45,75 @@
             border-color: #17EFF9;
             border-width: 1px;
         }
+
+        .separator {
+            color: #F5A804;
+            border-color: #F5A804;
+            border-width: 1px 0px 1px 0px;
+            text-shadow: 0px 0px 3px;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="container highlighted">
-        <hr>
+
+    <button id="simulate-startup">Simulate startup</button>
+    <button id="new-route-1">New route</button>
+    <button id="target-first">Target First System</button>
+    <button id="target-last">Target Last System</button>
+    <button id="start-jump">Start Jump</button>
+    <button id="finish-jump">Finish Jump</button>
+
+    <div class="container">
+        <div class="row separator align-items-center">
+            <div class="col"><hr class="separator"/></div>
+            <div class="col-auto">Current System</div>
+            <div class="col"><hr class="separator"/></div>
+        </div>
     </div>
-    <div id="location" class="container highlighted" data-currentSystem="">
-        Location: Unknown
+
+    <div class="container statusInfo">
+        <div id="location" data-currentSystem="" class="row align-items-center">
+            <div class="col system highlighted text-center">Unknown</div>
+        </div>
     </div>
-    <div id="targetsys" class="container highlighted">
-        FSD Target: Not Set
+
+    <div class="container">
+        <div class="row separator align-items-center">
+            <div class="col"><hr class="separator"/></div>
+            <div class="col-auto">Next System</div>
+            <div class="col"><hr class="separator"/></div>
+        </div>
     </div>
-    <div class="container highlighted">
-        <hr>
+
+    <div class="container statusInfo">
+        <div id="target-sys" data-target-sys="" class="row align-items-center">
+            <div class="col system highlighted text-center">Waiting for nav data...</div>
+        </div>
     </div>
-    <div id="navroute" class="container">
+
+    <div class="container">
+        <div class="row separator align-items-center">
+            <div class="col"><hr class="separator"/></div>
+            <div class="col-auto" id="nav-route-label">Nav Route</div>
+            <div class="col"><hr class="separator"/></div>
+        </div>
+    </div>
+
+    <div id="nav-route" class="container">
         <div class="row">
             <div class="col system highlighted text-center">Waiting for nav data...</div>
         </div>
     </div>
-    <div class="container highlighted">
-        <hr>
+
+    <div class="container">
+        <div class="row separator align-items-center">
+            <div class="col"><hr class="separator"/></div>
+        </div>
     </div>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
     <script>
 
@@ -73,28 +121,43 @@
 
         (function init() {
 
-            document.addEventListener('DOMContentLoaded', function() {
-                var url = 'http://127.0.0.1:5001/GUI-is-still-open';
-                fetch(url, { mode: 'no-cors'});
-                setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
-            });
 
-            var socket = io()
-            var loggerElement = document.getElementById('navroute')
-            const isFirstElemnth = loggerElement.childElementCount === 0
 
-            function setCurrentSystem(status, systemId, systemName) {
-                let loggerElement = document.getElementById('location')
-
+            function setCurrentSystem(systemId, systemName) {
+                let locationElement = document.getElementById('location')
+                locationElement.innerHTML = "Location: "+systemName
+                locationElement.setAttribute('data-currentSystem', systemId)
             }
 
-            function setTargetSystem(systemId) {
-
+            function setTargetSystem(systemId, systemName) {
+                let locationElement = document.getElementById('targetsys')
+                locationElement.innerHTML = "FSD Target: "+systemName
+                locationElement.setAttribute('data-targetSystem', systemId)
             }
 
             function startJumpTo(systemId, systemName) {
-
+                let locationElement = document.getElementById('location')
+                locationElement.innerHTML = "Location: Hyperspace to "+systemName
             }
+
+            function createSystemEntry(systemInfo) {
+                var row = '<div class="row">'
+
+                if (systemInfo.charted == true)
+                {
+                    row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system charted text-center">'+systemInfo.StarClass+'</div><div class="col system charted">'+systemInfo.StarSystem+'</div><div class="col-3 system charted text-center">'+systemInfo.estimatedValueMapped+'</div>'
+                    console.log('CHARTED')
+                }
+                else
+                {
+                    row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system uncharted text-center">'+systemInfo.StarClass+'</div><div class="col system uncharted">'+systemInfo.StarSystem+'</div>'
+                }
+                row += '</div>'
+                return row;
+            }
+
+            var loggerElement = document.getElementById('nav-route')
+            const isFirstElemnth = loggerElement.childElementCount === 0
 
             function postData(payload) {
                 console.log(payload);
@@ -108,7 +171,7 @@
                 {
                     if (payload.data.event == "FSDTarget")
                     {
-                        var loggerElement1 = document.getElementById('targetsys')
+                        var loggerElement1 = document.getElementById('target-sys')
                         loggerElement1.innerHTML = "FSD Target: "+payload.data.Name
                         /*
                         <---------- todo;
@@ -121,8 +184,7 @@
                     }
                     else if (payload.data.event == "Location")
                     {
-                        var loggerElement1 = document.getElementById('location')
-                        loggerElement1.innerHTML = "Location: "+payload.data.StarSystem
+                        setCurrentSystem(payload.data.SystemAddress, payload.data.StarSystem)
                     }
                     else if (payload.data.event == "StartJump") // When 3..2..1 starts
                     {
@@ -131,8 +193,7 @@
                     }
                     else if (payload.data.event == "FSDJump") // When you drop out of hyperspace
                     {
-                        var loggerElement1 = document.getElementById('location')
-                        loggerElement1.innerHTML = "Location: "+payload.data.StarSystem
+                        setCurrentSystem(payload.data.SystemAddress, payload.data.StarSyste)
                     }
                 }
                 else
@@ -140,51 +201,110 @@
                     var dataElement = document.createElement('div')
                     systemInfo = payload.data
 
-                    var row = '<div class="row">'
-
-                    if (systemInfo.charted == true)
-                    {
-                        row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system charted text-center">'+systemInfo.StarClass+'</div><div class="col system charted">'+systemInfo.StarSystem+'</div><div class="col-3 system charted text-center">'+systemInfo.estimatedValueMapped+'</div>'
-                        console.log('CHARTED')
-                    }
-                    else
-                    {
-                        row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system uncharted text-center">'+systemInfo.StarClass+'</div><div class="col system uncharted">'+systemInfo.StarSystem+'</div>'
-                    }
-                    row += '</div>'
+                    row = createSystemEntry(systemInfo)
 
                     dataElement.innerHTML = row
 
                     loggerElement.appendChild(dataElement)
-                    console.log(systemInfo.valuableBodies)
-                    var body;
-                    for (body of systemInfo.valuableBodies)
+                    if (systemInfo.valuableBodies)
                     {
-                        console.log(body)
-                        var dataElement2 = document.createElement('div')
-                        var row2 = '<div class="row">'
-                        row2 += '<div class="col-1 system"></div><div class="col-1 system charted text-center">'+'P'+'</div><div class="col system charted">'+body.bodyName+'</div><div class="col-3 system charted text-center">'+body.valueMax+'</div>'
-                        row2 += '</div>'
-                        console.log('BODY')
-                        dataElement2.innerHTML = row2
-                        loggerElement.appendChild(dataElement2)
+                        console.log("valuableBodies: "+systemInfo.valuableBodies)
+                        var body;
+                        for (body of systemInfo.valuableBodies)
+                        {
+                            console.log(body)
+                            var dataElement2 = document.createElement('div')
+                            var row2 = '<div class="row">'
+                            row2 += '<div class="col-1 system"></div><div class="col-1 system charted text-center">'+'P'+'</div><div class="col system charted">'+body.bodyName+'</div><div class="col-3 system charted text-center">'+body.valueMax+'</div>'
+                            row2 += '</div>'
+                            console.log('BODY')
+                            dataElement2.innerHTML = row2
+                            loggerElement.appendChild(dataElement2)
+                        }
                     }
                 }
             }
 
-            /**
-            var exampleData = [
-                {'data': {'type': 'System', 'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}},
-                {'data': {'type': 'System', 'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}},
-                {'data': {'type': 'System', 'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}}]
+            var enableBackendConnections = true;
 
-            postData(exampleData[0])
-            postData(exampleData[1])
+            // Uncomment to debug without needing the backend
             /**/
 
-            socket.on('log', postData)
+            const exampleData =[
+                {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true},
+                {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true},
+                {'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}]
+
+            const locationData =
+                {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" };
+
+            const fsdTargetDataFirst =
+                {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 };
+            const fsdTargetDataLast =
+                {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":"Pro Eurl DV-E c12-2", "SystemAddress":637098300266, "StarClass":"F", "RemainingJumpsInRoute":0 };
+
+            const startJumpData =
+                { "timestamp":"2020-08-08T23:09:43Z", "event":"FSDTarget", "Name":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 };
+
+            const finishJumpData =
+                { "timestamp":"2020-08-08T23:09:55Z", "event":"FSDJump", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarPos":[25.06250,13.53125,19.93750], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Core Sys Sector ON-T b3-5 A", "BodyID":2, "BodyType":"Star", "JumpDist":51.088, "FuelUsed":7.591439, "FuelLevel":24.408562 };
+
+            function PostEntry(type, entryContent) {
+                let wrap = {'data': {'type': type}};
+                wrap.data = $.extend(true, {}, wrap.data, entryContent);
+                postData(wrap);
+            }
+
+            function PostJournalEntry(entryContent) {
+                PostEntry('JournalEntry', entryContent);
+            }
+
+            document.getElementById("simulate-startup").onclick = function fun() {
+                PostJournalEntry(locationData);
+            }
+
+            document.getElementById("new-route-1").onclick = function fun() {
+                postData({'data':{'type':'NewRoute'}});
+                let data;
+                for (data of exampleData)
+                {
+                    PostEntry('System', data);
+                }
+
+                PostJournalEntry(fsdTargetDataFirst);
+            }
+
+            document.getElementById("target-first").onclick = function fun() {
+                PostJournalEntry(fsdTargetDataFirst);
+            }
+
+            document.getElementById("target-last").onclick = function fun() {
+                PostJournalEntry(fsdTargetDataLast);
+            }
+
+            document.getElementById("start-jump").onclick = function fun() {
+                PostJournalEntry(startJumpData);
+            }
+
+            document.getElementById("finish-jump").onclick = function fun() {
+                PostJournalEntry(finishJumpData);
+            }
 
 
+            enableBackendConnections = false;
+
+            /**/
+
+            if (enableBackendConnections) {
+                var socket = io()
+                socket.on('log', postData)
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    var url = 'http://127.0.0.1:5001/GUI-is-still-open';
+                    fetch(url, { mode: 'no-cors'});
+                    setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
+                });
+            }
 
         })()
     </script>
