@@ -83,6 +83,19 @@
             var loggerElement = document.getElementById('navroute')
             const isFirstElemnth = loggerElement.childElementCount === 0
 
+            function setCurrentSystem(status, systemId, systemName) {
+                let loggerElement = document.getElementById('location')
+
+            }
+
+            function setTargetSystem(systemId) {
+
+            }
+
+            function startJumpTo(systemId, systemName) {
+
+            }
+
             function postData(payload) {
                 console.log(payload);
                 //console.log(payload.data.type);
@@ -111,12 +124,12 @@
                         var loggerElement1 = document.getElementById('location')
                         loggerElement1.innerHTML = "Location: "+payload.data.StarSystem
                     }
-                    else if (payload.data.event == "StartJump")
+                    else if (payload.data.event == "StartJump") // When 3..2..1 starts
                     {
                         var loggerElement1 = document.getElementById('location')
                         loggerElement1.innerHTML = "Starting jump to: "+payload.data.StarSystem
                     }
-                    else if (payload.data.event == "FSDJump")
+                    else if (payload.data.event == "FSDJump") // When you drop out of hyperspace
                     {
                         var loggerElement1 = document.getElementById('location')
                         loggerElement1.innerHTML = "Location: "+payload.data.StarSystem
@@ -131,12 +144,12 @@
 
                     if (systemInfo.charted == true)
                     {
-                        row += '<div id="'+str(systemInfo).SystemAddress+'" class="col-1 system charted text-center">'+systemInfo.StarClass+'</div><div class="col system charted">'+systemInfo.StarSystem+'</div><div class="col-3 system charted text-center">'+systemInfo.estimatedValueMapped+'</div>'
+                        row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system charted text-center">'+systemInfo.StarClass+'</div><div class="col system charted">'+systemInfo.StarSystem+'</div><div class="col-3 system charted text-center">'+systemInfo.estimatedValueMapped+'</div>'
                         console.log('CHARTED')
                     }
                     else
                     {
-                        row += '<div id="'+str(systemInfo).SystemAddress+'" class="col-1 system uncharted text-center">'+systemInfo.StarClass+'</div><div class="col system uncharted">'+systemInfo.StarSystem+'</div>'
+                        row += '<div id="'+systemInfo.SystemAddress+'" class="col-1 system uncharted text-center">'+systemInfo.StarClass+'</div><div class="col system uncharted">'+systemInfo.StarSystem+'</div>'
                     }
                     row += '</div>'
 
