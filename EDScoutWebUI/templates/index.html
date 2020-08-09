@@ -76,7 +76,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 var url = 'http://127.0.0.1:5001/GUI-is-still-open';
                 fetch(url, { mode: 'no-cors'});
-                setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000)();
+                setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
             });
 
             var socket = io()
@@ -97,12 +97,14 @@
                     {
                         var loggerElement1 = document.getElementById('targetsys')
                         loggerElement1.innerHTML = "FSD Target: "+payload.data.Name
+                        /*
                         <---------- todo;
                             lookup current 'data-currentSystem' and clear the highlighting of it.
                             set data-currentSystem for current location
                             If a matching system is in the DOM, highlight it instead.
                             Then we just need some clear means of indicating what is current vs targetted vs jumpnig systems
                             Sould also show how many jumps left
+                        */
                     }
                     else if (payload.data.event == "Location")
                     {
