@@ -72,13 +72,13 @@
     <div class="container">
         <div class="row separator align-items-center">
             <div class="col"><hr class="separator"/></div>
-            <div class="col-auto">Current System</div>
+            <div class="col-auto">Current Location</div>
             <div class="col"><hr class="separator"/></div>
         </div>
     </div>
 
-    <div class="container statusInfo">
-        <div id="location" data-currentSystem="" class="row align-items-center">
+    <div id="location" data-currentSystem="" class="container">
+        <div class="row align-items-center statusInfo">
             <div class="col system highlighted text-center">Unknown</div>
         </div>
     </div>
@@ -127,10 +127,21 @@
 
 
 
-            function setCurrentSystem(systemId, systemName) {
+            function setCurrentSystem(systemInfo) {
                 let locationElement = document.getElementById('location');
-                locationElement.innerHTML = "Location: "+systemName;
-                locationElement.setAttribute('data-currentSystem', systemId)
+                locationElement.innerHTML = "";
+                locationElement.setAttribute('data-currentSystem', systemInfo.SystemAddress)
+                locationElement.appendChild(createSystemEntry(systemInfo));
+            }
+
+            function getCurrentSystem() {
+                let locationElement = document.getElementById('location');
+                if (locationElement.hasAttribute('data-currentSystem')) {
+                    return locationElement.getAttribute('data-currentSystem');
+                }
+                else {
+                    return null;
+                }
             }
 
             function setTargetSystem(systemId, systemName) {
@@ -141,7 +152,7 @@
                     previousTarget = locationElement.getAttribute('data-targetSystem')
                     console.log("previously highlighted: "+previousTarget)
                 }
-                locationElement.innerText = "FSD Target: "+systemName;
+                locationElement.innerText = systemName;
                 locationElement.setAttribute('data-targetSystem', systemId.toString());
 
                 // Un-highlight the current target.
@@ -157,7 +168,17 @@
 
             function startJumpTo(systemId, systemName) {
                 let locationElement = document.getElementById('location');
-                locationElement.innerHTML = "Location: Hyperspace to "+systemName
+
+                let content = document.createElement('div');
+                content.classList.add("col","text-center");
+                content.innerText = ">> Hyperspace <<";
+
+                let row = document.createElement('div');
+                row.classList.add("row");
+                row.appendChild(content);
+
+                locationElement.innerHTML = "";
+                locationElement.appendChild(row);
             }
 
             function createSystemEntry(systemInfo) {
@@ -169,7 +190,7 @@
 
                 let starClass = document.createElement('div');
                 starClass.classList.add("col-1", "system", chartedSpecificStyle,"text-center");
-                starClass.innerText = systemInfo.StarClass;
+                starClass.innerText = systemInfo.StarClass?systemInfo.StarClass:"";
 
                 let systemName = document.createElement('div');
                 systemName.classList.add("col", "system", chartedSpecificStyle);
@@ -222,7 +243,7 @@
                 {
                     if (payload.data.event === "FSDTarget")
                     {
-                        setTargetSystem(payload.data.SystemAddress, payload.data.StarSystem);
+                        setTargetSystem(payload.data.SystemAddress, payload.data.Name);
                         /*
                         <---------- todo;
                             lookup current 'data-currentSystem' and clear the highlighting of it.
@@ -234,35 +255,45 @@
                     }
                     else if (payload.data.event === "Location")
                     {
-                        setCurrentSystem(payload.data.SystemAddress, payload.data.StarSystem);
+                        setCurrentSystem(payload.data);
                     }
                     else if (payload.data.event === "StartJump") // When 3..2..1 starts
                     {
-                        var loggerElement1 = document.getElementById('location')
-                        loggerElement1.innerHTML = "Starting jump to: "+payload.data.StarSystem
+                        startJumpTo(payload.data.SystemAddress,payload.data.StarSystem)
                     }
                     else if (payload.data.event === "FSDJump") // When you drop out of hyperspace
                     {
-                        setCurrentSystem(payload.data.SystemAddress, payload.data.StarSystem);
+                        setCurrentSystem(payload.data);
                     }
                 }
                 else
                 {
+                    // We're assuming this is a system info entry
                     let systemInfo = payload.data;
 
-                    let systemEntry = document.createElement('div');
-                    systemEntry.innerHTML = createSystemEntry(systemInfo).outerHTML;
-                    navRouteContainer.appendChild(systemEntry)
+                    let container;
+                    console.log(getCurrentSystem()+' vs '+systemInfo.SystemAddress.toString());
+                    if (getCurrentSystem() === systemInfo.SystemAddress.toString())
+                    {
+                        // This is the current system so we want to update that instead of the nav route
+                        container = document.getElementById('location');
+                        container.innerHTML = '';
+                    }
+                    else
+                    {
+                        // This is not the current system so we want to update the nav route
+                        container = navRouteContainer;
+                    }
+
+                    container.appendChild(createSystemEntry(systemInfo));
 
                     if (systemInfo.valuableBodies)
                     {
                         console.log("valuableBodies: "+systemInfo.valuableBodies);
-                        let body;
-                        for (body of systemInfo.valuableBodies)
+                        for (let body of systemInfo.valuableBodies)
                         {
                             console.log(body);
-                            let dataElement2 = createBodyEntry(body);
-                            navRouteContainer.appendChild(dataElement2)
+                            container.appendChild(createBodyEntry(body));
                         }
                     }
                 }
@@ -287,7 +318,7 @@
                 {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":"Pro Eurl DV-E c12-2", "SystemAddress":637098300266, "StarClass":"F", "RemainingJumpsInRoute":0 };
 
             const startJumpData =
-                { "timestamp":"2020-08-08T23:09:43Z", "event":"FSDTarget", "Name":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 };
+                { "timestamp":"2020-08-08T23:08:14Z", "event":"StartJump", "JumpType":"Hyperspace", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"M" };
 
             const finishJumpData =
                 { "timestamp":"2020-08-08T23:09:55Z", "event":"FSDJump", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarPos":[25.06250,13.53125,19.93750], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Core Sys Sector ON-T b3-5 A", "BodyID":2, "BodyType":"Star", "JumpDist":51.088, "FuelUsed":7.591439, "FuelLevel":24.408562 };
