@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "dad0fc311c7625d9fc0e1d857ffe0d2b51a6b27ea4f78ebb9f60e0bc22762c5d"
+            "sha256": "c99030dcb0a29ef34c0eac038ab52f43b301042e33da7f319f14d5caec848a11"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -58,6 +58,14 @@
             ],
             "index": "pypi",
             "version": "==0.26.1"
+        },
+        "flake8": {
+            "hashes": [
+                "sha256:15e351d19611c887e482fb960eae4d44845013cc142d42896e9862f775d8cf5c",
+                "sha256:f04b9fcbac03b0a3e58c0ab3a0ecc462e023a9faf046d57794184028123aa208"
+            ],
+            "index": "pypi",
+            "version": "==3.8.3"
         },
         "flask": {
             "hashes": [
@@ -117,6 +125,14 @@
             ],
             "version": "==2.10"
         },
+        "importlib-metadata": {
+            "hashes": [
+                "sha256:90bb658cdbbf6d1735b6341ce708fc7024a3e14e99ffdc5783edea9f9b077f83",
+                "sha256:dc15b2969b4ce36305c51eebe62d418ac7791e9a157911d58bfb1f9ccd8e2070"
+            ],
+            "markers": "python_version < '3.8'",
+            "version": "==1.7.0"
+        },
         "itsdangerous": {
             "hashes": [
                 "sha256:321b033d07f2a4136d3ec762eac9f16a10ccd60f53c0c91af90217ace7ba1f19",
@@ -169,6 +185,13 @@
             ],
             "version": "==1.1.1"
         },
+        "mccabe": {
+            "hashes": [
+                "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42",
+                "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"
+            ],
+            "version": "==0.6.1"
+        },
         "monotonic": {
             "hashes": [
                 "sha256:23953d55076df038541e648a53676fb24980f7a1be290cdda21300b3bc21dfb0",
@@ -204,12 +227,33 @@
             ],
             "version": "==5.7.2"
         },
+        "pycodestyle": {
+            "hashes": [
+                "sha256:2295e7b2f6b5bd100585ebcb1f616591b652db8a741695b3d8f5d28bdc934367",
+                "sha256:c58a7d2815e0e8d7972bf1803331fb0152f867bd89adf8a01dfd55085434192e"
+            ],
+            "version": "==2.6.0"
+        },
+        "pyflakes": {
+            "hashes": [
+                "sha256:0d94e0e05a19e57a99444b6ddcf9a6eb2e5c68d3ca1e98e90707af8152c90a92",
+                "sha256:35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"
+            ],
+            "version": "==2.2.0"
+        },
         "pyinstaller": {
             "hashes": [
-                "sha256:3730fa80d088f8bb7084d32480eb87cbb4ddb64123363763cf8f2a1378c1c4b7"
+                "sha256:970beb07115761d5e4ec317c1351b712fd90ae7f23994db914c633281f99bab0"
             ],
             "index": "pypi",
-            "version": "==3.6"
+            "version": "==4.0"
+        },
+        "pyinstaller-hooks-contrib": {
+            "hashes": [
+                "sha256:5b6e06ba6072499189f5b8e1623d5f0414962941aac370ee4f842de25455be5b",
+                "sha256:74936d044f319cd7a9dca322b46a818fcb6e2af1c67af62e8a6a3121eb2863d2"
+            ],
+            "version": "==2020.7"
         },
         "python-engineio": {
             "hashes": [
@@ -308,6 +352,13 @@
                 "sha256:deda9266fbb22b8c64fd3ee45c050d61139cd87419765f588e37c8d23e236dd9"
             ],
             "version": "==0.6.1"
+        },
+        "zipp": {
+            "hashes": [
+                "sha256:aa36550ff0c0b7ef7fa639055d797116ee891440eac1a56f378e2d3179e0320b",
+                "sha256:c599e4d75c98f6798c509911d08a22e6c021d074469042177c8c86fb92eefd96"
+            ],
+            "version": "==3.1.0"
         }
     },
     "develop": {}

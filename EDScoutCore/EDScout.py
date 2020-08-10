@@ -8,6 +8,7 @@ from EDScoutCore.NavRouteForwarder import Sender
 
 logger = logging.getLogger("EDScoutLogger")
 
+
 class EDScout:
 
     def __init__(self):
@@ -17,12 +18,13 @@ class EDScout:
         self.port = self.sender.port
 
     def report_route(self, nav_route):
+
         logger.debug('New route: ')
 
-        self.sender.send(json.dumps({'type':'NewRoute'}))
+        self.sender.send(json.dumps({'type': 'NewRoute'}))
 
         for jump_dest in nav_route:
-            #print(jump_dest)
+            # print(jump_dest)
 
             estimatedValue = EDSMInterface.get_system_estimated_value(jump_dest['StarSystem'])
 
@@ -36,11 +38,11 @@ class EDScout:
 
             value = None
             if estimatedValue:
-                value = ": value: "+str(estimatedValue['estimatedValueMapped'])
+                value = ": value: " + str(estimatedValue['estimatedValueMapped'])
             else:
                 value = ""
 
-            message = 'RouteItem: (%s) %s %s%s'%(jump_dest['StarClass'], chartedCheck, jump_dest['StarSystem'], value)
+            message = 'RouteItem: (%s) %s %s%s' % (jump_dest['StarClass'], chartedCheck, jump_dest['StarSystem'], value)
             logger.debug(message)
 
             report_content = {'type': 'System'}
@@ -52,8 +54,7 @@ class EDScout:
 
             if not unchartedCheck:
                 for body in estimatedValue['valuableBodies']:
-                    logger.debug("\t\t"+str(body))
-
+                    logger.debug("\t\t" + str(body))
 
     def stop(self):
         self.navWatcher.stop()
