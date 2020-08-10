@@ -11,6 +11,7 @@ eventlet = "*"
 pyzmq = "*"
 pyinstaller = "*"
 flaskwebgui = "*"
+pytest = "*"
 
 [dev-packages]
 

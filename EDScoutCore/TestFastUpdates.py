@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import tempfile
 import os
 from shutil import copyfile
@@ -8,9 +8,9 @@ import json
 from EDScoutCore.JournalWatcher import JournalChangeIdentifier, JournalWatcher
 
 
-class TestFastUpdates(unittest.TestCase):
+class TestFastUpdates:
 
-    def setUp(self):
+    def setup_class(self):
         # Create a temporary directory
         self.test_dir = tempfile.TemporaryDirectory()
         self.jw = JournalWatcher(self.test_dir.name)
@@ -22,7 +22,7 @@ class TestFastUpdates(unittest.TestCase):
         self.example_data_file = '..\\ExampleData\\Journal.FastWritesOnStartup.log'
         self.example_data_line_count = 0
 
-    def tearDown(self):
+    def teardown_class(self):
         # Close the file, the directory will be removed after the test
         self.test_dir.cleanup()
 
@@ -68,11 +68,10 @@ class TestFastUpdates(unittest.TestCase):
                 output_file.write(data_chunk)
 
         # Check we captured it all
-        self.assertEqual(self.example_data_line_count, len(self.entries_identified))
+        assert self.example_data_line_count == len(self.entries_identified)
 
 
-if __name__ == '__main__':
-    unittest.main()
+
 
 
 
