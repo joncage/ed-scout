@@ -45,6 +45,11 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
+### 1.1.0 - More options
+
+* Added commandline options to set port and host to enable external devices to connect to the UI.
+* Fixed a crash when multiple instances are opened.
+
 ### 1.0.0 - Initial release
 
 * Written in Python.
