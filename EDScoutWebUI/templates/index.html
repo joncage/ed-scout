@@ -61,13 +61,14 @@
 
 <body>
 
-
+<!--
     <button id="simulate-startup">Simulate startup</button>
     <button id="new-route-1">New route</button>
     <button id="target-first">Target First System</button>
     <button id="target-last">Target Last System</button>
     <button id="start-jump">Start Jump</button>
     <button id="finish-jump">Finish Jump</button>
+    -->
 
     <div class="container">
         <div class="row separator align-items-center">
@@ -128,6 +129,7 @@
 
 
             function setCurrentSystem(systemInfo) {
+                console.log("Setting current");
                 let locationElement = document.getElementById('location');
                 locationElement.innerHTML = "";
                 locationElement.setAttribute('data-currentSystem', systemInfo.SystemAddress)
@@ -263,6 +265,7 @@
                     }
                     else if (payload.data.event === "FSDJump") // When you drop out of hyperspace
                     {
+                        console.log("Finished jump");
                         setCurrentSystem(payload.data);
                     }
                 }
@@ -302,7 +305,7 @@
             var enableBackendConnections = true;
 
             // Uncomment to debug without needing the backend
-            /**/
+            /**
 
             const exampleData =[
                 {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true},
