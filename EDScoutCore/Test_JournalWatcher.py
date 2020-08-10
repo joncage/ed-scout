@@ -1,4 +1,3 @@
-import unittest
 import tempfile
 import os
 from shutil import copyfile
@@ -7,14 +6,14 @@ from shutil import copyfile
 from EDScoutCore.JournalWatcher import JournalWatcher
 
 
-class TestJournalWatcher(unittest.TestCase):
+class TestJournalWatcher():
 
-    def setUp(self):
+    def setup_class(self):
         # Create a temporary directory
         self.test_dir = tempfile.TemporaryDirectory()
         self.callback_arg = None
 
-    def tearDown(self):
+    def teardown_class(self):
         # Close the file, the directory will be removed after the test
         self.test_dir.cleanup()
 
@@ -36,9 +35,4 @@ class TestJournalWatcher(unittest.TestCase):
             with open(test_input_file_path, "wb") as output_file:
                 output_file.write(input_file.read())
 
-        self.assertEqual(test_input_file_path, self.callback_arg)
-
-
-if __name__ == '__main__':
-    unittest.main()
-
+        assert test_input_file_path == self.callback_arg

@@ -1,4 +1,3 @@
-import unittest
 import tempfile
 import os
 from shutil import copyfile
@@ -7,16 +6,15 @@ from shutil import copyfile
 from EDScoutCore.JournalWatcher import JournalChangeIdentifier
 
 
-class TestJournalWatcher(unittest.TestCase):
+class TestJournalWatcher:
 
-    def setUp(self):
+    def setup_class(self):
         # Create a temporary directory
         self.test_dir = tempfile.TemporaryDirectory()
 
-    def tearDown(self):
+    def teardown_class(self):
         # Close the file, the directory will be removed after the test
         self.test_dir.cleanup()
-
 
     def test_extract_new_entries_from_file(self):
         # setup the test area
@@ -36,13 +34,6 @@ class TestJournalWatcher(unittest.TestCase):
 
         # Expecting the following as a json object
         #    { "timestamp":"2020-07-25T20:12:47Z", "event":"FSDTarget", "Name":"Plio Eurl JA-K c10-1", "SystemAddress":360878510682, "StarClass":"K", "RemainingJumpsInRoute":12 }'
-        self.assertEqual(1, len(changed_lines))
+        assert 1 == len(changed_lines)
         json_entry = changed_lines[0]
-        self.assertTrue(isinstance(json_entry, dict))
-        self.assertTrue(isinstance(json_entry, dict))
-
-
-
-if __name__ == '__main__':
-    unittest.main()
-
+        assert isinstance(json_entry, dict)
