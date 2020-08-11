@@ -26,14 +26,17 @@ class EDScout:
         self.port = self.sender.port
 
     def on_journal_change(self, altered_journal):
+        excluded_event_types = ["NavRoute", "Music", "ReceiveText", "FuelScoop"]
+
         for new_entry in self.journalChangeIdentifier.process_journal_change(altered_journal):
-            self.sender.send(json.dumps(new_entry))
+            if new_entry["event"] not in excluded_event_types:
+                self.report_new_info(new_entry)
 
 
     def on_new_route(self, nav_route):
         logger.debug('New route: ')
 
-        self.sender.send(json.dumps({'type':'NewRoute'}))
+        self.report_new_info({'type': 'NewRoute'})
 
         for jump_dest in nav_route:
             #print(jump_dest)
@@ -62,11 +65,14 @@ class EDScout:
             report_content.update(estimatedValue)
             report_content['charted'] = not unchartedCheck
 
-            self.sender.send(json.dumps(report_content))
+            self.report_new_info(report_content)
 
             if not unchartedCheck:
                 for body in estimatedValue['valuableBodies']:
                     logger.debug("\t\t"+str(body))
+
+    def report_new_info(self, new_info):
+        self.sender.send(json.dumps(new_info))
 
 
     def stop(self):
