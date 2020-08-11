@@ -44,6 +44,7 @@ class NavRouteWatcher:
             if new_route:
                 self.on_new_route(new_route)
 
+    @staticmethod
     def _extract_nav_route_from_file(nav_route_file: str):
         with open(nav_route_file, 'r') as read_file:
             content = read_file.read()
