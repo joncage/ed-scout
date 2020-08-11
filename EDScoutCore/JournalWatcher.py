@@ -1,3 +1,4 @@
+from inspect import signature
 import json
 import time
 import os
@@ -70,8 +71,6 @@ class JournalChangeIdentifier:
             self.journals[journal_file] = os.stat(journal_file).st_size
 
 
-
-
 class JournalWatcher:
 
     def __init__(self, path=default_journal_path):
@@ -100,6 +99,7 @@ class JournalWatcher:
 
         def on_modified(self, event):
             changed_file = str(event.src_path)
+            print("journal change: " + str(signature(self.on_journal_change)))
             self.on_journal_change(changed_file)
 
     def _configure_watchers(self):
@@ -108,7 +108,6 @@ class JournalWatcher:
         self.observer = Observer()
         self.observer.schedule(self.event_handler, self.path, recursive=False)
         self.observer.start()
-
 
 
 if __name__ == '__main__':

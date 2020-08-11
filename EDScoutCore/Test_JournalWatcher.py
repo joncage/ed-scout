@@ -8,12 +8,12 @@ from EDScoutCore.JournalWatcher import JournalWatcher
 
 class TestJournalWatcher():
 
-    def setup_class(self):
+    def setup_method(self):
         # Create a temporary directory
         self.test_dir = tempfile.TemporaryDirectory()
         self.callback_arg = None
 
-    def teardown_class(self):
+    def teardown_method(self):
         # Close the file, the directory will be removed after the test
         self.test_dir.cleanup()
 
@@ -21,6 +21,7 @@ class TestJournalWatcher():
         self.callback_arg = callback_arg
 
     def test_extract_new_entries_from_file(self):
+
         # setup the test area
         file_to_watch = "Journal.200725210202.01.log"
         test_input_file_path = os.path.join(self.test_dir.name, file_to_watch)
@@ -36,3 +37,4 @@ class TestJournalWatcher():
                 output_file.write(input_file.read())
 
         assert test_input_file_path == self.callback_arg
+

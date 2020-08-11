@@ -10,19 +10,19 @@ from EDScoutCore.JournalWatcher import JournalChangeIdentifier, JournalWatcher
 
 class TestFastUpdates:
 
-    def setup_class(self):
+    def setup_method(self):
         # Create a temporary directory
         self.test_dir = tempfile.TemporaryDirectory()
         self.jw = JournalWatcher(self.test_dir.name)
+        self.jw.set_callback(self.on_journal_change)
         self.jci = JournalChangeIdentifier(self.test_dir.name)
         self.file_to_watch = "Journal.200725210202.01.log"
         self.path_to_watch = os.path.join(self.test_dir.name, self.file_to_watch)
-        self.jw.set_callback(self.on_journal_change)
         self.entries_identified = []
         self.example_data_file = '..\\ExampleData\\Journal.FastWritesOnStartup.log'
         self.example_data_line_count = 0
 
-    def teardown_class(self):
+    def teardown_method(self):
         # Close the file, the directory will be removed after the test
         self.test_dir.cleanup()
 

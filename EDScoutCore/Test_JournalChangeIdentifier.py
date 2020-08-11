@@ -8,11 +8,11 @@ from EDScoutCore.JournalWatcher import JournalChangeIdentifier
 
 class TestJournalWatcher:
 
-    def setup_class(self):
+    def setup_method(self):
         # Create a temporary directory
         self.test_dir = tempfile.TemporaryDirectory()
 
-    def teardown_class(self):
+    def teardown_method(self):
         # Close the file, the directory will be removed after the test
         self.test_dir.cleanup()
 
