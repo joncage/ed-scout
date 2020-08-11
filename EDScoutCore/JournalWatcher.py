@@ -40,22 +40,28 @@ class JournalChangeIdentifier:
                 with open(changed_file, 'rb') as f:
                     f.seek(-size_diff, os.SEEK_END)  # Note minus sign
                     new_data = f.read()
-                self.journals[changed_file] = new_size
+
+
+        entries = []
 
         if new_data:
             new_journal_lines = JournalChangeIdentifier.binary_file_data_to_lines(new_data)
 
-            for line in new_journal_lines:
-                logger.debug(f'New journal entry detected: {line}')
+            try:
+                for line in new_journal_lines:
+                    logger.debug(f'New journal entry detected: {line}')
 
-                try:
                     entry = json.loads(line)
-                except json.decoder.JSONDecodeError as e:
-                    raise Exception(f"Error decoding '{line}'") from e
 
-                if entry["event"] != "NavRoute":
                     entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.
+                    entries.append(entry)
+
+                for entry in entries:
                     yield entry
+                self.journals[changed_file] = new_size
+
+            except json.decoder.JSONDecodeError as e:
+                logger.exception(e)
 
     @staticmethod
     def binary_file_data_to_lines(binary_data):
