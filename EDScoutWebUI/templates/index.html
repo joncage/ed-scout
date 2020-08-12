@@ -72,15 +72,6 @@
 
 <body>
 
-<!-- --
-    <button id="simulate-startup">Simulate startup</button>
-    <button id="new-route-1">New route</button>
-    <button id="target-first">Target First System</button>
-    <button id="target-last">Target Last System</button>
-    <button id="start-jump">Start Jump</button>
-    <button id="finish-jump">Finish Jump</button>
-<!--    -->
-
     <div class="container">
         <div class="row separator align-items-center">
             <div class="col"><hr class="separator"/></div>
@@ -387,7 +378,7 @@
             var enableBackendConnections = true;
 
             // Uncomment to debug without needing the backend
-            /**
+            /**/
 
             const exampleData =[
                 {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true},
@@ -408,6 +399,12 @@
             const finishJumpData =
                 { "timestamp":"2020-08-08T23:09:55Z", "event":"FSDJump", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarPos":[25.06250,13.53125,19.93750], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Core Sys Sector ON-T b3-5 A", "BodyID":2, "BodyType":"Star", "JumpDist":51.088, "FuelUsed":7.591439, "FuelLevel":24.408562 };
 
+            function WrapWithEventType(type, entryContent) {
+                let wrap = {'data': {'type': type}};
+                wrap.data = $.extend(true, {}, wrap.data, entryContent);
+                return wrap;
+            }
+
             function PostEntry(type, entryContent) {
                 let wrap = {'data': {'type': type}};
                 wrap.data = $.extend(true, {}, wrap.data, entryContent);
@@ -418,7 +415,7 @@
                 PostEntry('JournalEntry', entryContent);
             }
 
-            document.getElementById("simulate-startup").onclick = function fun() {
+            /*document.getElementById("simulate-startup").onclick = function fun() {
                 PostJournalEntry(locationData);
             }
 
@@ -447,8 +444,87 @@
 
             document.getElementById("finish-jump").onclick = function fun() {
                 PostJournalEntry(finishJumpData);
+            }*/
+
+
+            let tests = {};
+
+            tests["just-startup"] = [
+                // Simulate a normal startup
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
+            ];
+
+            tests["planets-and-systems-listed-after-nav-route-sent"] = [
+                // Simulate a normal startup
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
+                // Plot a nav route
+                WrapWithEventType("NewRoute"),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("System", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false})
+            ];
+
+            tests["planets-and-systems-removed-when-jump-finishes"] = [
+                // Simulate a normal startup
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
+                // Plot a nav route
+                WrapWithEventType("NewRoute"),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("System", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}),
+                // Do the jump
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:08:14Z", "event":"StartJump", "JumpType":"Hyperspace", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"M" }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl DV-E c12-2', "SystemAddress":637098300266, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:09:55Z", "event":"FSDJump", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarPos":[25.06250,13.53125,19.93750], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Core Sys Sector ON-T b3-5 A", "BodyID":2, "BodyType":"Star", "JumpDist":51.088, "FuelUsed":7.591439, "FuelLevel":24.408562 })
+            ];
+
+            tests["planets-and-systems-removed-when-jump-finishes-after-missed-startup"] = [
+                // Plot a nav route
+                WrapWithEventType("NewRoute"),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("System", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}),
+                // Do the jump
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:08:14Z", "event":"StartJump", "JumpType":"Hyperspace", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"M" }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl DV-E c12-2', "SystemAddress":637098300266, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:09:55Z", "event":"FSDJump", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarPos":[25.06250,13.53125,19.93750], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Core Sys Sector ON-T b3-5 A", "BodyID":2, "BodyType":"Star", "JumpDist":51.088, "FuelUsed":7.591439, "FuelLevel":24.408562 })
+            ];
+
+            function runTest(testId){
+                console.log("TESTING...")
+                console.log(testId)
+
+                let data;
+                for (data of tests[testId])
+                {
+                    postData(data);
+                }
             }
 
+
+            function addTest(testId) {
+                let newButton = document.createElement('button')
+                newButton.id = testId;
+                newButton.innerText = testId;
+                newButton.onclick = function() { runTest(testId); }
+
+                document.body.appendChild(newButton);
+                document.body.appendChild(document.createElement("br"))
+            }
+
+            console.log("keys...")
+            console.log(Object.keys(tests))
+
+            let testId;
+            for (testId of Object.keys(tests))
+            {
+                console.log("key...")
+                console.log(testId)
+                addTest(testId);
+            }
 
             enableBackendConnections = false;
 
@@ -468,6 +544,17 @@
 
         })()
     </script>
+
+<!-- --
+    <button id="simulate-startup">Simulate startup</button>
+    <button id="new-route-1">New route</button>
+    <button id="target-first">Target First System</button>
+    <button id="target-last">Target Last System</button>
+    <button id="start-jump">Start Jump</button>
+    <button id="finish-jump">Finish Jump</button>
+<!--    -->
+
+
 </body>
 
 </html>
