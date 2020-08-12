@@ -25,13 +25,70 @@ class EDScout:
         self.sender = Sender()
         self.port = self.sender.port
 
+    @staticmethod
+    def requires_system_lookup(new_event):
+        return new_event["event"] in ["FSDTarget", "Location", "FSDJump"]
+
+    @staticmethod
+    def get_estimated_value_info(system_id):
+        estimatedValue = EDSMInterface.get_system_estimated_value(system_id)
+        return None
+
+    @staticmethod
+    def create_system_report(journal_entry):
+        # Simulating something like a nav event:
+        # { "timestamp":"2020-08-12T00:19:35Z", "event":"NavRoute", "Route":[
+        # { "StarSystem":"Col 285 Sector GL-T b18-4", "SystemAddress":9470537180601, "StarPos":[259.00000,3.62500,36.81250], "StarClass":"M" },
+        # { "StarSystem":"Col 285 Sector ZE-V b17-3", "SystemAddress":7270708618673, "StarPos":[209.00000,4.40625,22.53125], "StarClass":"M" },
+        # { "StarSystem":"Antliae Sector JR-W b1-4", "SystemAddress":9469195068841, "StarPos":[163.56250,18.03125,1.31250], "StarClass":"M" },
+        # { "StarSystem":"Col 285 Sector QD-X b16-5", "SystemAddress":11667949888937, "StarPos":[137.06250,15.00000,-3.53125], "StarClass":"M" }
+        #  ] }
+
+        # ..from...
+
+        # { "timestamp":"2020-07-17T21:49:18Z", "event":"FSDTarget", "Name":"HIP 64420", "SystemAddress":560233253227, "StarClass":"F", "RemainingJumpsInRoute":1 }
+        # { "timestamp":"2020-07-17T21:48:48Z", "event":"Location", "Docked":false, "StarSystem":"Mel 111 Sector HH-V c2-1", "SystemAddress":358663590610, "StarPos":[-60.71875,318.40625,5.03125], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Mel 111 Sector HH-V c2-1", "BodyID":0, "BodyType":"Star" }
+        # { "timestamp":"2020-07-17T21:50:36Z", "event":"FSDJump", "StarSystem":"HIP 64420", "SystemAddress":560233253227, "StarPos":[-49.87500,317.75000,-0.56250], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"HIP 64420", "BodyID":0, "BodyType":"Star", "JumpDist":12.219, "FuelUsed":0.947167, "FuelLevel":12.835925 }
+
+        addditional_info = {
+            'StarSystem': journal_entry["StarSystem"],
+            'SystemAddress': journal_entry["SystemAddress"],
+            'StarClass': journal_entry["StarClass"] }
+
+        edsm_info = EDScout.get_edsm_system_report(journal_entry["StarSystem"])
+        edsm_info.update(addditional_info)
+
+        return edsm_info
+
+    def forward_journal_change(self, new_entry):
+        # Spit out the event
+        self.report_new_info(new_entry)
+
+        # If it needed a detailed system look, add that as well
+        if EDScout.requires_system_lookup(new_entry):
+            self.report_new_info(EDScout.create_system_report())
+
     def on_journal_change(self, altered_journal):
         excluded_event_types = ["NavRoute", "Music", "ReceiveText", "FuelScoop"]
 
         for new_entry in self.journalChangeIdentifier.process_journal_change(altered_journal):
             if new_entry["event"] not in excluded_event_types:
-                self.report_new_info(new_entry)
+                self.forward_journal_change(new_entry)
 
+    @staticmethod
+    def get_edsm_system_report(star_system):
+        estimated_value = EDSMInterface.get_system_estimated_value(star_system)
+
+        # IC 2602 Sector GC-T b4-8 (M) Charted:
+        #   {'id': 10594826, 'id64': 18269314557401, 'name': 'IC 2602 Sector GC-T b4-8', 'url': 'https://www.edsm.net/en/system/bodies/id/10594826/name/IC+2602+Sector+GC-T+b4-8', 'estimatedValue': 2413, 'estimatedValueMapped': 2413, 'valuableBodies': []}
+
+
+        report_content = {'type': 'System'}
+        report_content.update(estimated_value)
+        is_uncharted = not estimated_value
+        report_content['charted'] = not is_uncharted
+
+        return report_content
 
     def on_new_route(self, nav_route):
         logger.debug('New route: ')
@@ -41,29 +98,11 @@ class EDScout:
         for jump_dest in nav_route:
             #print(jump_dest)
 
-            estimatedValue = EDSMInterface.get_system_estimated_value(jump_dest['StarSystem'])
-
-            # IC 2602 Sector GC-T b4-8 (M) Charted: {'id': 10594826, 'id64': 18269314557401, 'name': 'IC 2602 Sector GC-T b4-8', 'url': 'https://www.edsm.net/en/system/bodies/id/10594826/name/IC+2602+Sector+GC-T+b4-8', 'estimatedValue': 2413, 'estimatedValueMapped': 2413, 'valuableBodies': []}
-
-            unchartedCheck = not estimatedValue
-            if unchartedCheck:
-                chartedCheck = "Uncharted!"
-            else:
-                chartedCheck = "Charted   "
-
-            value = None
-            if estimatedValue:
-                value = ": value: "+str(estimatedValue['estimatedValueMapped'])
-            else:
-                value = ""
-
-            message = 'RouteItem: (%s) %s %s%s'%(jump_dest['StarClass'], chartedCheck, jump_dest['StarSystem'], value)
-            logger.debug(message)
-
-            report_content = {'type': 'System'}
+            report_content = EDScout.get_edsm_system_report(jump_dest)
             report_content.update(jump_dest)
-            report_content.update(estimatedValue)
-            report_content['charted'] = not unchartedCheck
+
+            #message = 'RouteItem: (%s) %s %s%s'%(jump_dest['StarClass'], report_content['charted'], jump_dest['StarSystem'], value)
+            #logger.debug(message)
 
             self.report_new_info(report_content)
 
