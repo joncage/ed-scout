@@ -348,6 +348,13 @@
                     let systemInfo = payload.data;
                     let systemId = systemInfo.SystemAddress.toString();
 
+                    // If no current system set, the first one we get should be current
+                    let currentSystem = getCurrentSystem();
+                    if ((currentSystem === null) || (currentSystem === ""))
+                    {
+                        setCurrentSystem(systemInfo);
+                    }
+
                     let container;
                     if (getCurrentSystem() === systemId) {
                         // This is the current system so we want to update that instead of the nav route
@@ -453,7 +460,6 @@
 
                 document.addEventListener('DOMContentLoaded', function() {
                     var url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';
-                    // var url = window.location.href+'GUI-is-still-open';
                     console.log(window.location)
                     fetch(url, { mode: 'no-cors'});
                     setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
