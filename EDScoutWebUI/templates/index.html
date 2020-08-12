@@ -31,6 +31,10 @@
             color: #EAA529;
             background: #370C03;
         }
+
+        .hyperspace {
+            color: #0026FF;
+        }
         .statusInfo {
             color: #EAA529;
             background: #370C03;
@@ -41,7 +45,7 @@
         }
 
         .currentSystemHighlight {
-            background: #0F0;
+            background: #17EFF9;
         }
 
         .current_location {
@@ -56,19 +60,26 @@
             border-width: 1px 0px 1px 0px;
             text-shadow: 0px 0px 3px;
         }
+
+        .next-system {
+            color: #17EFF9;
+        }
+        .next-system hr {
+            border-color: #17EFF9;
+        }
     </style>
 </head>
 
 <body>
 
-<!--
+<!-- --
     <button id="simulate-startup">Simulate startup</button>
     <button id="new-route-1">New route</button>
     <button id="target-first">Target First System</button>
     <button id="target-last">Target Last System</button>
     <button id="start-jump">Start Jump</button>
     <button id="finish-jump">Finish Jump</button>
-    -->
+<!--    -->
 
     <div class="container">
         <div class="row separator align-items-center">
@@ -86,14 +97,14 @@
 
     <div class="container">
         <div class="row separator align-items-center">
-            <div class="col"><hr class="separator"/></div>
-            <div class="col-auto">Next System</div>
-            <div class="col"><hr class="separator"/></div>
+            <div class="col next-system"><hr class="separator"/></div>
+            <div class="col-auto next-system">Next System</div>
+            <div class="col next-system"><hr class="separator"/></div>
         </div>
     </div>
 
-    <div class="container statusInfo">
-        <div id="target-sys" data-target-sys="" class="row align-items-center">
+    <div id="target-sys" data-target-sys="" class="container statusInfo">
+        <div class="row align-items-center">
             <div class="col system highlighted text-center">Waiting for nav data...</div>
         </div>
     </div>
@@ -127,12 +138,33 @@
         (function init() {
 
 
+            function removeSystemFromNavList(systemId) {
+                // Remove the system from the nav list
+                let systemElement = document.getElementById(systemId);
+                if (systemElement)
+                {
+                    systemElement.remove();
+                }
+
+                // Remove any valuable bodies too.
+                let bodiesToRemove = document.querySelectorAll("[associatedSystem='"+systemId+"']");
+                let bodyElement;
+                for (bodyElement of bodiesToRemove)
+                {
+                    bodyElement.remove();
+                }
+            }
+
 
             function setCurrentSystem(systemInfo) {
                 console.log("Setting current");
+
+                const systemId = systemInfo.SystemAddress;
+                removeSystemFromNavList(systemId);
+
                 let locationElement = document.getElementById('location');
                 locationElement.innerHTML = "";
-                locationElement.setAttribute('data-currentSystem', systemInfo.SystemAddress)
+                locationElement.setAttribute('data-currentSystem', systemId);
                 locationElement.appendChild(createSystemEntry(systemInfo));
             }
 
@@ -146,33 +178,79 @@
                 }
             }
 
-            function setTargetSystem(systemId, systemName) {
+            function getCurrentlySelectedSystemElement()
+            {
+                let currentTarget = null;
                 let locationElement = document.getElementById('target-sys');
-                let previousTarget = null;
                 if (locationElement.hasAttribute('data-targetSystem'))
                 {
-                    previousTarget = locationElement.getAttribute('data-targetSystem')
-                    console.log("previously highlighted: "+previousTarget)
+                    currentTarget = locationElement.getAttribute('data-targetSystem')
                 }
-                locationElement.innerText = systemName;
-                locationElement.setAttribute('data-targetSystem', systemId.toString());
+                return currentTarget;
+            }
+
+            function highlightTargetSystemInNavList(systemId)
+            {
+                let systemEntryToHighlight = document.getElementById(systemId);
+                if (systemEntryToHighlight)
+                {
+                    systemEntryToHighlight.classList.add("currentSystemHighlight");
+                }
+            }
+
+            function setTargetSystem(data) {
+                console.log("Setting target system")
+                let systemId = data.SystemAddress
+                let systemName = data.Name;
 
                 // Un-highlight the current target.
-                if ((previousTarget != null))
+                let previousTarget = getCurrentlySelectedSystemElement();
+                if (previousTarget != null)
                 {
-                    document.getElementById(previousTarget).classList.remove("currentSystemHighlight");
+                    let currentTargetInNavList = document.getElementById(previousTarget);
+                    if (currentTargetInNavList != null)
+                    {
+                        currentTargetInNavList.classList.remove("currentSystemHighlight");
+                    }
                 }
 
                 // Highlight the new target.
-                let systemEntryToHighlight = document.getElementById(systemId);
-                systemEntryToHighlight.classList.add("currentSystemHighlight");
+                highlightTargetSystemInNavList(systemId)
+
+                // Record some data about this target so we can check it easily later
+                let locationElement = document.getElementById('target-sys');
+                locationElement.innerHTML = "";
+                locationElement.setAttribute('data-targetSystem', systemId.toString());
+
+                let chartedSpecificStyle = "uncharted";
+                let mappedValue = "?";
+
+                let starClass = document.createElement('div');
+                starClass.classList.add("col-1", "system", chartedSpecificStyle,"text-center");
+                starClass.innerText = data.StarClass?data.StarClass:"";
+
+                let systemNameElement = document.createElement('div');
+                systemNameElement.classList.add("col", "system", chartedSpecificStyle);
+                systemNameElement.innerText = systemName;
+
+                let systemValue = document.createElement('div');
+                systemValue.classList.add("col-3", "system", chartedSpecificStyle, "text-center");
+                systemValue.innerText = mappedValue;
+
+                let row = document.createElement('div');
+                row.innerHTML = starClass.outerHTML+systemNameElement.outerHTML+systemValue.outerHTML;
+                row.classList.add("row");
+                locationElement.appendChild(row);
             }
 
             function startJumpTo(systemId, systemName) {
+                console.log("Starting jump")
+
+                // Clear the current location as we're now jumping
                 let locationElement = document.getElementById('location');
 
                 let content = document.createElement('div');
-                content.classList.add("col","text-center");
+                content.classList.add("col","text-center", "highlighted");
                 content.innerText = ">> Hyperspace <<";
 
                 let row = document.createElement('div');
@@ -207,7 +285,7 @@
                 return row;
             }
 
-            function createBodyEntry(body) {
+            function createBodyEntry(body, systemId) {
 
                 let spacer = document.createElement('div');
                 spacer.classList.add("col-1", "system");
@@ -227,76 +305,73 @@
                 let row = document.createElement('div');
                 row.classList.add("row");
                 row.innerHTML = spacer.outerHTML+planetSymbol.outerHTML+bodyName.outerHTML+bodyValue.outerHTML;
+                row.setAttribute('data-associatedSystem', systemId);
 
                 return row;
             }
 
+            function finishJump(data)
+            {
+                console.log("Finished jump");
+
+                // Update the current system
+                setCurrentSystem(data);
+            }
+
             var navRouteContainer = document.getElementById('nav-route')
-            //const isFirstElemnth = loggerElement.childElementCount === 0
 
             function postData(payload) {
                 console.log(payload);
-                if (payload.data.type === 'NewRoute')
-                {
-                    console.log('Clearing')
-                    navRouteContainer.innerHTML = ''
+                if (payload.data.type === 'NewRoute') {
+                    console.log('Clearing');
+                    navRouteContainer.innerHTML = '';
                 }
-                else if (payload.data.type === 'JournalEntry')
-                {
-                    if (payload.data.event === "FSDTarget")
+                else if (payload.data.type === 'JournalEntry') {
+                    if (payload.data.event === "FSDTarget") // When you set a new jump target in the galaxy map
                     {
-                        setTargetSystem(payload.data.SystemAddress, payload.data.Name);
-                        /*
-                        <---------- todo;
-                            lookup current 'data-currentSystem' and clear the highlighting of it.
-                            set data-currentSystem for current location
-                            If a matching system is in the DOM, highlight it instead.
-                            Then we just need some clear means of indicating what is current vs targetted vs jumpnig systems
-                            Sould also show how many jumps left
-                        */
+                        setTargetSystem(payload.data);
                     }
-                    else if (payload.data.event === "Location")
-                    {
+                    else if (payload.data.event === "Location") {
                         setCurrentSystem(payload.data);
                     }
                     else if (payload.data.event === "StartJump") // When 3..2..1 starts
                     {
-                        startJumpTo(payload.data.SystemAddress,payload.data.StarSystem)
+                        startJumpTo(payload.data.SystemAddress, payload.data.StarSystem);
                     }
                     else if (payload.data.event === "FSDJump") // When you drop out of hyperspace
                     {
-                        console.log("Finished jump");
-                        setCurrentSystem(payload.data);
+                        finishJump(payload.data);
                     }
                 }
-                else
-                {
+                else {
                     // We're assuming this is a system info entry
                     let systemInfo = payload.data;
+                    let systemId = systemInfo.SystemAddress.toString();
 
                     let container;
-                    console.log(getCurrentSystem()+' vs '+systemInfo.SystemAddress.toString());
-                    if (getCurrentSystem() === systemInfo.SystemAddress.toString())
-                    {
+                    if (getCurrentSystem() === systemId) {
                         // This is the current system so we want to update that instead of the nav route
                         container = document.getElementById('location');
                         container.innerHTML = '';
                     }
-                    else
-                    {
+                    else {
                         // This is not the current system so we want to update the nav route
                         container = navRouteContainer;
                     }
 
                     container.appendChild(createSystemEntry(systemInfo));
 
-                    if (systemInfo.valuableBodies)
-                    {
-                        console.log("valuableBodies: "+systemInfo.valuableBodies);
-                        for (let body of systemInfo.valuableBodies)
-                        {
+                    let currentTarget = getCurrentlySelectedSystemElement();
+                    if (currentTarget === systemId) {
+                        highlightTargetSystemInNavList(systemId);
+                    }
+
+                    if (systemInfo.valuableBodies) {
+                        let body;
+                        for (body of systemInfo.valuableBodies) {
+
                             console.log(body);
-                            container.appendChild(createBodyEntry(body));
+                            container.appendChild(createBodyEntry(body, systemId));
                         }
                     }
                 }
@@ -377,7 +452,9 @@
                 socket.on('log', postData)
 
                 document.addEventListener('DOMContentLoaded', function() {
-                    var url = 'http://127.0.0.1:5001/GUI-is-still-open';
+                    var url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';
+                    // var url = window.location.href+'GUI-is-still-open';
+                    console.log(window.location)
                     fetch(url, { mode: 'no-cors'});
                     setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
                 });
