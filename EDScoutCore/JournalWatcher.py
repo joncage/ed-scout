@@ -9,10 +9,11 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-default_journal_path = os.path.join(str(Path.home()),"Saved Games\\Frontier Developments\\Elite Dangerous")
+default_journal_path = os.path.join(str(Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
 journal_file_pattern = "journal.*.log"
 
 logger = logging.getLogger("EDScoutLogger")
+
 
 class JournalChangeIdentifier:
 
@@ -41,7 +42,6 @@ class JournalChangeIdentifier:
                     f.seek(-size_diff, os.SEEK_END)  # Note minus sign
                     new_data = f.read()
 
-
         entries = []
 
         if new_data:
@@ -69,7 +69,6 @@ class JournalChangeIdentifier:
         all_lines = as_ascii.split("\r\n")
         all_lines.pop()  # Drop the last empty line
         return all_lines
-
 
     def _init_journal_lists(self):
         journal_files = glob.glob(os.path.join(self.journal_path, journal_file_pattern))
@@ -119,7 +118,7 @@ class JournalWatcher:
 if __name__ == '__main__':
 
     def ReportJournalChange(journal_hange):
-        print('New route detected:'+str(journal_hange))
+        print('New route detected:' + str(journal_hange))
 
     journalWatcher = JournalWatcher()
     journalWatcher.set_callback(ReportJournalChange)

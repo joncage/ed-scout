@@ -37,4 +37,3 @@ class TestJournalWatcher():
                 output_file.write(input_file.read())
 
         assert test_input_file_path == self.callback_arg
-

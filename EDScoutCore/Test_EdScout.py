@@ -1,16 +1,7 @@
 import pytest
 import tempfile
-import os
-from shutil import copyfile
-import json
 from EDScoutCore.EDScout import EDScout
 import EDScoutCore.EDSMInterface as EDSMInterface
-
-from EDScoutCore.JournalWatcher import JournalChangeIdentifier, JournalWatcher
-
-
-#class EDSMFaker:
-#    def get_system_estimated_value(self, system_name):
 
 
 class TestEdScout:
@@ -53,7 +44,6 @@ class TestEdScout:
     def test_music_changes_not_forwarded(self, monkeypatch, example_journal_entry):
         self.test_response = example_journal_entry
 
-
         def mock_get_system_estimated_value(system_name):
             return {'id': 560233253227, 'id64': 18269314557401, 'name': "HIP 64420", 'url': 'https://www.edsm.net/en/system/bodies/id/10594826/name/IC+2602+Sector+GC-T+b4-8', 'estimatedValue': 2413, 'estimatedValueMapped': 2413, 'valuableBodies': []}
 
@@ -71,12 +61,4 @@ class TestEdScout:
 
         # ASSERT
         assert len(self.new_entry) == 2, "There should be one report for the FSD target command then another for the system report"
-        assert self.new_entry[0] != None
-
-
-
-
-
-
-
-
+        assert self.new_entry[0] is not None

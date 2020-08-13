@@ -32,8 +32,6 @@ def search_systems(system_name, radius):
         data = get_system_estimated_value(item['name'])
 
         print(data)
-        #for key in data.keys():
-        #    print(key + ":" + str(data[key]))
 
 
 def lookup_system():

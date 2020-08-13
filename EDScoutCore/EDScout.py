@@ -10,13 +10,10 @@ from EDScoutCore.JournalWatcher import JournalWatcher, JournalChangeIdentifier
 
 logger = logging.getLogger("EDScoutLogger")
 
+
 class EDScout:
 
     def __init__(self):
-        # Set up the nav route watcher
-        #self.navWatcher = NavRouteWatcher()
-        #self.navWatcher.set_callback(self.on_new_route)
-
         # Setup the journal watcher
         self.journalWatcher = JournalWatcher()
         self.journalWatcher.set_callback(self.on_journal_change)
@@ -29,11 +26,6 @@ class EDScout:
     @staticmethod
     def requires_system_lookup(new_event):
         return new_event["event"] in ["FSDTarget", "Location", "FSDJump"]
-
-    @staticmethod
-    def get_estimated_value_info(system_id):
-        estimatedValue = EDSMInterface.get_system_estimated_value(system_id)
-        return None
 
     @staticmethod
     def create_system_report(journal_entry):
@@ -77,7 +69,7 @@ class EDScout:
 
     def read_and_process_new_nav_route(self):
         home = str(Path.home())
-        path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous\\NavRoute.json"
+        path = home + "\\Saved Games\\Frontier Developments\\Elite Dangerous\\NavRoute.json"
 
         new_nav_route = NavRouteWatcher._extract_nav_route_from_file(path)
         self.on_new_route(new_nav_route)
@@ -112,12 +104,11 @@ class EDScout:
 
         # print(f"estimated_value={estimated_value}")
 
-        report_content = {'type': 'System-'+association}
+        report_content = {'type': 'System-' + association}
         report_content.update(estimated_value)
         is_uncharted = not estimated_value
         report_content['charted'] = not is_uncharted
         # print(f"report_content['charted']={report_content['charted']}, is_uncharted={is_uncharted}")
-
 
         return report_content
 
@@ -127,26 +118,14 @@ class EDScout:
         self.report_new_info({'type': 'NewRoute'})
 
         for jump_dest in nav_route:
-            #print(jump_dest)
-
-            report_content = EDScout.get_edsm_system_report(jump_dest['StarSystem'],'NavRoute')
+            report_content = EDScout.get_edsm_system_report(jump_dest['StarSystem'], 'NavRoute')
             report_content.update(jump_dest)
-
-            #message = 'RouteItem: (%s) %s %s%s'%(jump_dest['StarClass'], report_content['charted'], jump_dest['StarSystem'], value)
-            #logger.debug(message)
-
             self.report_new_info(report_content)
-
-            #if not unchartedCheck:
-            #    for body in estimatedValue['valuableBodies']:
-            #        logger.debug("\t\t"+str(body))
 
     def report_new_info(self, new_info):
         self.sender.send(json.dumps(new_info))
 
-
     def stop(self):
-        #self.navWatcher.stop()
         self.journalWatcher.stop()
 
 
