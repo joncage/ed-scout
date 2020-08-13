@@ -3,7 +3,7 @@ import os
 from shutil import copyfile
 
 
-from EDScoutCore.JournalWatcher import JournalWatcher
+from EDScoutCore.JournalInterface import JournalWatcher
 
 
 class TestJournalWatcher():

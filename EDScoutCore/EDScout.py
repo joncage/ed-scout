@@ -3,10 +3,10 @@ import json
 import logging
 from pathlib import Path
 
-from EDScoutCore.NavRouteWatcher import NavRouteWatcher
+from EDScoutCore.NavRouteInterface import extract_nav_route_from_file
 import EDScoutCore.EDSMInterface as EDSMInterface
-from EDScoutCore.NavRouteForwarder import Sender
-from EDScoutCore.JournalWatcher import JournalWatcher, JournalChangeIdentifier
+from EDScoutCore.ZmqWrappers import Sender
+from EDScoutCore.JournalInterface import JournalWatcher, JournalChangeIdentifier
 
 logger = logging.getLogger("EDScoutLogger")
 
@@ -71,7 +71,7 @@ class EDScout:
         home = str(Path.home())
         path = home + "\\Saved Games\\Frontier Developments\\Elite Dangerous\\NavRoute.json"
 
-        new_nav_route = NavRouteWatcher._extract_nav_route_from_file(path)
+        new_nav_route = extract_nav_route_from_file(path)
         self.on_new_route(new_nav_route)
 
     def forward_journal_change(self, new_entry):

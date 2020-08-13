@@ -8,7 +8,7 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from flaskwebgui import FlaskUI
 
-from EDScoutCore.NavRouteForwarder import Receiver
+from EDScoutCore.ZmqWrappers import Receiver
 from EDScoutCore.EDScout import EDScout
 
 __version__ = "1.1.0"

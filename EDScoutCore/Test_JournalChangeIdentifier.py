@@ -2,8 +2,7 @@ import tempfile
 import os
 from shutil import copyfile
 
-
-from EDScoutCore.JournalWatcher import JournalChangeIdentifier
+from EDScoutCore.JournalInterface import JournalChangeIdentifier
 
 
 class TestJournalWatcher:
