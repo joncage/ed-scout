@@ -1,6 +1,7 @@
 import time
 import json
 import logging
+from pathlib import Path
 
 from EDScoutCore.NavRouteWatcher import NavRouteWatcher
 import EDScoutCore.EDSMInterface as EDSMInterface
@@ -13,8 +14,8 @@ class EDScout:
 
     def __init__(self):
         # Set up the nav route watcher
-        self.navWatcher = NavRouteWatcher()
-        self.navWatcher.set_callback(self.on_new_route)
+        #self.navWatcher = NavRouteWatcher()
+        #self.navWatcher.set_callback(self.on_new_route)
 
         # Setup the journal watcher
         self.journalWatcher = JournalWatcher()
@@ -67,38 +68,56 @@ class EDScout:
             'SystemAddress': journal_entry["SystemAddress"],
             'StarClass': starClass}
 
-        edsm_info = EDScout.get_edsm_system_report(systemName)
+        # print(f"SystemName={systemName}")
+
+        edsm_info = EDScout.get_edsm_system_report(systemName, journal_entry['event'])
         edsm_info.update(addditional_info)
 
         return edsm_info
 
-    def forward_journal_change(self, new_entry):
-        # Spit out the event
-        self.report_new_info(new_entry)
+    def read_and_process_new_nav_route(self):
+        home = str(Path.home())
+        path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous\\NavRoute.json"
 
-        # If it needed a detailed system look, add that as well
-        if EDScout.requires_system_lookup(new_entry):
-            self.report_new_info(EDScout.create_system_report(new_entry))
+        new_nav_route = NavRouteWatcher._extract_nav_route_from_file(path)
+        self.on_new_route(new_nav_route)
+
+    def forward_journal_change(self, new_entry):
+        if new_entry["event"] == "NavRoute":
+            self.read_and_process_new_nav_route()
+        else:
+            # Spit out the event
+            self.report_new_info(new_entry)
+
+            # If it needed a detailed system lookup, add that as well
+            if EDScout.requires_system_lookup(new_entry):
+                self.report_new_info(EDScout.create_system_report(new_entry))
 
     def on_journal_change(self, altered_journal):
-        excluded_event_types = ["NavRoute", "Music", "ReceiveText", "FuelScoop"]
+        excluded_event_types = ["Music", "ReceiveText", "FuelScoop"]
 
         for new_entry in self.journalChangeIdentifier.process_journal_change(altered_journal):
             if new_entry["event"] not in excluded_event_types:
                 self.forward_journal_change(new_entry)
 
     @staticmethod
-    def get_edsm_system_report(star_system):
+    def get_edsm_system_report(star_system, association):
+
+        # print(f"EVALUATING={star_system}")
+
         estimated_value = EDSMInterface.get_system_estimated_value(star_system)
 
         # IC 2602 Sector GC-T b4-8 (M) Charted:
         #   {'id': 10594826, 'id64': 18269314557401, 'name': 'IC 2602 Sector GC-T b4-8', 'url': 'https://www.edsm.net/en/system/bodies/id/10594826/name/IC+2602+Sector+GC-T+b4-8', 'estimatedValue': 2413, 'estimatedValueMapped': 2413, 'valuableBodies': []}
 
+        # print(f"estimated_value={estimated_value}")
 
-        report_content = {'type': 'System'}
+        report_content = {'type': 'System-'+association}
         report_content.update(estimated_value)
         is_uncharted = not estimated_value
         report_content['charted'] = not is_uncharted
+        # print(f"report_content['charted']={report_content['charted']}, is_uncharted={is_uncharted}")
+
 
         return report_content
 
@@ -110,7 +129,7 @@ class EDScout:
         for jump_dest in nav_route:
             #print(jump_dest)
 
-            report_content = EDScout.get_edsm_system_report(jump_dest)
+            report_content = EDScout.get_edsm_system_report(jump_dest['StarSystem'],'NavRoute')
             report_content.update(jump_dest)
 
             #message = 'RouteItem: (%s) %s %s%s'%(jump_dest['StarClass'], report_content['charted'], jump_dest['StarSystem'], value)
@@ -118,16 +137,17 @@ class EDScout:
 
             self.report_new_info(report_content)
 
-            if not unchartedCheck:
-                for body in estimatedValue['valuableBodies']:
-                    logger.debug("\t\t"+str(body))
+            #if not unchartedCheck:
+            #    for body in estimatedValue['valuableBodies']:
+            #        logger.debug("\t\t"+str(body))
 
     def report_new_info(self, new_info):
         self.sender.send(json.dumps(new_info))
 
 
     def stop(self):
-        self.navWatcher.stop()
+        #self.navWatcher.stop()
+        self.journalWatcher.stop()
 
 
 if __name__ == '__main__':

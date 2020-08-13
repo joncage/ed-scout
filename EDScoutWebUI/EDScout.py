@@ -116,6 +116,7 @@ if __name__ == '__main__':
         scout = EDScout()
         zmq_port_test = scout.port
         ui.run()
+        socketio.run(app)
     except Exception as e:
         log.exception(e)
         raise

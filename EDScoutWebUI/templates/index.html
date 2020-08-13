@@ -88,24 +88,14 @@
 
     <div class="container">
         <div class="row separator align-items-center">
-            <div class="col next-system"><hr class="separator"/></div>
-            <div class="col-auto next-system">Next System</div>
-            <div class="col next-system"><hr class="separator"/></div>
-        </div>
-    </div>
-
-    <div id="target-sys" data-target-sys="" class="container statusInfo">
-        <div class="row align-items-center">
-            <div class="col system highlighted text-center">Waiting for nav data...</div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="row separator align-items-center">
             <div class="col"><hr class="separator"/></div>
             <div class="col-auto" id="nav-route-label">Nav Route</div>
             <div class="col"><hr class="separator"/></div>
         </div>
+    </div>
+
+    <div id="target-sys" data-target-sys="" class="container d-none">
+
     </div>
 
     <div id="nav-route" class="container">
@@ -138,8 +128,7 @@
                 }
 
                 // Remove any valuable bodies too.
-                console.log("Checking to remove bodies..");
-                console.log(systemId);
+
                 let bodiesToRemove = document.querySelectorAll("[data-associatedsystem='"+systemId+"']");
                 let bodyElement;
                 console.log(bodiesToRemove);
@@ -159,7 +148,6 @@
                 let locationElement = document.getElementById('location');
                 locationElement.innerHTML = "";
                 locationElement.setAttribute('data-currentSystem', systemId);
-                locationElement.appendChild(createSystemEntry(systemInfo));
             }
 
             function getCurrentSystem() {
@@ -183,58 +171,19 @@
                 return currentTarget;
             }
 
-            function highlightTargetSystemInNavList(systemId)
-            {
-                let systemEntryToHighlight = document.getElementById(systemId);
-                if (systemEntryToHighlight)
-                {
-                    systemEntryToHighlight.classList.add("currentSystemHighlight");
-                }
-            }
 
             function setTargetSystem(data) {
                 console.log("Setting target system")
                 let systemId = data.SystemAddress
                 let systemName = data.Name;
 
-                // Un-highlight the current target.
-                let previousTarget = getCurrentlySelectedSystemElement();
-                if (previousTarget != null)
-                {
-                    let currentTargetInNavList = document.getElementById(previousTarget);
-                    if (currentTargetInNavList != null)
-                    {
-                        currentTargetInNavList.classList.remove("currentSystemHighlight");
-                    }
-                }
 
-                // Highlight the new target.
-                highlightTargetSystemInNavList(systemId)
 
                 // Record some data about this target so we can check it easily later
                 let locationElement = document.getElementById('target-sys');
-                locationElement.innerHTML = "";
                 locationElement.setAttribute('data-targetSystem', systemId.toString());
 
-                let chartedSpecificStyle = "uncharted";
-                let mappedValue = "?";
 
-                let starClass = document.createElement('div');
-                starClass.classList.add("col-1", "system", chartedSpecificStyle,"text-center");
-                starClass.innerText = data.StarClass?data.StarClass:"";
-
-                let systemNameElement = document.createElement('div');
-                systemNameElement.classList.add("col", "system", chartedSpecificStyle);
-                systemNameElement.innerText = systemName;
-
-                let systemValue = document.createElement('div');
-                systemValue.classList.add("col-3", "system", chartedSpecificStyle, "text-center");
-                systemValue.innerText = mappedValue;
-
-                let row = document.createElement('div');
-                row.innerHTML = starClass.outerHTML+systemNameElement.outerHTML+systemValue.outerHTML;
-                row.classList.add("row");
-                locationElement.appendChild(row);
             }
 
             function startJumpTo(systemId, systemName) {
@@ -279,7 +228,7 @@
                 return row;
             }
 
-            function createBodyEntry(body, systemId) {
+            function createBodyEntry(body, system_id) {
 
                 let spacer = document.createElement('div');
                 spacer.classList.add("col-1", "system");
@@ -299,7 +248,7 @@
                 let row = document.createElement('div');
                 row.classList.add("row");
                 row.innerHTML = spacer.outerHTML+planetSymbol.outerHTML+bodyName.outerHTML+bodyValue.outerHTML;
-                row.setAttribute('data-associatedsystem', systemId);
+                row.setAttribute('data-associatedsystem', system_id);
 
                 return row;
             }
@@ -314,66 +263,117 @@
 
             var navRouteContainer = document.getElementById('nav-route')
 
+            function hideCurrentTarget() {
+                // <div id="target-sys" data-target-sys="" class="container statusInfo d-none">
+                let nextTargetContainer = document.getElementById('target-sys');
+                nextTargetContainer.classList.add("d-none");
+            }
+
+            function showCurrentTarget() {
+                // <div id="target-sys" data-target-sys="" class="container statusInfo d-none">
+                let nextTargetContainer = document.getElementById('target-sys');
+                if (nextTargetContainer.classList.contains("d-none"))
+                {
+                    nextTargetContainer.classList.remove("d-none");
+                }
+            }
+
+            function addNewSystemToContainer(systemInfo, container) {
+                                            // This needs to go in the nav list
+                let systemEntry = createSystemEntry(systemInfo)
+                container.appendChild(systemEntry);
+
+                if (systemInfo.valuableBodies) {
+                    let body;
+                    for (body of systemInfo.valuableBodies) {
+
+                        console.log(body);
+                        container.appendChild(createBodyEntry(body, systemInfo.SystemAddress));
+                    }
+                }
+            }
+
             function postData(payload) {
                 console.log(payload);
-                if (payload.data.type === 'NewRoute') {
+                let systemInfo = payload.data;
+                if (systemInfo.type === 'NewRoute') {
                     console.log('Clearing');
                     navRouteContainer.innerHTML = '';
+                    // If we're about to plot a new route, it'll set the next target as the first item in the navroute.
+                    hideCurrentTarget();
                 }
-                else if (payload.data.type === 'JournalEntry') {
-                    if (payload.data.event === "FSDTarget") // When you set a new jump target in the galaxy map
+                else if (systemInfo.type === 'JournalEntry')
+                {
+                    if (systemInfo.event === "FSDTarget") // When you set a new jump target in the galaxy map
                     {
-                        setTargetSystem(payload.data);
+                        setTargetSystem(systemInfo);
                     }
-                    else if (payload.data.event === "Location") {
-                        setCurrentSystem(payload.data);
+                    else if (systemInfo.event === "Location") {
+                        setCurrentSystem(systemInfo);
                     }
-                    else if (payload.data.event === "StartJump") // When 3..2..1 starts
+                    else if (systemInfo.event === "StartJump") // When 3..2..1 starts
                     {
-                        startJumpTo(payload.data.SystemAddress, payload.data.StarSystem);
+                        startJumpTo(systemInfo.SystemAddress, systemInfo.StarSystem);
                     }
-                    else if (payload.data.event === "FSDJump") // When you drop out of hyperspace
+                    else if (systemInfo.event === "FSDJump") // When you drop out of hyperspace
                     {
-                        finishJump(payload.data);
+                        finishJump(systemInfo);
                     }
                 }
                 else {
-                    // We're assuming this is a system info entry
-                    let systemInfo = payload.data;
-                    let systemId = systemInfo.SystemAddress.toString();
+                    console.log('Processing system report', systemInfo)
 
-                    // If no current system set, the first one we get should be current
-                    let currentSystem = getCurrentSystem();
-                    if ((currentSystem === null) || (currentSystem === ""))
+                    if (systemInfo.type === 'System-NavRoute')
                     {
-                        setCurrentSystem(systemInfo);
-                    }
-
-                    let container;
-                    if (getCurrentSystem() === systemId) {
-                        // This is the current system so we want to update that instead of the nav route
-                        container = document.getElementById('location');
-                        container.innerHTML = '';
-                    }
-                    else {
-                        // This is not the current system so we want to update the nav route
-                        container = navRouteContainer;
-                    }
-
-                    container.appendChild(createSystemEntry(systemInfo));
-
-                    let currentTarget = getCurrentlySelectedSystemElement();
-                    if (currentTarget === systemId) {
-                        highlightTargetSystemInNavList(systemId);
-                    }
-
-                    if (systemInfo.valuableBodies) {
-                        let body;
-                        for (body of systemInfo.valuableBodies) {
-
-                            console.log(body);
-                            container.appendChild(createBodyEntry(body, systemId));
+                        // If no current system set (or it matches the one that's already set because we just cleared it and we're waiting for the data to populate it), the first one we get should be current
+                        let currentSystem = getCurrentSystem();
+                        let container = null;
+                        let systemId = systemInfo.SystemAddress.toString();
+                        if ((currentSystem === null) || (currentSystem === "") || (currentSystem === systemId))
+                        {
+                            setCurrentSystem(systemInfo);
+                            container = document.getElementById('location');
                         }
+                        else
+                        {
+                            container = navRouteContainer;
+                        }
+
+                        addNewSystemToContainer(systemInfo, container)
+                    }
+                    else
+                    {
+                        // This is going to be oe of the other routines that wants a system report showing
+                        if (systemInfo.type === 'System-FSDTarget')
+                        {
+                            // If this doesn't exist in the nav list, it's a unique target the commander has selected independently of the selected route
+                            // As such, we need to...
+
+                            // ...update the system in the target area
+                            // NOTE: Make sure we clear the ID so it doesn't interfere with other checks (we can have systems in the target area that are also in the navlist).
+                            let container = document.getElementById('target-sys');
+                            container.innerHTML = "";
+
+                            if (document.getElementById(systemInfo.SystemAddress)) {
+                                // This element exists already so make sure the next-address is hidden
+                                hideCurrentTarget();
+                            }
+                            else
+                            {
+                                showCurrentTarget();
+                                addNewSystemToContainer(systemInfo, container);
+
+                            }
+
+
+                        }
+                        else if ((systemInfo.type === 'System-Location') || // Update the system recorded in 'current system'
+                            (systemInfo.type === 'System-FSDJump')) // Happens at the end of the jump so update the current system.
+                        {
+                            addNewSystemToContainer(systemInfo, document.getElementById('location'));
+                        }
+
+
                     }
                 }
             }
@@ -381,7 +381,7 @@
             var enableBackendConnections = true;
 
             // Uncomment to debug without needing the backend
-            /**/
+            /**
 
             function WrapWithEventType(type, entryContent) {
                 let wrap = {'data': {'type': type}};
@@ -470,7 +470,6 @@
 
                 document.addEventListener('DOMContentLoaded', function() {
                     var url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';
-                    console.log(window.location)
                     fetch(url, { mode: 'no-cors'});
                     setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
                 });
@@ -478,17 +477,6 @@
 
         })()
     </script>
-
-<!-- --
-    <button id="simulate-startup">Simulate startup</button>
-    <button id="new-route-1">New route</button>
-    <button id="target-first">Target First System</button>
-    <button id="target-last">Target Last System</button>
-    <button id="start-jump">Start Jump</button>
-    <button id="finish-jump">Finish Jump</button>
-<!--    -->
-
-
 </body>
 
 </html>
