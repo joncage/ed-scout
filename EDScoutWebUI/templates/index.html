@@ -16,10 +16,12 @@
         }
 
         .system {
-            margin-top: 2px;
+            margin-top: 1px;
+            margin-bottom: 1px;
             padding-left: 10px;
             text-shadow: 0px 0px 3px;
-            margin-left: 2px;
+            margin-left: 1px;
+            margin-right: 1px;
         }
         .charted {
             color: #9f9f9f;
@@ -29,47 +31,86 @@
             color: #EAA529;
             background: #370C03;
         }
+
+        .hyperspace {
+            color: #0026FF;
+        }
+        .statusInfo {
+            color: #EAA529;
+            background: #370C03;
+        }
         .highlighted {
             color: #370C03;
             background: #F5A804;
+        }
+
+        .currentSystemHighlight {
+            background: #17EFF9;
+        }
+
+        .current_location {
+            border-style: dotted;
+            border-color: #17EFF9;
+            border-width: 1px;
+        }
+
+        .separator {
+            color: #F5A804;
+            border-color: #F5A804;
+            border-width: 1px 0px 1px 0px;
+            text-shadow: 0px 0px 3px;
+        }
+
+        .next-system {
+            color: #17EFF9;
+        }
+        .next-system hr {
+            border-color: #17EFF9;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container highlighted">
-        <hr>
+    <div class="container">
+        <div class="row separator align-items-center">
+            <div class="col"><hr class="separator"/></div>
+            <div class="col-auto">Current Location</div>
+            <div class="col"><hr class="separator"/></div>
+        </div>
     </div>
-    <div id="navroute" class="container">
-        <!--
-      <div class="row">
-        <div class="col-1 system charted text-center">
-          F
+
+    <div id="location" data-currentSystem="" class="container">
+        <div class="row align-items-center statusInfo">
+            <div class="col system highlighted text-center">Unknown</div>
         </div>
-        <div class="col  system charted">
-          PRO EURL YJ-Q D5-18
+    </div>
+
+    <div class="container">
+        <div class="row separator align-items-center">
+            <div class="col"><hr class="separator"/></div>
+            <div class="col-auto" id="nav-route-label">Nav Route</div>
+            <div class="col"><hr class="separator"/></div>
         </div>
-        <div class="col-auto system charted text-center">
-          127197 CR
-        </div>
-      </div>
-      <div class="row ">
-        <div class="col-1 system uncharted text-center">
-          K
-        </div>
-        <div class="col system uncharted">
-          EURL DV-E C12-2
-        </div>
-      </div>
-      -->
+    </div>
+
+    <div id="target-sys" data-target-sys="" class="container d-none">
+
+    </div>
+
+    <div id="nav-route" class="container">
         <div class="row">
             <div class="col system highlighted text-center">Waiting for nav data...</div>
         </div>
     </div>
-    <div class="container highlighted">
-        <hr>
+
+    <div class="container">
+        <div class="row separator align-items-center">
+            <div class="col"><hr class="separator"/></div>
+        </div>
     </div>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
     <script>
 
@@ -77,73 +118,362 @@
 
         (function init() {
 
-            document.addEventListener('DOMContentLoaded', function() {
-                var url = 'http://127.0.0.1:5001/GUI-is-still-open';
-                fetch(url, { mode: 'no-cors'});
-                setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000)();
-            });
 
-            var socket = io()
-            var loggerElement = document.getElementById('navroute')
-
-            function postData(payload) {
-                console.log(payload);
-                //console.log(payload.data.type);
-                if (payload.data.type == 'NewRoute')
+            function removeSystemFromNavList(systemId) {
+                // Remove the system from the nav list
+                let systemElement = document.getElementById(systemId);
+                if (systemElement)
                 {
-                    console.log('Clearing')
-                    loggerElement.innerHTML = ''
+                    systemElement.remove();
                 }
-                else
+
+                // Remove any valuable bodies too.
+
+                let bodiesToRemove = document.querySelectorAll("[data-associatedsystem='"+systemId+"']");
+                let bodyElement;
+                console.log(bodiesToRemove);
+                for (bodyElement of bodiesToRemove)
                 {
-                    var dataElement = document.createElement('div')
-                    systemInfo = payload.data
+                    bodyElement.remove();
+                }
+            }
 
-                    var row = '<div class="row">'
 
-                    if (systemInfo.charted == true)
-                    {
-                        row += '<div class="col-1 system charted text-center">'+systemInfo.StarClass+'</div><div class="col system charted">'+systemInfo.StarSystem+'</div><div class="col-3 system charted text-center">'+systemInfo.estimatedValueMapped+'</div>'
-                        console.log('CHARTED')
-                    }
-                    else
-                    {
-                        row += '<div class="col-1 system uncharted text-center">'+systemInfo.StarClass+'</div><div class="col system uncharted">'+systemInfo.StarSystem+'</div>'
-                    }
-                    row += '</div>'
+            function setCurrentSystem(systemInfo) {
+                console.log("Setting current");
 
-                    dataElement.innerHTML = row
+                const systemId = systemInfo.SystemAddress;
+                removeSystemFromNavList(systemId);
 
-                    loggerElement.appendChild(dataElement)
-                    console.log(systemInfo.valuableBodies)
-                    var body;
-                    for (body of systemInfo.valuableBodies)
-                    {
-                        console.log(body)
-                        var dataElement2 = document.createElement('div')
-                        var row2 = '<div class="row">'
-                        row2 += '<div class="col-1 system"></div><div class="col-1 system charted text-center">'+'P'+'</div><div class="col system charted">'+body.bodyName+'</div><div class="col-3 system charted text-center">'+body.valueMax+'</div>'
-                        row2 += '</div>'
-                        console.log('BODY')
-                        dataElement2.innerHTML = row2
-                        loggerElement.appendChild(dataElement2)
+                let locationElement = document.getElementById('location');
+                locationElement.innerHTML = "";
+                locationElement.setAttribute('data-currentSystem', systemId);
+            }
+
+            function getCurrentSystem() {
+                let locationElement = document.getElementById('location');
+                if (locationElement.hasAttribute('data-currentSystem')) {
+                    return locationElement.getAttribute('data-currentSystem');
+                }
+                else {
+                    return null;
+                }
+            }
+
+            function getCurrentlySelectedSystemElement()
+            {
+                let currentTarget = null;
+                let locationElement = document.getElementById('target-sys');
+                if (locationElement.hasAttribute('data-targetSystem'))
+                {
+                    currentTarget = locationElement.getAttribute('data-targetSystem')
+                }
+                return currentTarget;
+            }
+
+
+            function setTargetSystem(data) {
+                console.log("Setting target system")
+                let systemId = data.SystemAddress
+                let systemName = data.Name;
+
+
+
+                // Record some data about this target so we can check it easily later
+                let locationElement = document.getElementById('target-sys');
+                locationElement.setAttribute('data-targetSystem', systemId.toString());
+
+
+            }
+
+            function startJumpTo(systemId, systemName) {
+                console.log("Starting jump")
+
+                // Clear the current location as we're now jumping
+                let locationElement = document.getElementById('location');
+
+                let content = document.createElement('div');
+                content.classList.add("col","text-center", "highlighted");
+                content.innerText = ">> Hyperspace <<";
+
+                let row = document.createElement('div');
+                row.classList.add("row");
+                row.appendChild(content);
+
+                locationElement.innerHTML = "";
+                locationElement.appendChild(row);
+            }
+
+            function createSystemEntry(systemInfo) {
+                let row = document.createElement('div');
+                row.classList.add("row");
+                row.id = systemInfo.SystemAddress;
+                let chartedSpecificStyle = systemInfo.charted?"charted":"uncharted";
+                let mappedValue = systemInfo.charted?systemInfo.estimatedValueMapped:"?";
+
+                let starClass = document.createElement('div');
+                starClass.classList.add("col-1", "system", chartedSpecificStyle,"text-center");
+                starClass.innerText = systemInfo.StarClass?systemInfo.StarClass:"";
+
+                let systemName = document.createElement('div');
+                systemName.classList.add("col", "system", chartedSpecificStyle);
+                systemName.innerText = systemInfo.StarSystem;
+
+                let systemValue = document.createElement('div');
+                systemValue.classList.add("col-3", "system", chartedSpecificStyle, "text-center");
+                systemValue.innerText = mappedValue;
+
+                row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
+
+                return row;
+            }
+
+            function createBodyEntry(body, system_id) {
+
+                let spacer = document.createElement('div');
+                spacer.classList.add("col-1", "system");
+
+                let planetSymbol = document.createElement('div');
+                planetSymbol.classList.add("col-1", "system", "charted", "text-center");
+                planetSymbol.innerText = "P";
+
+                let bodyName = document.createElement('div');
+                bodyName.classList.add("col", "system", "charted");
+                bodyName.innerText = body.bodyName;
+
+                let bodyValue = document.createElement('div');
+                bodyValue.classList.add("col-3", "system", "charted", "text-center");
+                bodyValue.innerText = body.valueMax;
+
+                let row = document.createElement('div');
+                row.classList.add("row");
+                row.innerHTML = spacer.outerHTML+planetSymbol.outerHTML+bodyName.outerHTML+bodyValue.outerHTML;
+                row.setAttribute('data-associatedsystem', system_id);
+
+                return row;
+            }
+
+            function finishJump(data)
+            {
+                console.log("Finished jump");
+
+                // Update the current system
+                setCurrentSystem(data);
+            }
+
+            var navRouteContainer = document.getElementById('nav-route')
+
+            function hideCurrentTarget() {
+                // <div id="target-sys" data-target-sys="" class="container statusInfo d-none">
+                let nextTargetContainer = document.getElementById('target-sys');
+                nextTargetContainer.classList.add("d-none");
+            }
+
+            function showCurrentTarget() {
+                // <div id="target-sys" data-target-sys="" class="container statusInfo d-none">
+                let nextTargetContainer = document.getElementById('target-sys');
+                if (nextTargetContainer.classList.contains("d-none"))
+                {
+                    nextTargetContainer.classList.remove("d-none");
+                }
+            }
+
+            function addNewSystemToContainer(systemInfo, container) {
+                                            // This needs to go in the nav list
+                let systemEntry = createSystemEntry(systemInfo)
+                container.appendChild(systemEntry);
+
+                if (systemInfo.valuableBodies) {
+                    let body;
+                    for (body of systemInfo.valuableBodies) {
+
+                        console.log(body);
+                        container.appendChild(createBodyEntry(body, systemInfo.SystemAddress));
                     }
                 }
             }
 
-            /**
-            var exampleData = [
-                {'data': {'type': 'System', 'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}},
-                {'data': {'type': 'System', 'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}},
-                {'data': {'type': 'System', 'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}}]
+            function postData(payload) {
+                console.log(payload);
+                let systemInfo = payload.data;
+                if (systemInfo.type === 'NewRoute') {
+                    console.log('Clearing');
+                    navRouteContainer.innerHTML = '';
+                    // If we're about to plot a new route, it'll set the next target as the first item in the navroute.
+                    hideCurrentTarget();
+                }
+                else if (systemInfo.type === 'JournalEntry')
+                {
+                    if (systemInfo.event === "FSDTarget") // When you set a new jump target in the galaxy map
+                    {
+                        setTargetSystem(systemInfo);
+                    }
+                    else if (systemInfo.event === "Location") {
+                        setCurrentSystem(systemInfo);
+                    }
+                    else if (systemInfo.event === "StartJump") // When 3..2..1 starts
+                    {
+                        startJumpTo(systemInfo.SystemAddress, systemInfo.StarSystem);
+                    }
+                    else if (systemInfo.event === "FSDJump") // When you drop out of hyperspace
+                    {
+                        finishJump(systemInfo);
+                    }
+                }
+                else {
+                    console.log('Processing system report', systemInfo)
 
-            postData(exampleData[0])
-            postData(exampleData[1])
+                    if (systemInfo.type === 'System-NavRoute')
+                    {
+                        // If no current system set (or it matches the one that's already set because we just cleared it and we're waiting for the data to populate it), the first one we get should be current
+                        let currentSystem = getCurrentSystem();
+                        let container = null;
+                        let systemId = systemInfo.SystemAddress.toString();
+                        if ((currentSystem === null) || (currentSystem === "") || (currentSystem === systemId))
+                        {
+                            setCurrentSystem(systemInfo);
+                            container = document.getElementById('location');
+                        }
+                        else
+                        {
+                            container = navRouteContainer;
+                        }
+
+                        addNewSystemToContainer(systemInfo, container)
+                    }
+                    else
+                    {
+                        // This is going to be oe of the other routines that wants a system report showing
+                        if (systemInfo.type === 'System-FSDTarget')
+                        {
+                            // If this doesn't exist in the nav list, it's a unique target the commander has selected independently of the selected route
+                            // As such, we need to...
+
+                            // ...update the system in the target area
+                            // NOTE: Make sure we clear the ID so it doesn't interfere with other checks (we can have systems in the target area that are also in the navlist).
+                            let container = document.getElementById('target-sys');
+                            container.innerHTML = "";
+
+                            if (document.getElementById(systemInfo.SystemAddress)) {
+                                // This element exists already so make sure the next-address is hidden
+                                hideCurrentTarget();
+                            }
+                            else
+                            {
+                                showCurrentTarget();
+                                addNewSystemToContainer(systemInfo, container);
+
+                            }
+
+
+                        }
+                        else if ((systemInfo.type === 'System-Location') || // Update the system recorded in 'current system'
+                            (systemInfo.type === 'System-FSDJump')) // Happens at the end of the jump so update the current system.
+                        {
+                            addNewSystemToContainer(systemInfo, document.getElementById('location'));
+                        }
+
+
+                    }
+                }
+            }
+
+            var enableBackendConnections = true;
+
+            // Uncomment to debug without needing the backend
+            /**
+
+            function WrapWithEventType(type, entryContent) {
+                let wrap = {'data': {'type': type}};
+                wrap.data = $.extend(true, {}, wrap.data, entryContent);
+                return wrap;
+            }
+
+            let tests = {};
+
+            tests["just-startup"] = [
+                // Simulate a normal startup
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
+            ];
+
+            tests["planets-and-systems-listed-after-nav-route-sent"] = [
+                // Simulate a normal startup
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
+                // Plot a nav route
+                WrapWithEventType("NewRoute"),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("System", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false})
+            ];
+
+            tests["planets-and-systems-removed-when-jump-finishes"] = [
+                // Simulate a normal startup
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
+                // Plot a nav route
+                WrapWithEventType("NewRoute"),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("System", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Sifeae EH-C c13-3 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}),
+                // Do the jump
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:08:14Z", "event":"StartJump", "JumpType":"Hyperspace", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"M" }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl DV-E c12-2', "SystemAddress":637098300266, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:09:55Z", "event":"FSDJump", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarPos":[25.06250,13.53125,19.93750], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Core Sys Sector ON-T b3-5 A", "BodyID":2, "BodyType":"Star", "JumpDist":51.088, "FuelUsed":7.591439, "FuelLevel":24.408562 })
+            ];
+
+            tests["planets-and-systems-removed-when-jump-finishes-after-missed-startup"] = [
+                // Plot a nav route
+                WrapWithEventType("NewRoute"),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("System", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696}], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [], 'charted': true}),
+                WrapWithEventType("System", {'StarSystem': 'Pro Eurl DV-E c12-2', 'SystemAddress': 637098300266, 'StarPos': [2083.0, 374.71875, 748.09375], 'StarClass': 'K', 'charted': false}),
+                // Do the jump
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:08:14Z", "event":"StartJump", "JumpType":"Hyperspace", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarClass":"M" }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl DV-E c12-2', "SystemAddress":637098300266, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:09:55Z", "event":"FSDJump", "StarSystem":"Pro Eurl YJ-Q d5-18", "SystemAddress":629388954035, "StarPos":[25.06250,13.53125,19.93750], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Core Sys Sector ON-T b3-5 A", "BodyID":2, "BodyType":"Star", "JumpDist":51.088, "FuelUsed":7.591439, "FuelLevel":24.408562 })
+            ];
+
+            function runTest(testId){
+                let data;
+                for (data of tests[testId])
+                {
+                    postData(data);
+                }
+            }
+
+
+            function addTest(testId) {
+                let newButton = document.createElement('button')
+                newButton.id = testId;
+                newButton.innerText = testId;
+                newButton.onclick = function() { runTest(testId); }
+
+                document.body.appendChild(newButton);
+                document.body.appendChild(document.createElement("br"))
+            }
+
+            let testId;
+            for (testId of Object.keys(tests))
+            {
+                addTest(testId);
+            }
+
+            enableBackendConnections = false;
+
             /**/
 
-            socket.on('log', postData)
+            if (enableBackendConnections) {
+                var socket = io()
+                socket.on('log', postData)
 
-
+                document.addEventListener('DOMContentLoaded', function() {
+                    var url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';
+                    fetch(url, { mode: 'no-cors'});
+                    setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
+                });
+            }
 
         })()
     </script>

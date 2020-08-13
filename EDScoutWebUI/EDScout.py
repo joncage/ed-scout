@@ -4,11 +4,11 @@ import sys
 import logging
 import argparse
 
-from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template
+from flask_socketio import SocketIO
 from flaskwebgui import FlaskUI
 
-from EDScoutCore.NavRouteForwarder import Receiver
+from EDScoutCore.ZmqWrappers import Receiver
 from EDScoutCore.EDScout import EDScout
 
 __version__ = "1.1.0"
@@ -63,8 +63,8 @@ if is_deployed:
 
 # Setup the app
 app = Flask(__name__,
-        static_folder=os.path.join(base_dir, 'static'),
-        template_folder=os.path.join(base_dir, 'templates'))
+            static_folder=os.path.join(base_dir, 'static'),
+            template_folder=os.path.join(base_dir, 'templates'))
 app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 
 # Configure socketIO and the WebUI we use to encapsulate the window
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         scout = EDScout()
         zmq_port_test = scout.port
         ui.run()
+        socketio.run(app)
     except Exception as e:
         log.exception(e)
         raise
-
