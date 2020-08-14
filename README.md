@@ -12,7 +12,7 @@ Enjoy this tool? Consider [donating to EDSM](https://www.edsm.net/en_GB/donation
 ## Usage
  
 1. If you don't already have it, install [Google Chrome browser](https://www.google.com/intl/en_uk/chrome/)
-1. Download [the latest release of ED Scout](https://github.com/joncage/ed-scout/releases/download/v1.2.0/EDScout.exe)
+1. Download [the latest release of ED Scout](https://github.com/joncage/ed-scout/releases/latest)
 1. Run `EDScout.exe`
 1. Plot a new route in Galaxy Map and watch EDScout work it's magic; Scouting out which systems in your route have already been explored and how much mapping them is worth.
 
@@ -46,6 +46,12 @@ Assuming your computer's firewall allows it, you should then be able to access i
   * This is due to the way a background watcher looks for changes in the navroute files and (via a local network link) hands over the data to the web service. Don't run more than one copy and it'll work fine :-)
 
 ## Version History
+
+### 1.2.0 - HUD Colours & Better Journal Support
+
+* Added detection of the user's HUD colours from the override file `C:\Users\<User>\AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml`.
+* Added colour adjustment to match the HUD colours.
+* Better journal support to present the next-selected target system at the top of the nav route list.
 
 ### 1.1.0 - More options
 
