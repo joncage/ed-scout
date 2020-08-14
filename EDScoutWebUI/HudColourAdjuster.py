@@ -1,14 +1,9 @@
 import xml.etree.ElementTree as ET
 import re
+import os
 
-
-default_config_file = r"C:\Users\Jon\AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml"
-
-#Todo:
-#* Read the above
-#* Make the adjustments: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feColorMatrix
-#* read the current .css file
-#* Replace all the colours into a new .css file
+default_config_file = os.path.join(os.path.expanduser('~'), r"AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml")
+print(f'default_config_file={default_config_file}')
 
 # Worked out the transform from here:
 # https://arkku.com/elite/hud_editor/
