@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import re
 
 
 default_config_file = r"C:\Users\Jon\AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml"
@@ -22,7 +23,7 @@ def get_matrix_values(config_file=default_config_file):
     vals = {}
     for element in root.findall("./GUIColour/Default/"):
         if 'Matrix' in element.tag:
-            vals[element.tag] = [int(x) for x in element.text.strip().split(',')]
+            vals[element.tag] = [float(x) for x in element.text.strip().split(',')]
     return vals
 
 
@@ -54,13 +55,28 @@ def hex_colour_shift(original_hex, colour_matrix):
     blue = int(original_hex[5:7], 16)/max_colour_val
 
     rgb_in = [red, green, blue]
-    print(rgb_in)
 
     adjusted = adjust_colours(rgb_in, colour_matrix)
-    print(adjusted)
 
     new_red = "%0.2X" % int(adjusted[0]*max_colour_val)
     new_green = "%0.2X" % int(adjusted[1]*max_colour_val)
     new_blue = "%0.2X" % int(adjusted[2]*max_colour_val)
 
     return f'#{new_red}{new_green}{new_blue}'
+
+
+def remap_styles(data_to_remap, colour_matrix):
+
+    return re.sub('(#[A-Za-z0-9]{6})', lambda m: hex_colour_shift(m.group(), colour_matrix), data_to_remap)
+
+
+def remap_style_file(original_file_name, colour_matrix, new_file_name):
+
+    with open(original_file_name, "r") as input:
+        css_content = input.read()
+
+    remapped = remap_styles(css_content, colour_matrix)
+
+    with open(new_file_name, "w") as output:
+        output.write(remapped)
+
