@@ -12,7 +12,7 @@ Enjoy this tool? Consider [donating to EDSM](https://www.edsm.net/en_GB/donation
 ## Usage
  
 1. If you don't already have it, install [Google Chrome browser](https://www.google.com/intl/en_uk/chrome/)
-1. Download [the latest release of ED Scout](https://github.com/joncage/ed-scout/releases/tag/v1.1.0)
+1. Download [the latest release of ED Scout](https://github.com/joncage/ed-scout/releases/download/v1.2.0/EDScout.exe)
 1. Run `EDScout.exe`
 1. Plot a new route in Galaxy Map and watch EDScout work it's magic; Scouting out which systems in your route have already been explored and how much mapping them is worth.
 
