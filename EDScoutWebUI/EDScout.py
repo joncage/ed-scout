@@ -3,13 +3,16 @@ import os
 import sys
 import logging
 import argparse
+import tempfile
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO
 from flaskwebgui import FlaskUI
+from werkzeug.utils import secure_filename
 
 from EDScoutCore.ZmqWrappers import Receiver
 from EDScoutCore.EDScout import EDScout
+from EDScoutWebUI import HudColourAdjuster
 
 __version__ = "1.1.0"
 
@@ -17,6 +20,8 @@ __version__ = "1.1.0"
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
 parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
 parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
+parser.add_argument('-noapp', action="store_false", dest="run_as_app")
+
 
 args = parser.parse_args()
 
@@ -61,20 +66,25 @@ base_dir = '.'
 if is_deployed:
     base_dir = os.path.join(sys._MEIPASS)
 
+
+
 # Setup the app
+static_path = os.path.join(base_dir, 'static')
 app = Flask(__name__,
-            static_folder=os.path.join(base_dir, 'static'),
+            static_folder=static_path,
             template_folder=os.path.join(base_dir, 'templates'))
 app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
-ui = FlaskUI(app, socketio=socketio, host=args.host, port=args.port)
+if args.run_as_app:
+    ui = FlaskUI(app, socketio=socketio, host=args.host, port=args.port)
 
 # Make the global thread used to forward data.
 thread = None
 zmq_port_test = None
 
+temp_dir = tempfile.TemporaryDirectory()
 
 def receive_and_forward():
     """
@@ -101,6 +111,11 @@ def receive_and_forward():
 def index():
     return render_template('index.html', version=__version__)
 
+@app.route('/css-overrides/<path:filename>')
+def css_override_route(filename):
+    safe_filename = secure_filename(filename)
+    log.debug(f"Looking for: {safe_filename} in {temp_dir.name}")
+    return send_from_directory(temp_dir.name, safe_filename, conditional=True)
 
 @socketio.on('connect')
 def on_connect():
@@ -113,10 +128,30 @@ def on_connect():
 
 if __name__ == '__main__':
     try:
+
+        # Try to load the users gfx changes if they exist
+        if os.path.exists(HudColourAdjuster.default_config_file):
+            log.info(f"Looking for HUD overrides in {HudColourAdjuster.default_config_file}")
+
+            original_css_path = os.path.join(static_path, "style.css")
+            colour_matrix = HudColourAdjuster.get_matrix_values(HudColourAdjuster.default_config_file)
+            remapped_css_file = "css-overrides.css"
+            remapped_css_file_path = os.path.join(temp_dir.name,remapped_css_file)
+
+            HudColourAdjuster.remap_style_file(original_css_path, colour_matrix, remapped_css_file_path)
+
+        else:
+            log.info(f"No HUD overrides file detected ({HudColourAdjuster.default_config_file})")
+
+        # Launch the background interfaces
         scout = EDScout()
         zmq_port_test = scout.port
-        ui.run()
-        socketio.run(app)
+
+        # Launch the web server either directly or as an app
+        if args.run_as_app:
+            ui.run()
+        else:
+            socketio.run(app)
     except Exception as e:
         log.exception(e)
         raise

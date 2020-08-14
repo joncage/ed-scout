@@ -1,0 +1,59 @@
+
+body {
+    background-color:black;
+    font: 20px Eurostile, sans-serif;
+    text-transform: uppercase;
+}
+
+.system {
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding-left: 10px;
+    text-shadow: 0px 0px 3px;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+.charted {
+    color: #9f9f9f;
+    background: #333333;
+}
+.uncharted {
+    color: #EAA529;
+    background: #370C03;
+}
+
+.hyperspace {
+    color: #0026FF;
+}
+.statusInfo {
+    color: #EAA529;
+    background: #370C03;
+}
+.highlighted {
+    color: #370C03;
+    background: #F5A804;
+}
+
+.currentSystemHighlight {
+    background: #17EFF9;
+}
+
+.current_location {
+    border-style: dotted;
+    border-color: #17EFF9;
+    border-width: 1px;
+}
+
+.separator {
+    color: #F5A804;
+    border-color: #F5A804;
+    border-width: 1px 0px 1px 0px;
+    text-shadow: 0px 0px 3px;
+}
+
+.next-system {
+    color: #17EFF9;
+}
+.next-system hr {
+    border-color: #17EFF9;
+}
