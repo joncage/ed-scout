@@ -15,7 +15,7 @@ from EDScoutCore.ZmqWrappers import Receiver
 from EDScoutCore.EDScout import EDScout
 from EDScoutWebUI import HudColourAdjuster
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
