@@ -1,3 +1,9 @@
+SET OPTIONS=%~1
+
+ECHO Using options: %OPTIONS%
+
+RMDIR /S /Q dist
+
 pipenv run pyinstaller ^
     --hidden-import=eventlet.hubs.epolls ^
     --hidden-import=eventlet.hubs.kqueue ^
@@ -17,7 +23,6 @@ pipenv run pyinstaller ^
     --hidden-import=engineio.server ^
     --hidden-import=flaskwebgui ^
     --add-data "EDScoutWebUI\templates;templates" ^
-    -y ^
-    --noconsole ^
-    --onefile ^
+    --add-data "EDScoutWebUI\static;static" ^
+    %OPTIONS% ^
     EDScoutWebUI\EDScout.py 
