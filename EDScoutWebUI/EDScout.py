@@ -4,6 +4,7 @@ import sys
 import logging
 import argparse
 import tempfile
+from datetime import datetime
 
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO
@@ -109,7 +110,7 @@ def receive_and_forward():
 
 @app.route('/')
 def index():
-    return render_template('index.html', version=__version__)
+    return render_template('index.html', version=__version__, timestamp=str(datetime.utcnow()))
 
 @app.route('/css-overrides/<path:filename>')
 def css_override_route(filename):
