@@ -4,6 +4,7 @@ import sys
 import logging
 import argparse
 import tempfile
+import psutil
 from datetime import datetime
 
 from flask import Flask, render_template, send_from_directory
@@ -17,13 +18,10 @@ from EDScoutWebUI import HudColourAdjuster
 
 __version__ = "1.2.1"
 
-
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
 parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
 parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
 parser.add_argument('-noapp', action="store_false", dest="run_as_app")
-
-
 args = parser.parse_args()
 
 # Check if this has been packaged up for distribution
@@ -59,7 +57,21 @@ if not is_deployed:
     log.addHandler(ch)
 
 # Lets go!
-log.info("ED Scout Started")
+log.info("ED Scout Starting")
+
+# Kill off any previous scouts; There can be only one (due to interactions with flaskwebgui)!
+PROCNAME = "EDScout.exe"
+log.debug(f"Current process: {os.getpid()}")
+current_pid = os.getpid()
+matching_processes = []
+for proc in psutil.process_iter():
+    # check whether the process name matches
+    try:
+        if (proc.name() == PROCNAME) and (proc.pid != current_pid):
+            log.info(f"Found existing Scout instance PID:{proc.pid}, killing off before continuing")
+            proc.kill()
+    except psutil.AccessDenied:
+        pass
 
 # Fudge where the templates are located so they're still found after packaging
 # See https://stackoverflow.com/questions/32149892/flask-application-built-using-pyinstaller-not-rendering-index-html
@@ -136,11 +148,13 @@ if __name__ == '__main__':
 
             original_css_path = os.path.join(static_path, "style.css")
             colour_matrix = HudColourAdjuster.get_matrix_values(HudColourAdjuster.default_config_file)
-            remapped_css_file = "css-overrides.css"
-            remapped_css_file_path = os.path.join(temp_dir.name,remapped_css_file)
+            if colour_matrix:
+                remapped_css_file = "css-overrides.css"
+                remapped_css_file_path = os.path.join(temp_dir.name,remapped_css_file)
 
-            HudColourAdjuster.remap_style_file(original_css_path, colour_matrix, remapped_css_file_path)
-
+                HudColourAdjuster.remap_style_file(original_css_path, colour_matrix, remapped_css_file_path)
+            else:
+                log.info(f"No HUD overrides detected in ({HudColourAdjuster.default_config_file})")
         else:
             log.info(f"No HUD overrides file detected ({HudColourAdjuster.default_config_file})")
 
