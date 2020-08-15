@@ -12,7 +12,7 @@ from watchdog.events import PatternMatchingEventHandler
 default_journal_path = os.path.join(str(Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
 journal_file_pattern = "journal.*.log"
 
-logger = logging.getLogger("EDScoutLogger")
+logger = logging.getLogger('JournalInterface')
 
 
 class JournalChangeIdentifier:
@@ -21,6 +21,8 @@ class JournalChangeIdentifier:
         pass
         self.journals = {}
         self.journal_path = journal_path
+
+        logger.debug(f"watching for journal changes in {self.journal_path}")
 
         self._init_journal_lists()
         self._new_journal_entry_callback = None
@@ -33,7 +35,7 @@ class JournalChangeIdentifier:
         if changed_file not in self.journals:
             self.journals[changed_file] = 0
 
-        logger.debug(f'{changed_file}: {self.journals[changed_file]} ==> {new_size}')
+        logger.debug(f'{changed_file} - Size change: {self.journals[changed_file]} to {new_size}')
         if new_size > 0:  # Don't  try and read it if this is the first notification (we seem to get two; one from the file being cleared).
             # Check how much it has grown and read the excess
             size_diff = new_size - self.journals[changed_file]
@@ -55,6 +57,8 @@ class JournalChangeIdentifier:
 
                     entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.
                     entries.append(entry)
+
+                logger.debug(f'Found {len(entries)} new entries')
 
                 for entry in entries:
                     yield entry
@@ -104,8 +108,21 @@ class JournalWatcher:
 
         def on_modified(self, event):
             changed_file = str(event.src_path)
-            print("journal change: " + str(signature(self.on_journal_change)))
+            logger.debug("Journal change: " + changed_file)
             self.on_journal_change(changed_file)
+
+        def on_created(self, event):
+            file = str(event.src_path)
+            logger.debug("Journal created: " + file)
+
+        def on_deleted(self, event):
+            file = str(event.src_path)
+            logger.debug("Journal deleted: " + file)
+
+        def on_moved(self, event):
+            file = str(event.src_path)
+            logger.debug("Journal moved: " + file)
+
 
     def _configure_watchers(self):
         self.event_handler = JournalWatcher._EntriesChangeHandler()

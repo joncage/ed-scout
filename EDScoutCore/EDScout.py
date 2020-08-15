@@ -7,8 +7,9 @@ from EDScoutCore.NavRouteInterface import extract_nav_route_from_file
 import EDScoutCore.EDSMInterface as EDSMInterface
 from EDScoutCore.ZmqWrappers import Sender
 from EDScoutCore.JournalInterface import JournalWatcher, JournalChangeIdentifier
+from EDScoutCore.NavRouteWatcher import NavRouteWatcher
 
-logger = logging.getLogger("EDScoutLogger")
+logger = logging.getLogger('EDScoutCore')
 
 
 class EDScout:
@@ -18,6 +19,8 @@ class EDScout:
         self.journalWatcher = JournalWatcher()
         self.journalWatcher.set_callback(self.on_journal_change)
         self.journalChangeIdentifier = JournalChangeIdentifier()
+
+        self.navWatcher = NavRouteWatcher()
 
         # Setup the ZMQ forwarder that'll pass on the log file changes
         self.sender = Sender()

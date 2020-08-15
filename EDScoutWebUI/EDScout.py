@@ -21,40 +21,53 @@ __version__ = "1.2.2"
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
 parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
 parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
-parser.add_argument('-noapp', action="store_false", dest="run_as_app")
+parser.add_argument('-no_app', action="store_false", dest="run_as_app")
+parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=logging.INFO)
 args = parser.parse_args()
 
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
 
+
+def configure_logger(logger_to_configure, log_path):
+    logger_to_configure.setLevel(logging.DEBUG)
+
+    # Logging to file
+    fh = logging.FileHandler(log_path)
+    if args.log_level != logging.INFO:
+        log_level = args.log_level
+    elif is_deployed:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+    fh.setLevel(log_level)
+    formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s-%(module)s - %(levelname)s - %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    fh.setFormatter(formatter)
+    logger_to_configure.addHandler(fh)
+
+    # More detailed logging to console if not deployed
+    if not is_deployed:
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        ch.setFormatter(formatter)
+        logger_to_configure.addHandler(ch)
+
+
 # Work out where to stick the logs and make sure it exists
-logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout')
+logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout', 'Logs')
 if not os.path.isdir(logging_dir):
     os.mkdir(logging_dir)
 logging_path = os.path.join(logging_dir, 'EDScout.log')
 
 # Configure logging
-log = logging.getLogger("EDScoutLogger")
-log.setLevel(logging.DEBUG)
+log = logging.getLogger('EDScoutWebUI')
+configure_logger(log, logging_path)
+configure_logger(logging.getLogger('EDScoutCore'), logging_path)
+configure_logger(logging.getLogger('EDScoutCore'), logging_path)
+configure_logger(logging.getLogger('JournalInterface'), logging_path)
 
-# Logging to file
-fh = logging.FileHandler(logging_path)
-if is_deployed:
-    log_level = logging.INFO
-else:
-    log_level = logging.DEBUG
-fh.setLevel(log_level)
-formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s',
-                              datefmt='%Y-%m-%d %H:%M:%S')
-fh.setFormatter(formatter)
-log.addHandler(fh)
-
-# More detailed logging to console if not deployed
-if not is_deployed:
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
+# configure_logger(logging.getLogger('flaskwebgui'), logging_path)
 
 # Lets go!
 log.info("ED Scout Starting")
@@ -79,8 +92,6 @@ base_dir = '.'
 if is_deployed:
     base_dir = os.path.join(sys._MEIPASS)
 
-
-
 # Setup the app
 static_path = os.path.join(base_dir, 'static')
 app = Flask(__name__,
@@ -98,6 +109,7 @@ thread = None
 zmq_port_test = None
 
 temp_dir = tempfile.TemporaryDirectory()
+
 
 def receive_and_forward():
     """
@@ -124,11 +136,13 @@ def receive_and_forward():
 def index():
     return render_template('index.html', version=__version__, timestamp=str(datetime.utcnow()))
 
+
 @app.route('/css-overrides/<path:filename>')
 def css_override_route(filename):
     safe_filename = secure_filename(filename)
     log.debug(f"Looking for: {safe_filename} in {temp_dir.name}")
     return send_from_directory(temp_dir.name, safe_filename, conditional=True)
+
 
 @socketio.on('connect')
 def on_connect():
