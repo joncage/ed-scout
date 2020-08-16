@@ -64,7 +64,7 @@ logging_path = os.path.join(logging_dir, 'EDScout.log')
 log = logging.getLogger('EDScoutWebUI')
 configure_logger(log, logging_path)
 configure_logger(logging.getLogger('EDScoutCore'), logging_path)
-configure_logger(logging.getLogger('EDScoutCore'), logging_path)
+configure_logger(logging.getLogger('NavRouteWatcher'), logging_path)
 configure_logger(logging.getLogger('JournalInterface'), logging_path)
 
 # configure_logger(logging.getLogger('flaskwebgui'), logging_path)

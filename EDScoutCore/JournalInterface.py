@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+from EDScoutCore.FileSystemUpdatePrompter import FileSystemUpdatePrompter
 
 default_journal_path = os.path.join(str(Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
 journal_file_pattern = "journal.*.log"
@@ -26,6 +27,16 @@ class JournalChangeIdentifier:
 
         self._init_journal_lists()
         self._new_journal_entry_callback = None
+
+        latest_journal = self.identify_latest_journal()
+        self.prompter = FileSystemUpdatePrompter(latest_journal)
+
+    def identify_latest_journal(self):
+        if len(self.journals.keys()) == 0:
+            return None
+
+        keys = sorted(self.journals.keys())
+        return keys[-1]
 
     def process_journal_change(self, changed_file):
         new_size = os.stat(changed_file).st_size
