@@ -174,6 +174,9 @@ if __name__ == '__main__':
             log.info(f"No HUD overrides file detected ({HudColourAdjuster.default_config_file})")
 
         # Launch the background interfaces
+
+        if args.force_polling:
+            log.info("Polling enabled")
         scout = EDScout(force_polling=args.force_polling)
         zmq_port_test = scout.port
 
