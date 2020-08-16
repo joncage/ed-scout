@@ -23,6 +23,7 @@ parser.add_argument('-port', action="store", dest="port", type=int, default=5000
 parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
 parser.add_argument('-no_app', action="store_false", dest="run_as_app")
 parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=logging.INFO)
+parser.add_argument('-force_polling', action="store_true", dest="force_polling")
 args = parser.parse_args()
 
 # Check if this has been packaged up for distribution
@@ -173,7 +174,7 @@ if __name__ == '__main__':
             log.info(f"No HUD overrides file detected ({HudColourAdjuster.default_config_file})")
 
         # Launch the background interfaces
-        scout = EDScout()
+        scout = EDScout(force_polling=args.force_polling)
         zmq_port_test = scout.port
 
         # Launch the web server either directly or as an app

@@ -14,10 +14,10 @@ logger = logging.getLogger('EDScoutCore')
 
 class EDScout:
 
-    def __init__(self):
+    def __init__(self, force_polling=False):
         # Setup the journal watcher
         self.journalChangeIdentifier = JournalChangeIdentifier()
-        self.journalWatcher = JournalWatcher()
+        self.journalWatcher = JournalWatcher(force_polling=force_polling)
         self.journalWatcher.set_callback(self.on_journal_change)
 
         self.navWatcher = NavRouteWatcher()

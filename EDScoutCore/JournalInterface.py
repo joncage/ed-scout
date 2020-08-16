@@ -7,6 +7,7 @@ import logging
 
 from pathlib import Path
 from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler
 from EDScoutCore.FileSystemUpdatePrompter import FileSystemUpdatePrompter
 
@@ -93,8 +94,9 @@ class JournalChangeIdentifier:
 
 class JournalWatcher:
 
-    def __init__(self, path=default_journal_path):
+    def __init__(self, path=default_journal_path, force_polling=False):
         self.path = path
+        self.force_polling = force_polling
         self._configure_watchers()
 
     def set_callback(self, on_journal_change):
@@ -134,11 +136,13 @@ class JournalWatcher:
             file = str(event.src_path)
             logger.debug("Journal moved: " + file)
 
-
     def _configure_watchers(self):
         self.event_handler = JournalWatcher._EntriesChangeHandler()
 
-        self.observer = Observer()
+        if self.force_polling:
+            self.observer = PollingObserver(0.25)
+        else:
+            self.observer = Observer()
         self.observer.schedule(self.event_handler, self.path, recursive=False)
         self.observer.start()
 
