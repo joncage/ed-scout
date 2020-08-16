@@ -30,10 +30,7 @@ is_deployed = hasattr(sys, '_MEIPASS')
 
 
 def configure_logger(logger_to_configure, log_path, log_level_override=None):
-    logger_to_configure.setLevel(logging.DEBUG)
 
-    # Logging to file
-    fh = logging.FileHandler(log_path)
     if log_level_override is not None:
         log_level = log_level_override
     elif args.log_level != logging.INFO:
@@ -42,7 +39,10 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
         log_level = logging.INFO
     else:
         log_level = logging.DEBUG
-    fh.setLevel(log_level)
+    logger_to_configure.setLevel(log_level)
+
+    # Logging to file
+    fh = logging.FileHandler(log_path)
     formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s-%(module)s - %(levelname)s - %(message)s',
                                   datefmt='%Y-%m-%d %H:%M:%S')
     fh.setFormatter(formatter)
@@ -51,7 +51,6 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
     # More detailed logging to console if not deployed
     if not is_deployed:
         ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
         logger_to_configure.addHandler(ch)
 

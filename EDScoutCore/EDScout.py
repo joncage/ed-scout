@@ -16,9 +16,9 @@ class EDScout:
 
     def __init__(self):
         # Setup the journal watcher
+        self.journalChangeIdentifier = JournalChangeIdentifier()
         self.journalWatcher = JournalWatcher()
         self.journalWatcher.set_callback(self.on_journal_change)
-        self.journalChangeIdentifier = JournalChangeIdentifier()
 
         self.navWatcher = NavRouteWatcher()
 
