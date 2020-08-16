@@ -13,7 +13,6 @@ class FileSystemUpdatePrompter:
         self.file_size = None
 
         self.hello()
-        self.t.start()
 
     def hello(self):
         new_size = os.stat(self.path_to_query).st_size
@@ -24,3 +23,6 @@ class FileSystemUpdatePrompter:
             logger.debug(f"File size check: {new_size} (+{new_size-self.file_size})")
 
         self.file_size = new_size
+        self.t = Timer(0.1, self.hello)
+        self.t.start()
+
