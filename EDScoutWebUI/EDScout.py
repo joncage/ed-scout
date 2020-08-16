@@ -29,12 +29,14 @@ args = parser.parse_args()
 is_deployed = hasattr(sys, '_MEIPASS')
 
 
-def configure_logger(logger_to_configure, log_path):
+def configure_logger(logger_to_configure, log_path, log_level_override=None):
     logger_to_configure.setLevel(logging.DEBUG)
 
     # Logging to file
     fh = logging.FileHandler(log_path)
-    if args.log_level != logging.INFO:
+    if log_level_override is not None:
+        log_level = log_level_override
+    elif args.log_level != logging.INFO:
         log_level = args.log_level
     elif is_deployed:
         log_level = logging.INFO
@@ -66,11 +68,10 @@ configure_logger(log, logging_path)
 configure_logger(logging.getLogger('EDScoutCore'), logging_path)
 configure_logger(logging.getLogger('NavRouteWatcher'), logging_path)
 configure_logger(logging.getLogger('JournalInterface'), logging_path)
-
-# configure_logger(logging.getLogger('flaskwebgui'), logging_path)
+configure_logger(logging.getLogger('flaskwebgui'), logging_path, logging.INFO)
 
 # Lets go!
-log.info("ED Scout Starting")
+log.info(f"ED Scout v{__version__} Starting")
 
 # Kill off any previous scouts; There can be only one (due to interactions with flaskwebgui)!
 PROCNAME = "EDScout.exe"
