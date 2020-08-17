@@ -29,11 +29,11 @@ class JournalChangeIdentifier:
         self._init_journal_lists()
         self._new_journal_entry_callback = None
 
-        latest_journal = self.identify_latest_journal()
+        self.latest_journal = self.identify_latest_journal()
 
         # Prompter is required to force the file system to do updates on some systems so we get regular updates from the
         # journal watcher.
-        self.prompter = FileSystemUpdatePrompter(latest_journal)
+        self.prompter = FileSystemUpdatePrompter(self.latest_journal)
 
     def identify_latest_journal(self):
         if len(self.journals.keys()) == 0:
@@ -43,6 +43,10 @@ class JournalChangeIdentifier:
         return keys[-1]
 
     def process_journal_change(self, changed_file):
+        if changed_file != self.latest_journal:
+            self.latest_journal = changed_file
+            self.prompter.set_watch_file(self.latest_journal)
+
         new_size = os.stat(changed_file).st_size
         new_data = None
 

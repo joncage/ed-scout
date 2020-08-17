@@ -5,7 +5,9 @@ import logging
 import argparse
 import tempfile
 import psutil
+import time
 from datetime import datetime
+from pathlib import Path
 
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO
@@ -44,8 +46,9 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
     # Logging to file
     fh = logging.FileHandler(log_path)
-    formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s-%(module)s - %(levelname)s - %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S')
+    formatter = logging.Formatter('%(asctime)s.%(msecs)03dZ - %(name)s-%(module)s - %(levelname)s - %(message)s',
+                                  datefmt='%Y-%m-%dT%H:%M:%S')
+    logging.Formatter.converter = time.gmtime
     fh.setFormatter(formatter)
     logger_to_configure.addHandler(fh)
 
@@ -57,10 +60,11 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
 
 # Work out where to stick the logs and make sure it exists
-logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout', 'Logs')
+logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
 if not os.path.isdir(logging_dir):
-    os.mkdir(logging_dir)
-logging_path = os.path.join(logging_dir, 'EDScout.log')
+    Path(logging_dir).mkdir(parents=True, exist_ok=True)
+timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+logging_path = os.path.join(logging_dir, f"EDScout-{timestamp}.log")
 
 # Configure logging
 log = logging.getLogger('EDScoutWebUI')
