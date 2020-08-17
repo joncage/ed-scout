@@ -20,8 +20,6 @@ class EDScout:
         self.journalWatcher = JournalWatcher(force_polling=force_polling)
         self.journalWatcher.set_callback(self.on_journal_change)
 
-        self.navWatcher = NavRouteWatcher()
-
         # Setup the ZMQ forwarder that'll pass on the log file changes
         self.sender = Sender()
         self.port = self.sender.port

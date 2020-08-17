@@ -30,6 +30,9 @@ class JournalChangeIdentifier:
         self._new_journal_entry_callback = None
 
         latest_journal = self.identify_latest_journal()
+
+        # Prompter is required to force the file system to do updates on some systems so we get regular updates from the
+        # journal watcher.
         self.prompter = FileSystemUpdatePrompter(latest_journal)
 
     def identify_latest_journal(self):
@@ -140,7 +143,7 @@ class JournalWatcher:
         self.event_handler = JournalWatcher._EntriesChangeHandler()
 
         if self.force_polling:
-            self.observer = PollingObserver(0.25)
+            self.observer = PollingObserver(0.25)  # Poll every quarter of a second
         else:
             self.observer = Observer()
         self.observer.schedule(self.event_handler, self.path, recursive=False)
