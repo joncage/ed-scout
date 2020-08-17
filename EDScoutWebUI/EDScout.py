@@ -5,6 +5,7 @@ import logging
 import argparse
 import tempfile
 import psutil
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -45,8 +46,9 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
     # Logging to file
     fh = logging.FileHandler(log_path)
-    formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s-%(module)s - %(levelname)s - %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S')
+    formatter = logging.Formatter('%(asctime)s.%(msecs)03dZ - %(name)s-%(module)s - %(levelname)s - %(message)s',
+                                  datefmt='%Y-%m-%dT%H:%M:%S')
+    logging.Formatter.converter = time.gmtime
     fh.setFormatter(formatter)
     logger_to_configure.addHandler(fh)
 
@@ -61,7 +63,8 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
 if not os.path.isdir(logging_dir):
     Path(logging_dir).mkdir(parents=True, exist_ok=True)
-logging_path = os.path.join(logging_dir, 'EDScout.log')
+timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+logging_path = os.path.join(logging_dir, f"EDScout-{timestamp}.log")
 
 # Configure logging
 log = logging.getLogger('EDScoutWebUI')
