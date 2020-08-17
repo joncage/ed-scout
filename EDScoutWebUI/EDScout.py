@@ -21,43 +21,57 @@ __version__ = "1.2.2"
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
 parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
 parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
-parser.add_argument('-noapp', action="store_false", dest="run_as_app")
+parser.add_argument('-no_app', action="store_false", dest="run_as_app")
+parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=logging.INFO)
+parser.add_argument('-force_polling', action="store_true", dest="force_polling")
 args = parser.parse_args()
 
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
 
+
+def configure_logger(logger_to_configure, log_path, log_level_override=None):
+
+    if log_level_override is not None:
+        log_level = log_level_override
+    elif args.log_level != logging.INFO:
+        log_level = args.log_level
+    elif is_deployed:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+    logger_to_configure.setLevel(log_level)
+
+    # Logging to file
+    fh = logging.FileHandler(log_path)
+    formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s-%(module)s - %(levelname)s - %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    fh.setFormatter(formatter)
+    logger_to_configure.addHandler(fh)
+
+    # More detailed logging to console if not deployed
+    if not is_deployed:
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        logger_to_configure.addHandler(ch)
+
+
 # Work out where to stick the logs and make sure it exists
-logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout')
+logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout', 'Logs')
 if not os.path.isdir(logging_dir):
     os.mkdir(logging_dir)
 logging_path = os.path.join(logging_dir, 'EDScout.log')
 
 # Configure logging
-log = logging.getLogger("EDScoutLogger")
-log.setLevel(logging.DEBUG)
-
-# Logging to file
-fh = logging.FileHandler(logging_path)
-if is_deployed:
-    log_level = logging.INFO
-else:
-    log_level = logging.DEBUG
-fh.setLevel(log_level)
-formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s',
-                              datefmt='%Y-%m-%d %H:%M:%S')
-fh.setFormatter(formatter)
-log.addHandler(fh)
-
-# More detailed logging to console if not deployed
-if not is_deployed:
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
+log = logging.getLogger('EDScoutWebUI')
+configure_logger(log, logging_path)
+configure_logger(logging.getLogger('EDScoutCore'), logging_path)
+configure_logger(logging.getLogger('NavRouteWatcher'), logging_path)
+configure_logger(logging.getLogger('JournalInterface'), logging_path)
+configure_logger(logging.getLogger('flaskwebgui'), logging_path, logging.INFO)
 
 # Lets go!
-log.info("ED Scout Starting")
+log.info(f"ED Scout v{__version__} Starting")
 
 # Kill off any previous scouts; There can be only one (due to interactions with flaskwebgui)!
 PROCNAME = "EDScout.exe"
@@ -79,8 +93,6 @@ base_dir = '.'
 if is_deployed:
     base_dir = os.path.join(sys._MEIPASS)
 
-
-
 # Setup the app
 static_path = os.path.join(base_dir, 'static')
 app = Flask(__name__,
@@ -98,6 +110,7 @@ thread = None
 zmq_port_test = None
 
 temp_dir = tempfile.TemporaryDirectory()
+
 
 def receive_and_forward():
     """
@@ -124,11 +137,13 @@ def receive_and_forward():
 def index():
     return render_template('index.html', version=__version__, timestamp=str(datetime.utcnow()))
 
+
 @app.route('/css-overrides/<path:filename>')
 def css_override_route(filename):
     safe_filename = secure_filename(filename)
     log.debug(f"Looking for: {safe_filename} in {temp_dir.name}")
     return send_from_directory(temp_dir.name, safe_filename, conditional=True)
+
 
 @socketio.on('connect')
 def on_connect():
@@ -159,7 +174,10 @@ if __name__ == '__main__':
             log.info(f"No HUD overrides file detected ({HudColourAdjuster.default_config_file})")
 
         # Launch the background interfaces
-        scout = EDScout()
+
+        if args.force_polling:
+            log.info("Polling enabled")
+        scout = EDScout(force_polling=args.force_polling)
         zmq_port_test = scout.port
 
         # Launch the web server either directly or as an app
