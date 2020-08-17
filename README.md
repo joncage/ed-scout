@@ -16,7 +16,7 @@ Enjoy this tool? Consider [donating to EDSM](https://www.edsm.net/en_GB/donation
 1. Run `EDScout.exe`
 1. Plot a new route in Galaxy Map and watch EDScout work it's magic; Scouting out which systems in your route have already been explored and how much mapping them is worth.
 
-![Nav Route Example](Images/NavRouteDisplay.png)
+![Nav Route Example](Images/NavRouteDisplay-TwoColours.png)
 
 ## Key
 
@@ -46,6 +46,13 @@ Assuming your computer's firewall allows it, you should then be able to access i
   * This is due to the way a background watcher looks for changes in the navroute files and (via a local network link) hands over the data to the web service. Don't run more than one copy and it'll work fine :-)
 
 ## Version History
+
+### 1.2.3 - Stability, Logging & More info logged 
+
+* Fixed journal updates not being detected on some machines.
+* Moved logging to `C:\Users\User\AppData\Local\EDScout\Logs`
+* Tidied up some unnecessary logging.
+* Added logging of additional information from EDSM in prep for the next release.
 
 ### 1.2.0 - HUD Colours & Better Journal Support
 
