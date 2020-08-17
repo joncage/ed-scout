@@ -7,7 +7,6 @@ from EDScoutCore.NavRouteInterface import extract_nav_route_from_file
 import EDScoutCore.EDSMInterface as EDSMInterface
 from EDScoutCore.ZmqWrappers import Sender
 from EDScoutCore.JournalInterface import JournalWatcher, JournalChangeIdentifier
-from EDScoutCore.NavRouteWatcher import NavRouteWatcher
 
 logger = logging.getLogger('EDScoutCore')
 
@@ -29,6 +28,25 @@ class EDScout:
         return new_event["event"] in ["FSDTarget", "Location", "FSDJump"]
 
     @staticmethod
+    def requires_body_investigation(new_event):
+        return new_event["event"] in ["FSSDiscoveryScan", "FSSAllBodiesFound"]
+
+    @staticmethod
+    def identify_system_name(journal_entry):
+        if "StarSystem" in journal_entry:
+            system_name = journal_entry["StarSystem"]
+        elif "Name" in journal_entry:
+            # FSD Target uses Name instead of StarSystem to name this for some reason.
+            system_name = journal_entry["Name"]
+        elif "SystemName" in journal_entry:
+            # FSSDiscoveryScan
+            system_name = journal_entry["SystemName"]
+        else:
+            raise Exception("Failed to find system name from "+str(journal_entry))
+
+        return system_name
+
+    @staticmethod
     def create_system_report(journal_entry):
         # Simulating something like a nav event:
         # { "timestamp":"2020-08-12T00:19:35Z", "event":"NavRoute", "Route":[
@@ -44,27 +62,27 @@ class EDScout:
         # { "timestamp":"2020-07-17T21:48:48Z", "event":"Location", "Docked":false, "StarSystem":"Mel 111 Sector HH-V c2-1", "SystemAddress":358663590610, "StarPos":[-60.71875,318.40625,5.03125], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Mel 111 Sector HH-V c2-1", "BodyID":0, "BodyType":"Star" }
         # { "timestamp":"2020-07-17T21:50:36Z", "event":"FSDJump", "StarSystem":"HIP 64420", "SystemAddress":560233253227, "StarPos":[-49.87500,317.75000,-0.56250], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"HIP 64420", "BodyID":0, "BodyType":"Star", "JumpDist":12.219, "FuelUsed":0.947167, "FuelLevel":12.835925 }
 
-        if "StarSystem" in journal_entry:
-            systemName = journal_entry["StarSystem"]
-        else:
-            # FSD Target uses Name instead of StarSystem to name this for some reason.
-            systemName = journal_entry["Name"]
-
+        system_name = EDScout.identify_system_name(journal_entry)
         if "StarClass" in journal_entry:
-            starClass = journal_entry["StarClass"]
+            star_class = journal_entry["StarClass"]
         else:
-            # FSD Target uses Name instead of StarSystem to name this for some reason.
-            starClass = "?"
+            # Rely on edsm to fill this in
+            system = EDSMInterface.get_system(system_name)
+            primary_star = system["primaryStar"]
+            if primary_star:
+                star_class = primary_star["type"].split(maxsplit=1)[0]
+            else:
+                star_class = "?"
 
-        addditional_info = {
-            'StarSystem': systemName,
+        additional_info = {
+            'StarSystem': system_name,
             'SystemAddress': journal_entry["SystemAddress"],
-            'StarClass': starClass}
+            'StarClass': star_class
+        }
 
         # print(f"SystemName={systemName}")
-
-        edsm_info = EDScout.get_edsm_system_report(systemName, journal_entry['event'])
-        edsm_info.update(addditional_info)
+        edsm_info = EDScout.get_edsm_system_report(system_name, journal_entry['event'])
+        edsm_info.update(additional_info)
 
         return edsm_info
 
@@ -74,6 +92,7 @@ class EDScout:
 
         new_nav_route = extract_nav_route_from_file(path)
         self.on_new_route(new_nav_route)
+
 
     def forward_journal_change(self, new_entry):
         if new_entry["event"] == "NavRoute":
@@ -85,6 +104,15 @@ class EDScout:
             # If it needed a detailed system lookup, add that as well
             if EDScout.requires_system_lookup(new_entry):
                 self.report_new_info(EDScout.create_system_report(new_entry))
+                logger.debug(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
+
+            if EDScout.requires_body_investigation(new_entry):
+                logger.debug(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
+
+    @staticmethod
+    def check_system_content(new_entry):
+        bodies = EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))
+        logger.info("Body check: ", bodies)
 
     def on_journal_change(self, altered_journal):
         excluded_event_types = ["Music", "ReceiveText", "FuelScoop"]
