@@ -6,6 +6,7 @@ import argparse
 import tempfile
 import psutil
 from datetime import datetime
+from pathlib import Path
 
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO
@@ -57,9 +58,9 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
 
 # Work out where to stick the logs and make sure it exists
-logging_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'EDScout', 'Logs')
+logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
 if not os.path.isdir(logging_dir):
-    os.mkdir(logging_dir)
+    Path(logging_dir).mkdir(parents=True, exist_ok=True)
 logging_path = os.path.join(logging_dir, 'EDScout.log')
 
 # Configure logging
