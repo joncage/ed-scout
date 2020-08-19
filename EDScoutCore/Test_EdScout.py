@@ -1,7 +1,7 @@
 import pytest
 import tempfile
-from EDScoutCore.EDScout import EDScout
-import EDScoutCore.EDSMInterface as EDSMInterface
+from .EDScout import EDScout
+from . import EDSMInterface
 
 
 class TestEdScout:

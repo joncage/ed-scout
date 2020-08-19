@@ -1,9 +1,12 @@
-from EDScoutCore import EDSMInterface
+from . import EDSMInterface
 
 
 class TestEDSMInterface:
 
     def test_get_system(self):
+        import sys
+        print(f"paths: {sys.path}")
+
         value = EDSMInterface.get_system("Wolf 397")
         print(f"{value}")
         expected_value = {

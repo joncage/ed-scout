@@ -1,4 +1,4 @@
-from EDScoutWebUI import HudColourAdjuster
+from . import HudColourAdjuster
 
 
 def test_can_read_values_correctly():

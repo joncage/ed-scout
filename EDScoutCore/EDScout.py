@@ -3,10 +3,10 @@ import json
 import logging
 from pathlib import Path
 
-from EDScoutCore.NavRouteInterface import extract_nav_route_from_file
-import EDScoutCore.EDSMInterface as EDSMInterface
-from EDScoutCore.ZmqWrappers import Sender
-from EDScoutCore.JournalInterface import JournalWatcher, JournalChangeIdentifier
+from .NavRouteInterface import extract_nav_route_from_file
+from . import EDSMInterface
+from .ZmqWrappers import Sender
+from .JournalInterface import JournalWatcher, JournalChangeIdentifier
 
 logger = logging.getLogger('EDScoutCore')
 

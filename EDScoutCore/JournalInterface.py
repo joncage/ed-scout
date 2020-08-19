@@ -8,7 +8,7 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler
-from EDScoutCore.FileSystemUpdatePrompter import FileSystemUpdatePrompter
+from .FileSystemUpdatePrompter import FileSystemUpdatePrompter
 
 default_journal_path = os.path.join(str(Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
 journal_file_pattern = "journal.*.log"
