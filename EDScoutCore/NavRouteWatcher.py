@@ -13,7 +13,7 @@ class NavRouteWatcher:
 
     def __init__(self):
         home = str(Path.home())
-        path = home+"\\Saved Games\\Frontier Developments\\Elite Dangerous"
+        path = home + "\\Saved Games\\Frontier Developments\\Elite Dangerous"
         self.event_handler = NavRouteWatcher._NewRouteHandler()
 
         self.observer = Observer()
@@ -34,20 +34,17 @@ class NavRouteWatcher:
             self.on_new_route = on_new_route
 
         def on_modified(self, event):
-            nav_route_file = str(event.src_path)
             log.debug('Nav route file change detected')
-
 
     def _extract_nav_route_from_file(nav_route: str):
         with open(nav_route, 'r') as read_file:
             content = read_file.read()
-            if len(content) is 0:
+            if len(content) == 0:
                 return {}
 
             nav_route = json.loads(content)
 
             return nav_route['Route']
-
 
     def set_callback(self, on_new_route):
         self.event_handler.set_callback(on_new_route)
@@ -60,7 +57,7 @@ class NavRouteWatcher:
 if __name__ == '__main__':
 
     def ReportRoute(new_route):
-        print('New route detected:'+str(new_route))
+        print('New route detected:' + str(new_route))
 
     navWatcher = NavRouteWatcher()
     navWatcher.set_callback(ReportRoute)

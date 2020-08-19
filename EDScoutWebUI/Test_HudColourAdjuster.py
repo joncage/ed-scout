@@ -47,7 +47,6 @@ def test_colour_conversion_make_red_green_as_hex():
 
     original_colour = "#808080"
 
-
     new_colour = HudColourAdjuster.hex_colour_shift(original_colour, colour_matrix)
 
     assert new_colour == "#00FF80"

@@ -169,7 +169,7 @@ if __name__ == '__main__':
             colour_matrix = HudColourAdjuster.get_matrix_values(HudColourAdjuster.default_config_file)
             if colour_matrix:
                 remapped_css_file = "css-overrides.css"
-                remapped_css_file_path = os.path.join(temp_dir.name,remapped_css_file)
+                remapped_css_file_path = os.path.join(temp_dir.name, remapped_css_file)
 
                 HudColourAdjuster.remap_style_file(original_css_path, colour_matrix, remapped_css_file_path)
             else:

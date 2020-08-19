@@ -42,7 +42,7 @@ class EDScout:
             # FSSDiscoveryScan
             system_name = journal_entry["SystemName"]
         else:
-            raise Exception("Failed to find system name from "+str(journal_entry))
+            raise Exception("Failed to find system name from " + str(journal_entry))
 
         return system_name
 
@@ -93,7 +93,6 @@ class EDScout:
 
         new_nav_route = extract_nav_route_from_file(path)
         self.on_new_route(new_nav_route)
-
 
     def forward_journal_change(self, new_entry):
         if new_entry["event"] == "NavRoute":
@@ -154,7 +153,7 @@ class EDScout:
 
     def report_new_info(self, new_info):
         json_to_send = json.dumps(new_info)
-        logger.info("Reporting: "+str(json_to_send))
+        logger.info("Reporting: " + str(json_to_send))
         self.sender.send(json_to_send)
 
     def stop(self):
