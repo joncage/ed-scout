@@ -68,9 +68,10 @@ class EDScout:
         else:
             # Rely on edsm to fill this in
             system = EDSMInterface.get_system(system_name)
-            primary_star = system["primaryStar"]
-            if primary_star:
-                star_class = primary_star["type"].split(maxsplit=1)[0]
+            logger.debug(system)
+
+            if system and system["primaryStar"]:
+                star_class = system["primaryStar"]["type"].split(maxsplit=1)[0]
             else:
                 star_class = "?"
 
@@ -104,10 +105,10 @@ class EDScout:
             # If it needed a detailed system lookup, add that as well
             if EDScout.requires_system_lookup(new_entry):
                 self.report_new_info(EDScout.create_system_report(new_entry))
-                logger.debug(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
+                logger.info(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
 
             if EDScout.requires_body_investigation(new_entry):
-                logger.debug(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
+                logger.info(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
 
     @staticmethod
     def check_system_content(new_entry):
@@ -152,7 +153,9 @@ class EDScout:
             self.report_new_info(report_content)
 
     def report_new_info(self, new_info):
-        self.sender.send(json.dumps(new_info))
+        json_to_send = json.dumps(new_info)
+        logger.info("Reporting: "+str(json_to_send))
+        self.sender.send(json_to_send)
 
     def stop(self):
         self.journalWatcher.stop()
