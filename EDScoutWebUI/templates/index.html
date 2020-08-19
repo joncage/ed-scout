@@ -4,70 +4,14 @@
 <head>
     <meta charset="utf-8">
     <title>ED Scout {{ version }}</title>
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="static/style.css?{{ timestamp }}">
+    <link rel="stylesheet" type="text/css" href="css-overrides/css-overrides.css?{{ timestamp }}">
+
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-    <style>
-        body {
-            background-color:black;
-            font: 20px Eurostile, sans-serif;
-            text-transform: uppercase;
-        }
-
-        .system {
-            margin-top: 1px;
-            margin-bottom: 1px;
-            padding-left: 10px;
-            text-shadow: 0px 0px 3px;
-            margin-left: 1px;
-            margin-right: 1px;
-        }
-        .charted {
-            color: #9f9f9f;
-            background: #333333;
-        }
-        .uncharted {
-            color: #EAA529;
-            background: #370C03;
-        }
-
-        .hyperspace {
-            color: #0026FF;
-        }
-        .statusInfo {
-            color: #EAA529;
-            background: #370C03;
-        }
-        .highlighted {
-            color: #370C03;
-            background: #F5A804;
-        }
-
-        .currentSystemHighlight {
-            background: #17EFF9;
-        }
-
-        .current_location {
-            border-style: dotted;
-            border-color: #17EFF9;
-            border-width: 1px;
-        }
-
-        .separator {
-            color: #F5A804;
-            border-color: #F5A804;
-            border-width: 1px 0px 1px 0px;
-            text-shadow: 0px 0px 3px;
-        }
-
-        .next-system {
-            color: #17EFF9;
-        }
-        .next-system hr {
-            border-color: #17EFF9;
-        }
-    </style>
 </head>
 
 <body>

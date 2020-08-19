@@ -1,4 +1,3 @@
-from inspect import signature
 import json
 import time
 import os
@@ -7,12 +6,14 @@ import logging
 
 from pathlib import Path
 from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler
+from EDScoutCore.FileSystemUpdatePrompter import FileSystemUpdatePrompter
 
 default_journal_path = os.path.join(str(Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
 journal_file_pattern = "journal.*.log"
 
-logger = logging.getLogger("EDScoutLogger")
+logger = logging.getLogger('JournalInterface')
 
 
 class JournalChangeIdentifier:
@@ -22,10 +23,29 @@ class JournalChangeIdentifier:
         self.journals = {}
         self.journal_path = journal_path
 
+        logger.debug(f"watching for journal changes in {self.journal_path}")
+
         self._init_journal_lists()
         self._new_journal_entry_callback = None
 
+        self.latest_journal = self.identify_latest_journal()
+
+        # Prompter is required to force the file system to do updates on some systems so we get regular updates from the
+        # journal watcher.
+        self.prompter = FileSystemUpdatePrompter(self.latest_journal)
+
+    def identify_latest_journal(self):
+        if len(self.journals.keys()) == 0:
+            return None
+
+        keys = sorted(self.journals.keys())
+        return keys[-1]
+
     def process_journal_change(self, changed_file):
+        if changed_file != self.latest_journal:
+            self.latest_journal = changed_file
+            self.prompter.set_watch_file(self.latest_journal)
+
         new_size = os.stat(changed_file).st_size
         new_data = None
 
@@ -33,7 +53,7 @@ class JournalChangeIdentifier:
         if changed_file not in self.journals:
             self.journals[changed_file] = 0
 
-        logger.debug(f'{changed_file}: {self.journals[changed_file]} ==> {new_size}')
+        logger.debug(f'{changed_file} - Size change: {self.journals[changed_file]} to {new_size}')
         if new_size > 0:  # Don't  try and read it if this is the first notification (we seem to get two; one from the file being cleared).
             # Check how much it has grown and read the excess
             size_diff = new_size - self.journals[changed_file]
@@ -55,6 +75,8 @@ class JournalChangeIdentifier:
 
                     entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.
                     entries.append(entry)
+
+                logger.debug(f'Found {len(entries)} new entries')
 
                 for entry in entries:
                     yield entry
@@ -78,8 +100,9 @@ class JournalChangeIdentifier:
 
 class JournalWatcher:
 
-    def __init__(self, path=default_journal_path):
+    def __init__(self, path=default_journal_path, force_polling=False):
         self.path = path
+        self.force_polling = force_polling
         self._configure_watchers()
 
     def set_callback(self, on_journal_change):
@@ -104,13 +127,28 @@ class JournalWatcher:
 
         def on_modified(self, event):
             changed_file = str(event.src_path)
-            print("journal change: " + str(signature(self.on_journal_change)))
+            logger.debug("Journal change: " + changed_file)
             self.on_journal_change(changed_file)
+
+        def on_created(self, event):
+            file = str(event.src_path)
+            logger.debug("Journal created: " + file)
+
+        def on_deleted(self, event):
+            file = str(event.src_path)
+            logger.debug("Journal deleted: " + file)
+
+        def on_moved(self, event):
+            file = str(event.src_path)
+            logger.debug("Journal moved: " + file)
 
     def _configure_watchers(self):
         self.event_handler = JournalWatcher._EntriesChangeHandler()
 
-        self.observer = Observer()
+        if self.force_polling:
+            self.observer = PollingObserver(0.25)  # Poll every quarter of a second
+        else:
+            self.observer = Observer()
         self.observer.schedule(self.event_handler, self.path, recursive=False)
         self.observer.start()
 
