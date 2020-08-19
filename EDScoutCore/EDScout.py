@@ -68,9 +68,10 @@ class EDScout:
         else:
             # Rely on edsm to fill this in
             system = EDSMInterface.get_system(system_name)
-            primary_star = system["primaryStar"]
-            if primary_star:
-                star_class = primary_star["type"].split(maxsplit=1)[0]
+            logger.debug(system)
+
+            if system and system["primaryStar"]:
+                star_class = system["primaryStar"]["type"].split(maxsplit=1)[0]
             else:
                 star_class = "?"
 
