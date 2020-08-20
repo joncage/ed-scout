@@ -4,7 +4,7 @@ import os
 
 def get_test_file_path(filename):
     script_path = os.path.dirname(__file__)
-    data_dir = ".\\TestData\\"
+    data_dir = "./TestData/"
     return os.path.abspath(os.path.join(script_path, data_dir, filename))
 
 
