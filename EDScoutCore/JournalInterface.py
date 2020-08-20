@@ -9,7 +9,7 @@ from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler
 from .FileSystemUpdatePrompter import FileSystemUpdatePrompter
 
-journal_file_pattern = "journal.*.log"
+journal_file_pattern = "Journal.*.log"
 
 logger = logging.getLogger('JournalInterface')
 
@@ -157,6 +157,7 @@ class JournalWatcher:
 
     def identify_latest_journal(self):
         journal_files = glob.glob(os.path.join(self.journal_path, journal_file_pattern))
+        #print(f"Journal file detection: {self.journal_path}: {journal_files}")
         journals = []
         for journal_file in journal_files:
             journals.append(journal_file)

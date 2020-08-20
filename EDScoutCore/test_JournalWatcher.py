@@ -35,6 +35,8 @@ class TestJournalWatcher():
         pre_change_file_path = TestJournalWatcher.get_test_file_path("FileChangeTest-PreChange.log")
         copyfile(pre_change_file_path, test_input_file_path)
 
+        #print(f"Putting initial journal file in: {test_input_file_path}")
+
         # initialise the watcher
         jw = JournalWatcher(self.test_dir.name)
         jw.set_callback(self.receive_callback)
