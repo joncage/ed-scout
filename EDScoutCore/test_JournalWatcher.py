@@ -1,9 +1,10 @@
 import tempfile
 import os
+import pytest
 from shutil import copyfile
 
 
-from EDScoutCore.JournalInterface import JournalWatcher
+from .JournalInterface import JournalWatcher
 
 
 class TestJournalWatcher():
@@ -20,19 +21,31 @@ class TestJournalWatcher():
     def receive_callback(self, callback_arg):
         self.callback_arg = callback_arg
 
+    @staticmethod
+    def get_test_file_path(filename):
+        script_path = os.path.dirname(__file__)
+        data_dir = "../ExampleData/"
+        return os.path.abspath(os.path.join(script_path, data_dir, filename))
+
+    @pytest.mark.skip(reason="unreliable on linux")
     def test_extract_new_entries_from_file(self):
 
         # setup the test area
         file_to_watch = "Journal.200725210202.01.log"
         test_input_file_path = os.path.join(self.test_dir.name, file_to_watch)
-        copyfile("..\\ExampleData\\FileChangeTest-PreChange.log", test_input_file_path)
+
+        pre_change_file_path = TestJournalWatcher.get_test_file_path("FileChangeTest-PreChange.log")
+        copyfile(pre_change_file_path, test_input_file_path)
+
+        #print(f"Putting initial journal file in: {test_input_file_path}")
 
         # initialise the watcher
         jw = JournalWatcher(self.test_dir.name)
         jw.set_callback(self.receive_callback)
 
         # simulate a file change event
-        with open("..\\ExampleData\\FileChangeTest-PostChange.log", "rb") as input_file:
+        post_change_file_path = TestJournalWatcher.get_test_file_path("FileChangeTest-PostChange.log")
+        with open(post_change_file_path, "rb") as input_file:
             with open(test_input_file_path, "wb") as output_file:
                 output_file.write(input_file.read())
 

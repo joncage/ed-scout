@@ -4,70 +4,54 @@ import os
 import glob
 import logging
 
-from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import PatternMatchingEventHandler
-from EDScoutCore.FileSystemUpdatePrompter import FileSystemUpdatePrompter
+from .FileSystemUpdatePrompter import FileSystemUpdatePrompter
 
-default_journal_path = os.path.join(str(Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
-journal_file_pattern = "journal.*.log"
+journal_file_pattern = "Journal.*.log"
 
 logger = logging.getLogger('JournalInterface')
 
 
-class JournalChangeIdentifier:
+class JournalChangeProcessor:
 
-    def __init__(self, journal_path=default_journal_path):
-        pass
-        self.journals = {}
-        self.journal_path = journal_path
-
-        logger.debug(f"watching for journal changes in {self.journal_path}")
-
-        self._init_journal_lists()
+    def __init__(self):
         self._new_journal_entry_callback = None
 
-        self.latest_journal = self.identify_latest_journal()
+        self.latest_journal = None
+        self.journal_size = 0
 
-        # Prompter is required to force the file system to do updates on some systems so we get regular updates from the
-        # journal watcher.
-        self.prompter = FileSystemUpdatePrompter(self.latest_journal)
-
-    def identify_latest_journal(self):
-        if len(self.journals.keys()) == 0:
-            return None
-
-        keys = sorted(self.journals.keys())
-        return keys[-1]
+    def start_reading_journal(self, changed_file):
+        # TODO: Scan though the file to find the last location, FSD target and if there's a navroute file, set that too.
+        self.latest_journal = changed_file
+        self.journal_size = os.stat(changed_file).st_size
 
     def process_journal_change(self, changed_file):
+        new_size = os.stat(changed_file).st_size
+
         if changed_file != self.latest_journal:
             self.latest_journal = changed_file
-            self.prompter.set_watch_file(self.latest_journal)
+            self.journal_size = 0
 
-        new_size = os.stat(changed_file).st_size
         new_data = None
-
-        # If the game was loaded after the scout it will start a new journal which we need to treat as unscanned.
-        if changed_file not in self.journals:
-            self.journals[changed_file] = 0
-
-        logger.debug(f'{changed_file} - Size change: {self.journals[changed_file]} to {new_size}')
+        logger.debug(f'{changed_file} - Size change: {self.journal_size} to {new_size}')
         if new_size > 0:  # Don't  try and read it if this is the first notification (we seem to get two; one from the file being cleared).
             # Check how much it has grown and read the excess
-            size_diff = new_size - self.journals[changed_file]
+            size_diff = new_size - self.journal_size
             if size_diff > 0:
                 with open(changed_file, 'rb') as f:
                     f.seek(-size_diff, os.SEEK_END)  # Note minus sign
                     new_data = f.read()
 
-        entries = []
-
         if new_data:
-            new_journal_lines = JournalChangeIdentifier.binary_file_data_to_lines(new_data)
+            new_journal_lines = JournalChangeProcessor.binary_file_data_to_lines(new_data)
 
             try:
+                entries = []
+
+                # Deal with all entries in one go in case the last one isn't complete and throws.
+                # This ensures we treat it as one atomic operation - nex time round we'll re-read the data to try again.
                 for line in new_journal_lines:
                     logger.debug(f'New journal entry detected: {line}')
 
@@ -80,7 +64,7 @@ class JournalChangeIdentifier:
 
                 for entry in entries:
                     yield entry
-                self.journals[changed_file] = new_size
+                    self.journal_size = new_size
 
             except json.decoder.JSONDecodeError as e:
                 logger.exception(e)
@@ -92,65 +76,96 @@ class JournalChangeIdentifier:
         all_lines.pop()  # Drop the last empty line
         return all_lines
 
-    def _init_journal_lists(self):
-        journal_files = glob.glob(os.path.join(self.journal_path, journal_file_pattern))
-        for journal_file in journal_files:
-            self.journals[journal_file] = os.stat(journal_file).st_size
+
+class _EntriesChangeHandler(PatternMatchingEventHandler):
+
+    def __init__(self):
+        super(_EntriesChangeHandler, self).__init__(
+            patterns=['*Journal*.log'],
+            ignore_patterns=[],
+            ignore_directories=True)
+
+        self.on_journal_change = None
+
+    def set_callback(self, on_new_journal_entry):
+        self.on_journal_change = on_new_journal_entry
+
+    def on_modified(self, event):
+        changed_file = str(event.src_path)
+        logger.debug("Journal change: " + changed_file)
+        self.on_journal_change(changed_file)
+
+    def on_created(self, event):
+        changed_file = str(event.src_path)
+        logger.info("Journal created: " + changed_file)
+        self.on_journal_change(changed_file)
+
+    def on_deleted(self, event):
+        file = str(event.src_path)
+        logger.debug("Journal deleted: " + file)
+
+    def on_moved(self, event):
+        file = str(event.src_path)
+        logger.debug("Journal moved: " + file)
 
 
 class JournalWatcher:
 
-    def __init__(self, path=default_journal_path, force_polling=False):
-        self.path = path
+    def __init__(self, path, force_polling=False):
+        self.journal_path = path
         self.force_polling = force_polling
+        self.prompter = None
+        self.report_journal_change = None
+
         self._configure_watchers()
 
+        self.latest_journal = self.identify_latest_journal()
+        self.set_current_journal(self.latest_journal)
+
     def set_callback(self, on_journal_change):
-        self.event_handler.set_callback(on_journal_change)
+        self.report_journal_change = on_journal_change
+
+    def set_current_journal(self, current_journal):
+        if self.prompter is None:
+            self.prompter = FileSystemUpdatePrompter(current_journal)
+
+        if current_journal != self.latest_journal:
+            self.prompter.set_watch_file(current_journal)
+            self.latest_journal = current_journal
 
     def stop(self):
         self.observer.stop()
         self.observer.join()
 
-    class _EntriesChangeHandler(PatternMatchingEventHandler):
-
-        def __init__(self):
-            super(JournalWatcher._EntriesChangeHandler, self).__init__(
-                patterns=['*Journal*.log'],
-                ignore_patterns=[],
-                ignore_directories=True)
-
-            self.on_journal_change = None
-
-        def set_callback(self, on_new_journal_entry):
-            self.on_journal_change = on_new_journal_entry
-
-        def on_modified(self, event):
-            changed_file = str(event.src_path)
-            logger.debug("Journal change: " + changed_file)
-            self.on_journal_change(changed_file)
-
-        def on_created(self, event):
-            file = str(event.src_path)
-            logger.debug("Journal created: " + file)
-
-        def on_deleted(self, event):
-            file = str(event.src_path)
-            logger.debug("Journal deleted: " + file)
-
-        def on_moved(self, event):
-            file = str(event.src_path)
-            logger.debug("Journal moved: " + file)
+    def _on_journal_change(self, event):
+        self.report_journal_change(event)
 
     def _configure_watchers(self):
-        self.event_handler = JournalWatcher._EntriesChangeHandler()
+        if not os.path.exists(self.journal_path):
+            raise Exception(f"Unable to start watching; Path does not exist: {self.journal_path}")
+
+        self.event_handler = _EntriesChangeHandler()
+
+        self.event_handler.set_callback(self._on_journal_change)
 
         if self.force_polling:
             self.observer = PollingObserver(0.25)  # Poll every quarter of a second
         else:
             self.observer = Observer()
-        self.observer.schedule(self.event_handler, self.path, recursive=False)
+        self.observer.schedule(self.event_handler, self.journal_path, recursive=False)
         self.observer.start()
+
+    def identify_latest_journal(self):
+        journal_files = glob.glob(os.path.join(self.journal_path, journal_file_pattern))
+        #print(f"Journal file detection: {self.journal_path}: {journal_files}")
+        journals = []
+        for journal_file in journal_files:
+            journals.append(journal_file)
+
+        if len(journals) > 0:
+            return sorted(journals)[-1]
+        else:
+            return None
 
 
 if __name__ == '__main__':

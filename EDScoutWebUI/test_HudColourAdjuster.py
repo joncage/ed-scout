@@ -1,9 +1,19 @@
-from EDScoutWebUI import HudColourAdjuster
+from . import HudColourAdjuster
+import os
+
+
+def get_test_file_path(filename):
+    script_path = os.path.dirname(__file__)
+    data_dir = "./TestData/"
+    return os.path.abspath(os.path.join(script_path, data_dir, filename))
 
 
 def test_can_read_values_correctly():
-    data_file = "TestData\\example.xml"
-    matrix_values = HudColourAdjuster.get_matrix_values(data_file)
+
+    script_path = os.path.dirname(__file__)
+    data_file = get_test_file_path("example.xml")
+    data_path = os.path.join(script_path, data_file)
+    matrix_values = HudColourAdjuster.get_matrix_values(data_path)
     assert matrix_values is not None
     assert matrix_values['MatrixRed'] == [1, 0, 0]
     assert matrix_values['MatrixGreen'] == [0, 1, 0]
