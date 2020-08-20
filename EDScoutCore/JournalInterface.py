@@ -161,8 +161,10 @@ class JournalWatcher:
         for journal_file in journal_files:
             journals.append(journal_file)
 
-        last_journal = sorted(journals)[-1]
-        return last_journal
+        if len(journals) > 0:
+            return sorted(journals)[-1]
+        else:
+            return None
 
 
 if __name__ == '__main__':
