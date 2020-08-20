@@ -1,5 +1,6 @@
 import tempfile
 import os
+import pytest
 from shutil import copyfile
 
 
@@ -26,6 +27,7 @@ class TestJournalWatcher():
         data_dir = "../ExampleData/"
         return os.path.abspath(os.path.join(script_path, data_dir, filename))
 
+    @pytest.mark.skip(reason="unreliable on linux")
     def test_extract_new_entries_from_file(self):
 
         # setup the test area
