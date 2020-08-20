@@ -47,6 +47,10 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
+### 1.2.4 - Crash fix
+
+* Fixed a crash that occurred when you jump into a system which was unknown to EDSM (and consequently unable to feed back the star type).
+
 ### 1.2.3 - Stability, Logging & More info logged 
 
 * Fixed journal updates not being detected on some machines.
