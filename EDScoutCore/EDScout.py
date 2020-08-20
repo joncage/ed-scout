@@ -1,22 +1,33 @@
 import time
 import json
 import logging
+import os
 from pathlib import Path
 
 from .NavRouteInterface import extract_nav_route_from_file
 from . import EDSMInterface
 from .ZmqWrappers import Sender
-from .JournalInterface import JournalWatcher, JournalChangeIdentifier
+from .JournalInterface import JournalWatcher, JournalChangeProcessor
 
 logger = logging.getLogger('EDScoutCore')
+
+default_journal_path = os.path.join(str(Path.home()), "Saved Games/Frontier Developments/Elite Dangerous")
 
 
 class EDScout:
 
-    def __init__(self, force_polling=False):
+    def __init__(
+            self,
+            force_polling=False,
+            journal_watcher=None,
+            journal_change_processor=JournalChangeProcessor()):
+
+        if journal_watcher is None:
+            journal_watcher = JournalWatcher(default_journal_path, force_polling=force_polling)
+
         # Setup the journal watcher
-        self.journalChangeIdentifier = JournalChangeIdentifier()
-        self.journalWatcher = JournalWatcher(force_polling=force_polling)
+        self.journal_change_processor = journal_change_processor
+        self.journalWatcher = journal_watcher
         self.journalWatcher.set_callback(self.on_journal_change)
 
         # Setup the ZMQ forwarder that'll pass on the log file changes
@@ -117,7 +128,7 @@ class EDScout:
     def on_journal_change(self, altered_journal):
         excluded_event_types = ["Music", "ReceiveText", "FuelScoop"]
 
-        for new_entry in self.journalChangeIdentifier.process_journal_change(altered_journal):
+        for new_entry in self.journal_change_processor.process_journal_change(altered_journal):
             if new_entry["event"] not in excluded_event_types:
                 self.forward_journal_change(new_entry)
 
