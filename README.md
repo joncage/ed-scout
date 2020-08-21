@@ -1,5 +1,6 @@
 # Elite Dangerous Scout
 
+![GitHub](https://img.shields.io/github/license/joncage/ed-scout)
 
 Greetings commander and welcome to EDScout; an Elite Dangerous companion app to simplify finding unexplored worlds.
 
