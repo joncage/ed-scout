@@ -115,23 +115,26 @@
                 return currentTarget;
             }
 
-
             function setTargetSystem(data) {
-                console.log("Setting target system")
-                let systemId = data.SystemAddress
+                console.log("Setting target system");
+                let systemId = data.SystemAddress;
                 let systemName = data.Name;
-
-
 
                 // Record some data about this target so we can check it easily later
                 let locationElement = document.getElementById('target-sys');
                 locationElement.setAttribute('data-targetSystem', systemId.toString());
-
-
             }
 
-            function startJumpTo(systemId, systemName) {
-                console.log("Starting jump")
+            function startJumpTo(data) {
+                if (data.JumpType !== "HyperSpace") {
+                    // Don't do anything if we're just entering supercruise
+                    return
+                }
+
+                const systemId = data.systemId;
+                const systemName = data.systemName;
+
+                console.log("Starting jump");
 
                 // Clear the current location as we're now jumping
                 let locationElement = document.getElementById('location');
@@ -257,7 +260,7 @@
                     }
                     else if (systemInfo.event === "StartJump") // When 3..2..1 starts
                     {
-                        startJumpTo(systemInfo.SystemAddress, systemInfo.StarSystem);
+                        startJumpTo(systemInfo);
                     }
                     else if (systemInfo.event === "FSDJump") // When you drop out of hyperspace
                     {
