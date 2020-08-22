@@ -15,7 +15,8 @@ def appraise_body(body_info):
 
     return "???"
 
-def calculateEstimatedValue(mainType, type, mass, terraformState, options):
+
+def calculateEstimatedValue(main_type, specific_type, mass, terraform_state, options):
 
     # Merge default options
     # options = tuple_merge(tuple(
@@ -38,74 +39,71 @@ def calculateEstimatedValue(mainType, type, mass, terraformState, options):
     if mass is None:
         mass = 1
 
-    if mainType == 'Star' or mainType == 1:
+    if main_type == 'Star' or main_type == 1:
         value = 1200
 
         # White Dwarf Star
-        if type in (51, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514):
+        if specific_type in [51, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514]:
             value = 14057
 
         # Neutron Star, Black Hole
-        if type in (91, 92):
+        if specific_type in [91, 92]:
             value = 22628
 
         # Supermassive Black Hole
-        if type in (93):
+        if specific_type in [93]:
             # this is applying the same scaling to the 3.2 value as a normal black hole, not confirmed in game
             value = 33.5678
 
         return round(value + (mass * value / 66.25))
 
-
-    if mainType == 'Planet' or mainType == 2:
+    if main_type == 'Planet' or main_type == 2:
         value = 300
 
-        if terraformState is not None and terraformState > 0:
+        if terraform_state is not None and terraform_state > 0:
             bonus = 93328
 
         # Metal-rich body
-        if type in (1):
+        if specific_type in [1]:
             value = 21790
             bonus = 0
 
-            if terraformState is not None and terraformState > 0:
+            if terraform_state is not None and terraform_state > 0:
                 bonus = 65631
 
         # Ammonia world
-        if type in (51):
+        if specific_type in [51]:
             value = 96932
             bonus = 0
 
         # Class I gas giant
-        if type in (71):
+        if specific_type in [71]:
             value = 1656
             bonus = 0
 
         # High metal content world / Class II gas giant
-        if type in (2, 72):
+        if specific_type in [2, 72]:
             value = 9654
             bonus = 0
 
-            if terraformState is not None and terraformState > 0:
+            if terraform_state is not None and terraform_state > 0:
                 bonus = 100677
 
         # Earth-like world / Water world
-        if type in (31, 41):
+        if specific_type in [31, 41]:
             value = 64831
             bonus = 0
 
-            if terraformState is not None and terraformState > 0:
+            if terraform_state is not None and terraform_state > 0:
                 bonus = 116295
 
-            if type == 31: # Earth Like...
+            if specific_type == 31:  # Earth Like...
                 bonus = 116295
-
-
 
         # CALCULATION
-        q              = 0.56591828
-        value          = value + bonus
-        mapMultiplier  = 1
+        q = 0.56591828
+        value = value + bonus
+        mapMultiplier = 1.0
 
         if options['haveMapped']:
             mapMultiplier = 3.3333333333
