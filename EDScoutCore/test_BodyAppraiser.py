@@ -1,36 +1,6 @@
 
 from .BodyAppraiser import calculateEstimatedValue
 
-# Type mappings from EDSM\<Alias Repo>\Body\Planet\Type.php
-#          1      => 'Metal-rich body',
-#          2      => 'High metal content world',
-#
-#         11      => 'Rocky body',
-#         12      => 'Rocky Ice world', // Check in game
-#
-#         21      => 'Icy body',
-#
-#         31      => 'Earth-like world',
-#
-#         41      => 'Water world',
-#         42      => 'Water giant', // Check in game
-#         43      => 'Water giant with life', // Check in game
-#
-#         51      => 'Ammonia world',
-#
-#         61      => 'Gas giant with water-based life', // Check in game
-#         62      => 'Gas giant with ammonia-based life', // Check in game
-#
-#         71      => 'Class I gas giant',
-#         72      => 'Class II gas giant',
-#         73      => 'Class III gas giant',
-#         74      => 'Class IV gas giant',
-#         75      => 'Class V gas giant',
-#
-#         81      => 'Helium-rich gas giant',
-#         82      => 'Helium gas giant',
-
-
 def test_calculateEstimatedValue():
     scan_data = {"timestamp":"2020-08-22T15:22:37Z",
                  "event":"Scan",

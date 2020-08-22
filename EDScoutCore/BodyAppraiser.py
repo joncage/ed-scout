@@ -3,15 +3,64 @@
 # https://github.com/EDSM-NET/Component/blob/master/Body/Value.php
 
 
+# Type mappings from EDSM\<Alias Repo>\Body\Planet\Type.php
+body_types = {
+    'Metal-rich body': 1,
+    'High metal content world': 2,
+    'Rocky body': 11,
+    'Rocky Ice world': 12,
+    'Icy body': 21,
+    'Earth-like world': 31,
+    'Water world': 41,
+    'Water giant': 42,
+    'Water giant with life': 43,
+    'Ammonia world': 51,
+    'Gas giant with water-based life': 61,
+    'Gas giant with ammonia-based life': 62,
+    'Class I gas giant': 71,
+    'Class II gas giant': 72,
+    'Class III gas giant': 73,
+    'Class IV gas giant': 74,
+    'Class V gas giant': 75,
+    'Helium-rich gas giant': 81,
+    'Helium gas giant': 82,
+}
 
 
-def appraise_star(star_info):
-    # (k + (m * k / 66.25))
-    return 0
+#          1      => 'Metal-rich body',
+#          2      => 'High metal content world',
+#
+#         11      => 'Rocky body',
+#         12      => 'Rocky Ice world', // Check in game
+#
+#         21      => 'Icy body',
+#
+#         31      => 'Earth-like world',
+#
+#         41      => 'Water world',
+#         42      => 'Water giant', // Check in game
+#         43      => 'Water giant with life', // Check in game
+#
+#         51      => 'Ammonia world',
+#
+#         61      => 'Gas giant with water-based life', // Check in game
+#         62      => 'Gas giant with ammonia-based life', // Check in game
+#
+#         71      => 'Class I gas giant',
+#         72      => 'Class II gas giant',
+#         73      => 'Class III gas giant',
+#         74      => 'Class IV gas giant',
+#         75      => 'Class V gas giant',
+#
+#         81      => 'Helium-rich gas giant',
+#         82      => 'Helium gas giant',
+
+def identify_main_type(body_info):
+
 
 def appraise_body(body_info):
 
-
+    main_type = StarType | PlanetClass
 
     return "???"
 
