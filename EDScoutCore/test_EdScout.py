@@ -103,4 +103,11 @@ class TestEdScoutEntryProcessing:
         assert len(self.new_entry) == 1, "There should be one report for the FSD target command then another for the system report"
         reported_entry = self.new_entry[0]
         assert reported_entry is not None
-        assert 'mappedValue' in reported_entry
+        assert 'MappedValue' in reported_entry
+        assert 'BodyName' in reported_entry
+        assert 'StarSystem' in reported_entry
+        assert reported_entry['StarSystem'] not in reported_entry['BodyName']
+
+    #TODO = look up last nights journal and see why we get: `B A BELT CLUSTER 3 [V] [T]`
+    #Also check why hyperspace doesn't appear when we jump
+    #Also check why it does something odd when the first star is scanned.
