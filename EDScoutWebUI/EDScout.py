@@ -166,7 +166,13 @@ if __name__ == '__main__':
             log.info(f"Looking for HUD overrides in {HudColourAdjuster.default_config_file}")
 
             original_css_path = os.path.join(static_path, "style.css")
-            colour_matrix = HudColourAdjuster.get_matrix_values(HudColourAdjuster.default_config_file)
+            try:
+                colour_matrix = HudColourAdjuster.get_matrix_values(HudColourAdjuster.default_config_file)
+            except Exception as e:
+                log.error("Failed to interpret HUD overrides. Please check your file is of the format described in https://arkku.com/elite/hud_editor/")
+                log.exception(e)
+                colour_matrix = None
+
             if colour_matrix:
                 remapped_css_file = "css-overrides.css"
                 remapped_css_file_path = os.path.join(temp_dir.name, remapped_css_file)
