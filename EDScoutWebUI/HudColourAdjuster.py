@@ -3,7 +3,7 @@ import re
 import os
 
 default_config_file = os.path.join(os.path.expanduser('~'), r"AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml")
-#print(f'default_config_file={default_config_file}')
+# print(f'default_config_file={default_config_file}')
 
 # Worked out the transform from here:
 # https://arkku.com/elite/hud_editor/
