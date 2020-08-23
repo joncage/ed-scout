@@ -126,8 +126,9 @@
             }
 
             function startJumpTo(data) {
-                if (data.JumpType !== "HyperSpace") {
+                if (data.JumpType !== "Hyperspace") {
                     // Don't do anything if we're just entering supercruise
+                    console.log("Skipping jump");
                     return
                 }
 
