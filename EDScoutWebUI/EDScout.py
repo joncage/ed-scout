@@ -29,7 +29,7 @@ parser.add_argument('-force_polling', action="store_true", dest="force_polling")
 args = parser.parse_args()
 
 # Check if this has been packaged up for distribution
-is_deployed = False #hasattr(sys, '_MEIPASS')
+is_deployed = hasattr(sys, '_MEIPASS')
 
 
 def configure_logger(logger_to_configure, log_path, log_level_override=None):
@@ -72,7 +72,7 @@ configure_logger(log, logging_path)
 configure_logger(logging.getLogger('EDScoutCore'), logging_path)
 configure_logger(logging.getLogger('NavRouteWatcher'), logging_path)
 configure_logger(logging.getLogger('JournalInterface'), logging_path)
-configure_logger(logging.getLogger('flaskwebgui'), logging_path)
+configure_logger(logging.getLogger('flaskwebgui'), logging_path, log_level_override=logging.INFO)
 
 # Lets go!
 log.info(f"ED Scout v{__version__} Starting")
