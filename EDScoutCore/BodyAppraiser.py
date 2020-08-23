@@ -26,6 +26,13 @@ body_types = {
     'Helium gas giant': 82,
 }
 
+terraform_states = {
+    'Not terraformable': 0,
+    'Candidate for terraforming': 1,
+    'Terraformable': 1,
+    'Terraformed': 2,
+    'Terraforming': 3
+}
 
 #          1      => 'Metal-rich body',
 #          2      => 'High metal content world',
@@ -57,12 +64,54 @@ body_types = {
 
 def identify_main_type(body_info):
 
+    return None
+
+def encode_terraform_state(terraform_state):
+    return terraform_states[terraform_state]
 
 def appraise_body(body_info):
 
-    main_type = StarType | PlanetClass
+    # main_type = StarType | PlanetClass
+    main_type = None
+    specific_type = None
+    mass = None
+    terraform_state = None
+    if "StarType" in body_info:
+        #print(f"Star: {body_info['BodyName']}")
+        main_type = 'Star'
+    else:
+        # Planet
+        #print(f"Planet: {body_info['BodyName']}")
+        main_type = 'Planet'
 
-    return "???"
+    if "MassEM" in body_info:
+        mass = body_info['MassEM']
+    else:
+        mass = 0  # belts don't have a mass attribute
+
+    terraform_state = None
+    if 'TerraformState' in body_info and len(body_info['TerraformState']) > 0:
+        terraform_state = encode_terraform_state(body_info['TerraformState'])
+
+    options = {
+        'haveMapped': True,  # Always indicate we mapped it so we can tell the max worth
+        'efficiencyBonus': True,
+        'isFirstDiscoverer': not body_info['WasDiscovered'],
+        'isFirstMapper': not body_info['WasMapped'],
+    }
+
+
+
+    #     'isFirstDiscoverer'     => false,
+    #     'isFirstMapper'         => false,
+    #
+    #     'haveMapped'            => false,
+    #     'efficiencyBonus'       => false,
+    #
+    #     'systemBodies'          => tuple(),
+    #     'isPrimaryStar'         => false,
+
+    return calculateEstimatedValue(main_type, specific_type, mass, terraform_state, options)
 
 
 def calculateEstimatedValue(main_type, specific_type, mass, terraform_state, options):
