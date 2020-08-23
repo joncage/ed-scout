@@ -6,23 +6,35 @@
 # Type mappings from EDSM\<Alias Repo>\Body\Planet\Type.php
 body_types = {
     'Metal-rich body': 1,
+    'Metal rich body': 1,
     'High metal content world': 2,
+    'High metal content body': 2,
     'Rocky body': 11,
     'Rocky Ice world': 12,
+    'Rocky ice body': 12,
     'Icy body': 21,
     'Earth-like world': 31,
+    'Earthlike body': 31,
     'Water world': 41,
     'Water giant': 42,
     'Water giant with life': 43,
     'Ammonia world': 51,
     'Gas giant with water-based life': 61,
+    'Gas giant with water based life': 61,
     'Gas giant with ammonia-based life': 62,
+    'Gas giant with ammonia based life': 62,
     'Class I gas giant': 71,
     'Class II gas giant': 72,
     'Class III gas giant': 73,
     'Class IV gas giant': 74,
     'Class V gas giant': 75,
+    'Sudarsky class I gas giant': 71,
+    'Sudarsky class II gas giant': 72,
+    'Sudarsky class III gas giant': 73,
+    'Sudarsky class IV gas giant': 74,
+    'Sudarsky class V gas giant': 75,
     'Helium-rich gas giant': 81,
+    'Helium rich gas giant': 81,
     'Helium gas giant': 82,
 }
 
@@ -62,12 +74,17 @@ terraform_states = {
 #         81      => 'Helium-rich gas giant',
 #         82      => 'Helium gas giant',
 
-def identify_main_type(body_info):
 
-    return None
+def encode_body_type(body_info):
+    if 'PlanetClass' not in body_info:
+        return None  # Belt clusters for example do not have a planet class
+
+    return body_types[body_info['PlanetClass']]
+
 
 def encode_terraform_state(terraform_state):
     return terraform_states[terraform_state]
+
 
 def appraise_body(body_info):
 
@@ -83,6 +100,7 @@ def appraise_body(body_info):
         # Planet
         #print(f"Planet: {body_info['BodyName']}")
         main_type = 'Planet'
+        specific_type = encode_body_type(body_info)
 
     if "MassEM" in body_info:
         mass = body_info['MassEM']
