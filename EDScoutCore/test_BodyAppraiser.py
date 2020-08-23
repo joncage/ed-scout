@@ -71,4 +71,9 @@ def test_ensure_all_scan_events_can_be_processed():
                 raise Exception(f"Failed to decode '{scan}'") from e
             assert value != 0
 
-            print(f"{value} <= {data_obj['BodyName']}")
+            if "StarType" in data_obj:
+                # print(f"{value} <= {data_obj['StarType']} <= {data_obj['BodyName']}")
+                pass
+            else:
+                # print(f"{value} <= {data_obj['BodyName']}")
+                pass

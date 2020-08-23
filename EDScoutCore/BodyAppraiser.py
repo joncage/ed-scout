@@ -3,6 +3,83 @@
 # https://github.com/EDSM-NET/Component/blob/master/Body/Value.php
 
 
+star_types = {
+    # Main sequence
+    'O': 1,
+
+    'B': 2,
+    'B_BlueSuperGiant': 201,
+
+    'A': 3,
+    'A_BlueWhiteSuperGiant': 301,
+
+    'F': 4,
+    'F_WhiteSuperGiant': 401,
+
+    'G': 5,
+    'G_WhiteSuperGiant': 5001,
+
+    'K': 6,
+    'K_OrangeGiant': 601,
+
+    'M': 7,
+    'M_RedGiant': 701,
+    'M_RedSuperGiant': 702,
+
+    'L': 8,
+    'T': 9,
+    'Y': 10,
+
+    # Proto stars
+    'TTS': 11,
+    'AeBe': 12,
+
+    # Wolf-Rayet
+    'W': 21,
+    'WN': 22,
+    'WNC': 23,
+    'WC': 24,
+    'WO': 25,
+
+    # Carbon stars
+     'CS': 31,
+     'C': 32,
+     'CN': 33,
+     'CJ': 34,
+     'CH': 35,
+     'CHd': 36,
+
+     'MS': 41,
+     'S': 42,
+
+    # White dwarfs
+    'D': 51,
+    'DA': 501,
+    'DAB': 502,
+    'DAO': 503,
+    'DAZ': 504,
+    'DAV': 505,
+    'DB': 506,
+    'DBZ': 507,
+    'DBV': 508,
+    'DO': 509,
+    'DOV': 510,
+    'DQ': 511,
+    'DC': 512,
+    'DCV': 513,
+    'DX': 514,
+
+     'N': 91,
+     'H': 92,
+     'H': 93,
+
+     'X': 94, # Exotic?? // Check in game
+
+    'RoguePlanet': 111, # Check in game
+    'Nebula': 112, # Check in game
+    'StellarRemnantNebula': 113, # Check in game
+}
+
 # Type mappings from EDSM\<Alias Repo>\Body\Planet\Type.php
 body_types = {
     'Metal-rich body': 1,
@@ -46,33 +123,6 @@ terraform_states = {
     'Terraforming': 3
 }
 
-#          1      => 'Metal-rich body',
-#          2      => 'High metal content world',
-#
-#         11      => 'Rocky body',
-#         12      => 'Rocky Ice world', // Check in game
-#
-#         21      => 'Icy body',
-#
-#         31      => 'Earth-like world',
-#
-#         41      => 'Water world',
-#         42      => 'Water giant', // Check in game
-#         43      => 'Water giant with life', // Check in game
-#
-#         51      => 'Ammonia world',
-#
-#         61      => 'Gas giant with water-based life', // Check in game
-#         62      => 'Gas giant with ammonia-based life', // Check in game
-#
-#         71      => 'Class I gas giant',
-#         72      => 'Class II gas giant',
-#         73      => 'Class III gas giant',
-#         74      => 'Class IV gas giant',
-#         75      => 'Class V gas giant',
-#
-#         81      => 'Helium-rich gas giant',
-#         82      => 'Helium gas giant',
 
 
 def encode_body_type(body_info):
@@ -86,6 +136,9 @@ def encode_terraform_state(terraform_state):
     return terraform_states[terraform_state]
 
 
+def encode_star_type(body_info):
+    return star_types[body_info['StarType']]
+
 def appraise_body(body_info):
 
     # main_type = StarType | PlanetClass
@@ -96,6 +149,7 @@ def appraise_body(body_info):
     if "StarType" in body_info:
         #print(f"Star: {body_info['BodyName']}")
         main_type = 'Star'
+        specific_type = encode_star_type(body_info)
     else:
         # Planet
         #print(f"Planet: {body_info['BodyName']}")
