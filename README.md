@@ -48,6 +48,11 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
+### v1.2.5 - More Hud customisation resiliance & Chrome location detection
+
+* Fixes handling for HUD .xml files that don't have an entry for every matrix value (some third party tools don't specify all of them and Elite is fine with that so the scout should be too).
+* Added more thorough detection of the chrome browser (fix to third party PyWebGui library).
+
 ### 1.2.4 - Crash fix
 
 * Fixed a crash that occurred when you jump into a system which was unknown to EDSM (and consequently unable to feed back the star type).
