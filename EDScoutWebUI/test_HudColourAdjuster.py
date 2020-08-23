@@ -1,5 +1,7 @@
 from . import HudColourAdjuster
 import os
+import pytest
+import xml
 
 
 def get_test_file_path(filename):
@@ -91,3 +93,26 @@ def test_css_conversion_values_are_set_crrectly(monkeypatch):
     converted = HudColourAdjuster.remap_styles(original_data, colour_matrix)
 
     assert converted == ".charted { color: #00FF00; background: #00FFFF; }"
+
+
+@pytest.mark.parametrize("data_file", ["example-noblue.xml", "example-emptyblue.xml"])
+def test_verify_empty_blue_matrix_is_handled_correctly(data_file):
+    script_path = os.path.dirname(__file__)
+    data_file = get_test_file_path(data_file)
+    data_path = os.path.join(script_path, data_file)
+    matrix_values = HudColourAdjuster.get_matrix_values(data_path)
+    assert matrix_values is not None
+    assert matrix_values['MatrixRed'] == [0.3, 0, 0]
+    assert matrix_values['MatrixGreen'] == [0, 0.2, 0]
+    assert matrix_values['MatrixBlue'] == [0, 0, 1]
+
+
+def test_verify_empty_file_is_handled_correctly():
+    script_path = os.path.dirname(__file__)
+    data_file = get_test_file_path('example-empty.xml')
+    data_path = os.path.join(script_path, data_file)
+
+    with pytest.raises(xml.etree.ElementTree.ParseError):
+        HudColourAdjuster.get_matrix_values(data_path)
+
+
