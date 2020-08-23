@@ -3,7 +3,7 @@ import re
 import os
 
 default_config_file = os.path.join(os.path.expanduser('~'), r"AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml")
-print(f'default_config_file={default_config_file}')
+#print(f'default_config_file={default_config_file}')
 
 # Worked out the transform from here:
 # https://arkku.com/elite/hud_editor/
@@ -14,10 +14,19 @@ def get_matrix_values(config_file=default_config_file):
     tree = ET.parse(config_file)
     root = tree.getroot()
 
-    vals = {}
+    vals = {
+        'MatrixRed':   [1.0, 0.0, 0.0],
+        'MatrixGreen': [0.0, 1.0, 0.0],
+        'MatrixBlue':  [0.0, 0.0, 1.0]
+    }
     for element in root.findall("./GUIColour/Default/"):
         if 'Matrix' in element.tag:
-            vals[element.tag] = [float(x) for x in element.text.strip().split(',')]
+            tag_content = element.text
+            if tag_content:
+                cleaned_content = tag_content.strip()
+                matrix_vals = [float(x) for x in cleaned_content.split(',')]
+                if len(matrix_vals) == 3:
+                    vals[element.tag] = matrix_vals
     return vals
 
 

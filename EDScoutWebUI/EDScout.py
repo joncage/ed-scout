@@ -72,7 +72,7 @@ configure_logger(log, logging_path)
 configure_logger(logging.getLogger('EDScoutCore'), logging_path)
 configure_logger(logging.getLogger('NavRouteWatcher'), logging_path)
 configure_logger(logging.getLogger('JournalInterface'), logging_path)
-configure_logger(logging.getLogger('flaskwebgui'), logging_path, logging.INFO)
+configure_logger(logging.getLogger('flaskwebgui'), logging_path, log_level_override=logging.INFO)
 
 # Lets go!
 log.info(f"ED Scout v{__version__} Starting")
@@ -158,27 +158,38 @@ def on_connect():
         thread = socketio.start_background_task(target=receive_and_forward)
 
 
-if __name__ == '__main__':
-    try:
+def remap_css_to_match_hud():
+    # Try to load the users gfx changes if they exist
+    if os.path.exists(HudColourAdjuster.default_config_file):
+        log.info(f"Looking for HUD overrides in {HudColourAdjuster.default_config_file}")
 
-        # Try to load the users gfx changes if they exist
-        if os.path.exists(HudColourAdjuster.default_config_file):
-            log.info(f"Looking for HUD overrides in {HudColourAdjuster.default_config_file}")
-
-            original_css_path = os.path.join(static_path, "style.css")
+        original_css_path = os.path.join(static_path, "style.css")
+        try:
             colour_matrix = HudColourAdjuster.get_matrix_values(HudColourAdjuster.default_config_file)
+        except Exception as e:
+            log.error("Failed to interpret HUD overrides; Please check your file is of the format described in https://arkku.com/elite/hud_editor/")
+            log.exception(e)
+            colour_matrix = None
+        else:
             if colour_matrix:
                 remapped_css_file = "css-overrides.css"
                 remapped_css_file_path = os.path.join(temp_dir.name, remapped_css_file)
 
                 HudColourAdjuster.remap_style_file(original_css_path, colour_matrix, remapped_css_file_path)
+                log.info("Successfully remapped styles to match Elite HUD")
             else:
                 log.info(f"No HUD overrides detected in ({HudColourAdjuster.default_config_file})")
-        else:
-            log.info(f"No HUD overrides file detected ({HudColourAdjuster.default_config_file})")
+    else:
+        log.info(f"No HUD overrides file detected ({HudColourAdjuster.default_config_file})")
+
+
+if __name__ == '__main__':
+    try:
+        # If the user has altered the colour settings for their hud, attempt to do the same in the scout by adjusting
+        # any colours in the .css
+        remap_css_to_match_hud()
 
         # Launch the background interfaces
-
         if args.force_polling:
             log.info("Polling enabled")
         scout = EDScout(force_polling=args.force_polling)
