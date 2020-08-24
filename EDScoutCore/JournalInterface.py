@@ -157,7 +157,6 @@ class JournalWatcher:
 
     def identify_latest_journal(self):
         journal_files = glob.glob(os.path.join(self.journal_path, journal_file_pattern))
-        #print(f"Journal file detection: {self.journal_path}: {journal_files}")
         journals = []
         for journal_file in journal_files:
             journals.append(journal_file)

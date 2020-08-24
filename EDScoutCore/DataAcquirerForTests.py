@@ -8,37 +8,24 @@ import BodyAppraiser
 
 
 def generate_key(body_info):
+    """
+    Generates a key that uniquely identifies the type of processing that BodyAppraiser.calculate_estimated_value will apply so we only need one example per route.
+    :param body_info:
+    :return:
+    """
 
-    # main_type = StarType | PlanetClass
     main_type = None
     specific_type = None
-    mass = None
     terraform_state = None
+
     if "StarType" in body_info:
-        #print(f"Star: {body_info['BodyName']}")
         main_type = 'Star'
         specific_type = BodyAppraiser.encode_star_type(body_info)
     else:
-        # Planet
-        #print(f"Planet: {body_info['BodyName']}")
         main_type = 'Planet'
         specific_type = BodyAppraiser.encode_body_type(body_info)
 
-    if "MassEM" in body_info:
-        mass = body_info['MassEM']
-    else:
-        mass = 0  # belts don't have a mass attribute
-
-    terraform_state = None
-    if 'TerraformState' in body_info and len(body_info['TerraformState']) > 0:
-        terraform_state = BodyAppraiser.encode_terraform_state(body_info['TerraformState'])
-
-    options = {
-        'haveMapped': True,  # Always indicate we mapped it so we can tell the max worth
-        'efficiencyBonus': True,
-        'isFirstDiscoverer': not body_info['WasDiscovered'],
-        'isFirstMapper': not body_info['WasMapped'],
-    }
+    terraform_state = BodyAppraiser.encode_terraform_state(body_info)
 
     return f"{main_type}-{specific_type}-{terraform_state}-{body_info['WasDiscovered']}-{body_info['WasMapped']}"
 
@@ -94,7 +81,7 @@ def test_acquire_scan_data_from_journals():
             if min_value != max_value:
                 extremes_at_uniques.append(json.dumps(max_data))
             print(f"Min: {min_value}, Max: {max_value} from {len(unique)} entries")
-        else: # mass-less
+        else:  # mass-less
             (mass, data) = unique[0]
             extremes_at_uniques.append(json.dumps(data))
 

@@ -1,8 +1,6 @@
 import pytest
 import tempfile
 from .EDScout import EDScout
-from .JournalInterface import JournalWatcher
-from . import EDSMInterface
 
 
 class TestEdScoutJournalProcessing:
@@ -44,27 +42,6 @@ class TestEdScoutJournalProcessing:
     @pytest.mark.parametrize("example_journal_entry", test_data)
     def test_music_changes_not_forwarded(self, monkeypatch, example_journal_entry):
         pass
-    #     self.test_response = example_journal_entry
-    #
-    #     def mock_get_system_estimated_value(system_name):
-    #         return {'id': 560233253227, 'id64': 18269314557401, 'name': "HIP 64420", 'url': 'https://www.edsm.net/en/system/bodies/id/10594826/name/IC+2602+Sector+GC-T+b4-8', 'estimatedValue': 2413, 'estimatedValueMapped': 2413, 'valuableBodies': []}
-    #
-    #     monkeypatch.setattr(EDSMInterface, "get_system_estimated_value", mock_get_system_estimated_value)
-    #
-    #     watcher = JournalWatcher(self.test_dir.name, force_polling=False)
-    #     scout = EDScout(journal_watcher=watcher)
-    #     # mock out the bit that would normally pass on the result so we can capture it
-    #     scout.report_new_info = self.mock_report_new_info
-    #     # mock out the identifier that accesses the filesystem
-    #     scout.journalChangeIdentifier = self
-    #
-    #     # ACT
-    #     journal_that_changed = 'dummyValue'
-    #     scout.on_journal_change(journal_that_changed)
-    #
-    #     # ASSERT
-    #     assert len(self.new_entry) == 2, "There should be one report for the FSD target command then another for the system report"
-    #     assert self.new_entry[0] is not None
 
 
 class DummyWatcher():
@@ -74,9 +51,11 @@ class DummyWatcher():
     def set_callback(self, callback):
         pass
 
+
 class DummyJournalChangeProcessor():
     def __init__(self):
         pass
+
 
 class TestEdScoutEntryProcessing:
     def setup_method(self, test_data):
@@ -90,7 +69,17 @@ class TestEdScoutEntryProcessing:
 
     def test_process_scan_entry(self):
         # Input data
-        new_entry = {"timestamp":"2020-08-20T23:56:51Z", "event":"Scan", "ScanType":"AutoScan", "BodyName":"Pro Eurl MO-H d10-11 B Belt Cluster 10", "BodyID":17, "Parents":[ {"Ring":7}, {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":1728.885092, "WasDiscovered":False, "WasMapped":False }
+        new_entry = {"timestamp": "2020-08-20T23: 56: 51Z",
+                     "event": "Scan",
+                     "ScanType": "AutoScan",
+                     "BodyName": "Pro Eurl MO-H d10-11 B Belt Cluster 10",
+                     "BodyID": 17,
+                     "Parents": [{"Ring": 7}, {"Star": 0}],
+                     "StarSystem": "Pro Eurl MO-H d10-11",
+                     "SystemAddress": 388770122203,
+                     "DistanceFromArrivalLS": 1728.885092,
+                     "WasDiscovered": False,
+                     "WasMapped": False}
 
         # ARRANGE
         scout = EDScout(journal_watcher=DummyWatcher(), journal_change_processor=DummyJournalChangeProcessor())
@@ -100,14 +89,11 @@ class TestEdScoutEntryProcessing:
         scout.forward_journal_change(new_entry)
 
         # ASSERT
-        assert len(self.new_entry) == 1, "There should be one report for the FSD target command then another for the system report"
+        assert len(self.new_entry) == 1, "There should be one report for the FSD target command then another for the " \
+                                         "system report"
         reported_entry = self.new_entry[0]
         assert reported_entry is not None
         assert 'MappedValue' in reported_entry
         assert 'BodyName' in reported_entry
         assert 'StarSystem' in reported_entry
         assert reported_entry['StarSystem'] not in reported_entry['BodyName']
-
-    #TODO = look up last nights journal and see why we get: `B A BELT CLUSTER 3 [V] [T]`
-    #Also check why hyperspace doesn't appear when we jump
-    #Also check why it does something odd when the first star is scanned.

@@ -1,7 +1,7 @@
 
 # Uses calculations from here: https://forums.frontier.co.uk/threads/exploration-value-formulae.232000/
 # https://github.com/EDSM-NET/Component/blob/master/Body/Value.php
-
+# Ported from the EDSM code base.
 
 star_types = {
     # Main sequence
@@ -42,15 +42,15 @@ star_types = {
     'WO': 25,
 
     # Carbon stars
-     'CS': 31,
-     'C': 32,
-     'CN': 33,
-     'CJ': 34,
-     'CH': 35,
-     'CHd': 36,
+    'CS': 31,
+    'C': 32,
+    'CN': 33,
+    'CJ': 34,
+    'CH': 35,
+    'CHd': 36,
 
-     'MS': 41,
-     'S': 42,
+    'MS': 41,
+    'S': 42,
 
     # White dwarfs
     'D': 51,
@@ -69,15 +69,15 @@ star_types = {
     'DCV': 513,
     'DX': 514,
 
-     'N': 91,
-     'H': 92,
-     'H': 93,
+    'N': 91,
+    'H': 92,
+    'SuperMassiveBlackHole': 93,
 
-     'X': 94, # Exotic?? // Check in game
+    'X': 94,
 
-    'RoguePlanet': 111, # Check in game
-    'Nebula': 112, # Check in game
-    'StellarRemnantNebula': 113, # Check in game
+    'RoguePlanet': 111,
+    'Nebula': 112,
+    'StellarRemnantNebula': 113,
 }
 
 # Type mappings from EDSM\<Alias Repo>\Body\Planet\Type.php
@@ -124,35 +124,33 @@ terraform_states = {
 }
 
 
-
 def encode_body_type(body_info):
     if 'PlanetClass' not in body_info:
         return None  # Belt clusters for example do not have a planet class
-
     return body_types[body_info['PlanetClass']]
 
 
-def encode_terraform_state(terraform_state):
-    return terraform_states[terraform_state]
+def encode_terraform_state(body_info):
+    if 'TerraformState' not in body_info or len(body_info['TerraformState']) == 0:
+        return None
+    return terraform_states[body_info['TerraformState']]
 
 
 def encode_star_type(body_info):
     return star_types[body_info['StarType']]
 
+
 def appraise_body(body_info):
 
-    # main_type = StarType | PlanetClass
     main_type = None
     specific_type = None
     mass = None
     terraform_state = None
     if "StarType" in body_info:
-        #print(f"Star: {body_info['BodyName']}")
         main_type = 'Star'
         specific_type = encode_star_type(body_info)
     else:
         # Planet
-        #print(f"Planet: {body_info['BodyName']}")
         main_type = 'Planet'
         specific_type = encode_body_type(body_info)
 
@@ -161,9 +159,7 @@ def appraise_body(body_info):
     else:
         mass = 0  # belts don't have a mass attribute
 
-    terraform_state = None
-    if 'TerraformState' in body_info and len(body_info['TerraformState']) > 0:
-        terraform_state = encode_terraform_state(body_info['TerraformState'])
+    terraform_state = encode_terraform_state(body_info)
 
     options = {
         'haveMapped': True,  # Always indicate we mapped it so we can tell the max worth
@@ -172,39 +168,10 @@ def appraise_body(body_info):
         'isFirstMapper': not body_info['WasMapped'],
     }
 
+    return calculate_estimated_value(main_type, specific_type, mass, terraform_state, options)
 
 
-    #     'isFirstDiscoverer'     => false,
-    #     'isFirstMapper'         => false,
-    #
-    #     'haveMapped'            => false,
-    #     'efficiencyBonus'       => false,
-    #
-    #     'systemBodies'          => tuple(),
-    #     'isPrimaryStar'         => false,
-
-    return calculateEstimatedValue(main_type, specific_type, mass, terraform_state, options)
-
-
-def calculateEstimatedValue(main_type, specific_type, mass, terraform_state, options):
-
-    # Merge default options
-    # options = tuple_merge(tuple(
-    #     'dateScanned'           => null,
-    #
-    #     'isFirstDiscoverer'     => false,
-    #     'isFirstMapper'         => false,
-    #
-    #     'haveMapped'            => false,
-    #     'efficiencyBonus'       => false,
-    #
-    #     'systemBodies'          => tuple(),
-    #     'isPrimaryStar'         => false,
-    # ), options)
-
-
-    value  = 0
-    bonus  = 0
+def calculate_estimated_value(main_type, specific_type, mass, terraform_state, options):
 
     if mass is None:
         mass = 1
@@ -220,7 +187,7 @@ def calculateEstimatedValue(main_type, specific_type, mass, terraform_state, opt
         if specific_type in [91, 92]:
             value = 22628
 
-        # Supermassive Black Hole
+        # Super-massive Black Hole
         if specific_type in [93]:
             # this is applying the same scaling to the 3.2 value as a normal black hole, not confirmed in game
             value = 33.5678
@@ -229,6 +196,7 @@ def calculateEstimatedValue(main_type, specific_type, mass, terraform_state, opt
 
     if main_type == 'Planet' or main_type == 2:
         value = 300
+        bonus = 0
 
         if terraform_state is not None and terraform_state > 0:
             bonus = 93328
@@ -273,21 +241,21 @@ def calculateEstimatedValue(main_type, specific_type, mass, terraform_state, opt
         # CALCULATION
         q = 0.56591828
         value = value + bonus
-        mapMultiplier = 1.0
+        map_multiplier = 1.0
 
         if options['haveMapped']:
-            mapMultiplier = 3.3333333333
+            map_multiplier = 3.3333333333
 
             if options['isFirstDiscoverer'] and options['isFirstMapper']:
-                mapMultiplier = 3.699622554
+                map_multiplier = 3.699622554
 
             elif not options['isFirstDiscoverer'] and options['isFirstMapper']:
-                mapMultiplier = 8.0956
+                map_multiplier = 8.0956
 
             if options['efficiencyBonus']:
-                mapMultiplier *= 1.25
+                map_multiplier *= 1.25
 
-        value = max((value + (value * pow(mass, 0.2) * q)) * mapMultiplier, 500)
+        value = max((value + (value * pow(mass, 0.2) * q)) * map_multiplier, 500)
 
         if options['isFirstDiscoverer']:
             value *= 2.6
@@ -295,176 +263,3 @@ def calculateEstimatedValue(main_type, specific_type, mass, terraform_state, opt
         return round(value)
 
     return 0
-
-
-# Notes:
-
-#     static public function calculateEstimatedValue($mainType, $type, $mass, $terraformState, $options)
-#     {
-#         // Merge default options
-#         $options = array_merge(array(
-#             'dateScanned'           => null,
-#
-#             'isFirstDiscoverer'     => false,
-#             'isFirstMapper'         => false,
-#
-#             'haveMapped'            => false,
-#             'efficiencyBonus'       => false,
-#
-#             'systemBodies'          => array(),
-#             'isPrimaryStar'         => false,
-#         ), $options);
-#
-#
-#         if(!is_null($options['dateScanned']))
-#         {
-#             if(strtotime($options['dateScanned']) < strtotime('2017-04-11 12:00:00'))
-#             {
-#                 return static::calculateEstimatedValueFrom22(
-#                     $mainType,
-#                     $type,
-#                     $terraformState
-#                 );
-#             }
-#
-#             if(strtotime($options['dateScanned']) < strtotime('2018-12-11 12:00:00'))
-#             {
-#                 return static::calculateEstimatedValueFrom32(
-#                     $mainType,
-#                     $type,
-#                     $mass,
-#                     $terraformState
-#                 );
-#             }
-#         }
-#
-#         $value  = 0;
-#         $bonus  = 0;
-#
-#         if(is_null($mass))
-#         {
-#             $mass = 1;
-#         }
-#
-#         if($mainType == 'Star' || $mainType == 1)
-#         {
-#             $value = 1200;
-#
-#             // White Dwarf Star
-#             if(in_array($type, array(51, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514)))
-#             {
-#                 $value = 14057;
-#             }
-#
-#             // Neutron Star, Black Hole
-#             if(in_array($type, array(91, 92)))
-#             {
-#                 $value = 22628;
-#             }
-#
-#             // Supermassive Black Hole
-#             if(in_array($type, array(93)))
-#             {
-#                 // this is applying the same scaling to the 3.2 value as a normal black hole, not confirmed in game
-#                 $value = 33.5678;
-#             }
-#
-#             return round($value + ($mass * $value / 66.25));
-#         }
-#
-#         if($mainType == 'Planet' || $mainType == 2)
-#         {
-#             $value = 300;
-#
-#             if(!is_null($terraformState) && $terraformState > 0)
-#             {
-#                 $bonus = 93328;
-#             }
-#
-#             // Metal-rich body
-#             if(in_array($type, array(1)))
-#             {
-#                 $value = 21790;
-#                 $bonus = 0;
-#
-#                 if(!is_null($terraformState) && $terraformState > 0)
-#                 {
-#                     $bonus = 65631;
-#                 }
-#             }
-#
-#             // Ammonia world
-#             if(in_array($type, array(51)))
-#             {
-#                 $value = 96932;
-#                 $bonus = 0;
-#             }
-#
-#             // Class I gas giant
-#             if(in_array($type, array(71)))
-#             {
-#                 $value = 1656;
-#                 $bonus = 0;
-#             }
-#
-#             // High metal content world / Class II gas giant
-#             if(in_array($type, array(2, 72)))
-#             {
-#                 $value = 9654;
-#                 $bonus = 0;
-#
-#                 if(!is_null($terraformState) && $terraformState > 0)
-#                 {
-#                     $bonus = 100677;
-#                 }
-#             }
-#
-#             // Earth-like world / Water world
-#             if(in_array($type, array(31, 41)))
-#             {
-#                 $value = 64831;
-#                 $bonus = 0;
-#
-#                 if(!is_null($terraformState) && $terraformState > 0)
-#                 {
-#                     $bonus = 116295;
-#                 }
-#                 if($type == 31) // Earth Like...
-#                 {
-#                     $bonus = 116295;
-#                 }
-#             }
-#
-#             // CALCULATION
-#             $q              = 0.56591828;
-#             $value          = $value + $bonus;
-#             $mapMultiplier  = 1;
-#
-#             if($options['haveMapped'] === true)
-#             {
-#                 $mapMultiplier = 3.3333333333;
-#
-#                 if($options['isFirstDiscoverer'] === true && $options['isFirstMapper'] === true)
-#                 {
-#                     $mapMultiplier = 3.699622554;
-#                 }
-#                 elseif($options['isFirstDiscoverer'] === false && $options['isFirstMapper'] === true)
-#                 {
-#                     $mapMultiplier = 8.0956;
-#                 }
-#
-#                 if($options['efficiencyBonus'] === true)
-#                 {
-#                     $mapMultiplier *= 1.25;
-#                 }
-#             }
-#
-#             $value = max(($value + ($value * pow($mass, 0.2) * $q)) * $mapMultiplier, 500);
-#
-#             if($options['isFirstDiscoverer'] === true)
-#             {
-#                 $value *= 2.6;
-#             }
-#
-#             return round($value);
-#         }

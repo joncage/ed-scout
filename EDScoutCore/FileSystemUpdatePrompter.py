@@ -11,11 +11,10 @@ class FileSystemUpdatePrompter:
     def __init__(self, path_to_query):
         self.path_to_query = path_to_query
         self.file_size = None
-        
+
         t = Thread(target=self.file_check)
         t.daemon = True
         t.start()
-
 
     def file_check(self):
         while True:
