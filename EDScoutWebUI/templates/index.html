@@ -164,38 +164,64 @@
 
                 let planetSymbol = document.createElement('div');
                 planetSymbol.classList.add("col-1", "system", "charted", "text-center");
-                planetSymbol.innerText = "P";
-
-                PlanetClass
+                if (payloadContent.PlanetClass) {
+                    planetSymbol.innerText = "P";
+                    if (payloadContent.Landable) {
+                        planetSymbol.innerText += ' [L]'
+                    }
+                }
+                else if (payloadContent.StarType) {
+                    planetSymbol.innerText = "S";
+                }
 
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
 
-                let extra_info = ""
-                if (payloadContent.Landable) {
-                    extra_info += ' [L]'
-                }
-                if (payloadContent.Volcanism !== "") {
-                    extra_info += ' [V]'
-                }
-                if (payloadContent.TerraformState !== "") {
-                    extra_info += ' [T]'
-                }
-
                 let bodyName = document.createElement('div');
-                bodyName.classList.add("col", "system", "charted");
+                bodyName.classList.add("col-1", "system", "charted");
                 bodyName.innerText = payloadContent.BodyName;
 
+                let bodyType = document.createElement('div');
+                bodyType.classList.add("col", "system", "charted");
+                if (payloadContent.PlanetClass) {
+                    bodyType.innerText = payloadContent.PlanetClass;
+                }
+                else if (payloadContent.StarType) {
+                    bodyType.innerText = payloadContent.StarType;
+                }
+
+
+                let extra_info = ""
+
+                if (!payloadContent.StarType) {
+                    if (payloadContent.Volcanism !== "") {
+                        extra_info += ' V'
+                    }
+                    if (payloadContent.TerraformState !== "") {
+                        extra_info += ' T'
+                    }
+                }
+
                 let bodyInfo = document.createElement('div');
-                bodyInfo.classList.add("col-2", "system", "charted");
+                bodyInfo.classList.add("col-1", "system", "charted");
                 bodyInfo.innerText = extra_info;
 
+                function numberWithCommas(x) {
+                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+
                 let bodyValue = document.createElement('div');
-                bodyValue.classList.add("col-3", "system", "charted", "text-center");
-                bodyValue.innerText = payloadContent.MappedValue;
+                bodyValue.classList.add("col-2", "system", "charted");
+                bodyValue.innerText = payloadContent.MappedValue; //numberWithCommas(payloadContent.MappedValue);
 
                 let row = document.createElement('div');
                 row.classList.add("row");
-                row.innerHTML = spacer.outerHTML+planetSymbol.outerHTML+bodyName.outerHTML+bodyInfo.outerHTML+bodyValue.outerHTML;
+                row.innerHTML =
+                    spacer.outerHTML+
+                    planetSymbol.outerHTML+
+                    bodyName.outerHTML+
+                    bodyType.outerHTML+
+                    bodyInfo.outerHTML+
+                    bodyValue.outerHTML;
                 row.setAttribute('data-associatedsystem', payloadContent.SystemAddress);
 
                 return row;
