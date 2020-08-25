@@ -33,7 +33,7 @@
         <div class="row align-items-center statusInfo">
             <div class="col system highlighted text-center">Unknown</div>
         </div>
-        <!---->
+        <!----
         <div class="row align-items-center statusInfo">
             <div class="col system highlighted text-center">Test:
                 <i class="flaticon-stars"></i>
@@ -178,6 +178,29 @@
 
             }
 
+            function createIconElement(iconType) {
+                //                 <i class="flaticon-stars"></i>
+                let iconElement = document.createElement('i')
+                iconElement.classList.add("flaticon-"+iconType)
+                return iconElement
+            }
+
+            function getBodyIcon(bodyName) {
+                let bodyIcon = "";
+                if (bodyName.contains("Metal")) {
+                    createIconElement("ingot")
+                }
+                else if (bodyName.contains("Ice")) {
+                    createIconElement("snowflake")
+                }
+                else if (bodyName.contains("Earth")) {
+                    createIconElement("earth")
+                }
+                else if (bodyName.contains("Water")) {
+                    createIconElement("water-drop")
+                }
+            }
+
             function createDetailedBodyEntry(payloadContent) {
 
                 let spacer = document.createElement('div');
@@ -186,20 +209,25 @@
                 let planetSymbol = document.createElement('div');
                 planetSymbol.classList.add("col-1", "system", "charted", "text-center");
                 if (payloadContent.PlanetClass) {
-                    planetSymbol.innerText = "P";
+                    planetSymbol.innerHTML = createIconElement('planet').outerHTML;
                     if (payloadContent.Landable) {
-                        planetSymbol.innerText += ' [L]'
+                        planetSymbol.innerHTML += createIconElement('lander').outerHTML;
                     }
                 }
                 else if (payloadContent.StarType) {
-                    planetSymbol.innerText = "S";
+                    planetSymbol.innerHTML = createIconElement('stars').outerHTML;
+                }
+                else {
+                    if (payloadContent.BodyClass.contains("Belt")) {
+                        planetSymbol.innerHTML = createIconElement('asteroids').outerHTML;
+                    }
                 }
 
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
 
                 let bodyName = document.createElement('div');
                 bodyName.classList.add("col-1", "system", "charted");
-                bodyName.innerText = payloadContent.BodyName;
+                bodyName.innerHTML = getBodyIcon(payloadContent.BodyName)+" "+payloadContent.BodyName;
 
                 let bodyType = document.createElement('div');
                 bodyType.classList.add("col", "system", "charted");
@@ -209,30 +237,33 @@
                 else if (payloadContent.StarType) {
                     bodyType.innerText = payloadContent.StarType;
                 }
+                else if (payloadContent.BodyClass) {
+                    bodyType.innerText = payloadContent.BodyClass;
+                }
 
 
                 let extra_info = ""
 
                 if (!payloadContent.StarType) {
-                    if (payloadContent.Volcanism !== "") {
-                        extra_info += ' V'
+                    if (payloadContent.Volcanism) {
+                        extra_info += createIconElement('volcano').outerHTML;
                     }
-                    if (payloadContent.TerraformState !== "") {
-                        extra_info += ' T'
+                    if (payloadContent.TerraformState) {
+                        extra_info += createIconElement('eco-factory').outerHTML;
                     }
                 }
 
                 let bodyInfo = document.createElement('div');
                 bodyInfo.classList.add("col-1", "system", "charted");
-                bodyInfo.innerText = extra_info;
+                bodyInfo.innerHTML = extra_info;
 
                 function numberWithCommas(x) {
                     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 }
 
                 let bodyValue = document.createElement('div');
-                bodyValue.classList.add("col-2", "system", "charted");
-                bodyValue.innerText = payloadContent.MappedValue; //numberWithCommas(payloadContent.MappedValue);
+                bodyValue.classList.add("col-2", "system", "charted", "text-right");
+                bodyValue.innerText = numberWithCommas(payloadContent.MappedValue);
 
                 let row = document.createElement('div');
                 row.classList.add("row");
@@ -437,7 +468,7 @@
             var enableBackendConnections = true;
 
             // Uncomment to debug without needing the backend
-            /**/
+            /**
 
             function WrapWithEventType(type, entryContent) {
                 let wrap = {'data': {'type': type}};
