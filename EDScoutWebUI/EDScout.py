@@ -108,7 +108,9 @@ app = Flask(__name__,
             template_folder=os.path.join(base_dir, 'templates'))
 app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 if not is_deployed:
+    log.info("Disabling caching")
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Stop caching to changes to content files happens right away during debug
+    app.debug = True
 
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
