@@ -1,7 +1,11 @@
 import requests
+import requests_cache
+import os
 
 # See https://www.edsm.net/en_GB/api-v1
 
+cache_path = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'edsm_cache')
+requests_cache.install_cache(cache_path)
 
 def get_system(system_name):
     requestData = {

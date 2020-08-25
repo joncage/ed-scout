@@ -12,6 +12,7 @@ pyzmq = "*"
 pyinstaller = "*"
 flaskwebgui = "*"
 pytest = "*"
+requests-cache = "*"
 
 [dev-packages]
 
