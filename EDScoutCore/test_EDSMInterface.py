@@ -1,6 +1,7 @@
 from . import EDSMInterface
 import requests_cache
 
+
 class TestEDSMInterface:
 
     def test_get_system(self):
@@ -62,14 +63,13 @@ class TestEDSMInterface:
         requests_cache.clear()
         first_time_taken = None
 
-        for i in range(0,5):
+        for i in range(0, 5):
             EDSMInterface.get_bodies("Deciat")
-            time_taken = time.time()-start_time
+            time_taken = time.time() - start_time
             if not first_time_taken:
                 first_time_taken = time_taken
-                assert time_taken > 0.1  # Typically takes > 0.5s
+                assert time_taken > 0.1   # Typically takes > 0.5s
             else:
-                assert time_taken < 0.01 # Typically ~ 0.002 with the cache installed
+                assert time_taken < 0.01  # Typically ~ 0.002 with the cache installed
 
             start_time = time.time()
-

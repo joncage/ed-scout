@@ -114,5 +114,3 @@ def test_verify_empty_file_is_handled_correctly():
 
     with pytest.raises(xml.etree.ElementTree.ParseError):
         HudColourAdjuster.get_matrix_values(data_path)
-
-

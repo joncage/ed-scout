@@ -15,9 +15,9 @@ def get_matrix_values(config_file=default_config_file):
     root = tree.getroot()
 
     vals = {
-        'MatrixRed':   [1.0, 0.0, 0.0],
+        'MatrixRed': [1.0, 0.0, 0.0],
         'MatrixGreen': [0.0, 1.0, 0.0],
-        'MatrixBlue':  [0.0, 0.0, 1.0]
+        'MatrixBlue': [0.0, 0.0, 1.0]
     }
     for element in root.findall("./GUIColour/Default/"):
         if 'Matrix' in element.tag:
