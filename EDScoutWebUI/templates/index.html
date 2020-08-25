@@ -187,18 +187,20 @@
 
             function getBodyIcon(bodyName) {
                 let bodyIcon = "";
-                if (bodyName.contains("Metal")) {
-                    createIconElement("ingot")
+                let lowerBodyName = bodyName.toLowerCase();
+                if (lowerBodyName.includes("metal")) {
+                    bodyIcon = createIconElement("ingot")
                 }
-                else if (bodyName.contains("Ice")) {
-                    createIconElement("snowflake")
+                else if (lowerBodyName.includes("ice")) {
+                    bodyIcon = createIconElement("snowflake")
                 }
-                else if (bodyName.contains("Earth")) {
-                    createIconElement("earth")
+                else if (lowerBodyName.includes("earth")) {
+                    bodyIcon = createIconElement("earth")
                 }
-                else if (bodyName.contains("Water")) {
-                    createIconElement("water-drop")
+                else if (lowerBodyName.includes("water")) {
+                    bodyIcon = createIconElement("water-drop")
                 }
+                return bodyIcon;
             }
 
             function createDetailedBodyEntry(payloadContent) {
@@ -218,7 +220,7 @@
                     planetSymbol.innerHTML = createIconElement('stars').outerHTML;
                 }
                 else {
-                    if (payloadContent.BodyClass.contains("Belt")) {
+                    if (payloadContent.BodyClass.includes("Belt")) {
                         planetSymbol.innerHTML = createIconElement('asteroids').outerHTML;
                     }
                 }
@@ -227,18 +229,18 @@
 
                 let bodyName = document.createElement('div');
                 bodyName.classList.add("col-1", "system", "charted");
-                bodyName.innerHTML = getBodyIcon(payloadContent.BodyName)+" "+payloadContent.BodyName;
+                bodyName.innerHTML = payloadContent.BodyName;
 
                 let bodyType = document.createElement('div');
                 bodyType.classList.add("col", "system", "charted");
                 if (payloadContent.PlanetClass) {
-                    bodyType.innerText = payloadContent.PlanetClass;
+                    bodyType.innerHTML = getBodyIcon(payloadContent.PlanetClass).outerHTML+" "+payloadContent.PlanetClass;
                 }
                 else if (payloadContent.StarType) {
-                    bodyType.innerText = payloadContent.StarType;
+                    bodyType.innerHTML = payloadContent.StarType;
                 }
                 else if (payloadContent.BodyClass) {
-                    bodyType.innerText = payloadContent.BodyClass;
+                    bodyType.innerHTML = payloadContent.BodyClass;
                 }
 
 
