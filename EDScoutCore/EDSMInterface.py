@@ -10,6 +10,15 @@ os.makedirs(cache_path, exist_ok=True)
 cache_name = 'edsm_cache'
 requests_cache.install_cache(os.path.join(cache_path, cache_name))
 
+# Configure the user agent so that it's clear which requests are coming from the scout.
+headers = {
+    'User-Agent': "EDScout"
+}
+
+
+def set_current_version(version):
+    headers['User-Agent'] = f"EDScout {version}"
+
 
 def get_system(system_name):
     requestData = {
@@ -19,7 +28,7 @@ def get_system(system_name):
         "showPrimaryStar": 1
     }
 
-    data = requests.get("https://www.edsm.net/api-v1/system", requestData)
+    data = requests.get("https://www.edsm.net/api-v1/system", requestData, headers=headers)
 
     if data.status_code != 200:
         raise ("request returned bad response code %d" % (data.status_code))
@@ -32,7 +41,7 @@ def get_systems(system_name, radius):
         "radius": radius
     }
 
-    data = requests.get("https://www.edsm.net/api-v1/sphere-systems", requestData)
+    data = requests.get("https://www.edsm.net/api-v1/sphere-systems", requestData, headers=headers)
 
     if data.status_code != 200:
         raise ("request returned bad response code %d" % (data.status_code))
@@ -44,7 +53,7 @@ def get_bodies(system_name):
         "systemName": system_name
     }
 
-    data = requests.get("https://www.edsm.net/api-system-v1/bodies", requestData)
+    data = requests.get("https://www.edsm.net/api-system-v1/bodies", requestData, headers=headers)
 
     if data.status_code != 200:
         raise ("request returned bad response code %d" % (data.status_code))
@@ -57,7 +66,7 @@ def get_system_estimated_value(system_name):
         "systemName": system_name
     }
 
-    data = requests.get("https://www.edsm.net/api-system-v1/estimated-value", requestData)
+    data = requests.get("https://www.edsm.net/api-system-v1/estimated-value", requestData, headers=headers)
 
     if data.status_code != 200:
         raise ("request returned bad response code %d" % (data.status_code))
