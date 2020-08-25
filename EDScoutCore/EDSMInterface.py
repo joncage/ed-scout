@@ -10,6 +10,11 @@ os.makedirs(cache_path, exist_ok=True)
 cache_name = 'edsm_cache'
 requests_cache.install_cache(os.path.join(cache_path, cache_name))
 
+# Configure the user agent so that it's clear which requests are coming from the scout.
+headers = {
+    'User-Agent': "EDScout"
+}
+
 
 def set_current_version(version):
     headers['User-Agent'] = f"EDScout {version}"
