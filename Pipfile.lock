@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d6a9ceec9c27b5f77958691241b1341904df4b4f3daed497ae07100265b1da3e"
+            "sha256": "88882ab95ebd02d552eda03926bee4ff7858df16b5db62f9ba60c5d8ea36b20d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -33,10 +33,10 @@
         },
         "attrs": {
             "hashes": [
-                "sha256:08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c",
-                "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"
+                "sha256:0ef97238856430dcf9228e07f316aefc17e8939fc8507e18c6501b761ef1a42a",
+                "sha256:2867b7b9f8326499ab5b0e2d12801fa5c98842d2cbd22b35112ae04bf85b4dff"
             ],
-            "version": "==19.3.0"
+            "version": "==20.1.0"
         },
         "certifi": {
             "hashes": [
@@ -99,11 +99,11 @@
         },
         "flaskwebgui": {
             "hashes": [
-                "sha256:9dd8f4bb78ab6cb1c7e35617a308e97a0b59827be039b3488a617a0069eaaa3c",
-                "sha256:bb48deadc6a629315f833a377cf68d82bfa55915068b4e8e0fd550a2682d8ada"
+                "sha256:410ca9d8a466fd8aa0e6af4bbcf68dc15b92fddd11d1c4231c6eccc92778d62b",
+                "sha256:dd0f9349ed945c0594f6fc2a7d8e55996f1d77adc13b2d781ee779b353fe63a9"
             ],
             "index": "pypi",
-            "version": "==0.1.11"
+            "version": "==0.1.12"
         },
         "future": {
             "hashes": [
@@ -301,10 +301,10 @@
         },
         "python-engineio": {
             "hashes": [
-                "sha256:133bdb5fb89f43a53f8612fb1ddbb3a453318713dea18a9ecf5346ed0c0f793c",
-                "sha256:41353c2539493e9e30e0e75e53f9cbb670f09a5ebcf82fe738081a9ba28fe55c"
+                "sha256:36b33c6aa702d9b6a7f527eec6387a2da1a9a24484ec2f086d76576413cef04b",
+                "sha256:cfded18156862f94544a9f8ef37f56727df731c8552d7023f5afee8369be2db6"
             ],
-            "version": "==3.13.1"
+            "version": "==3.13.2"
         },
         "python-socketio": {
             "hashes": [
@@ -361,6 +361,14 @@
             ],
             "index": "pypi",
             "version": "==2.24.0"
+        },
+        "requests-cache": {
+            "hashes": [
+                "sha256:813023269686045f8e01e2289cc1e7e9ae5ab22ddd1e2849a9093ab3ab7270eb",
+                "sha256:81e13559baee64677a7d73b85498a5a8f0639e204517b5d05ff378e44a57831a"
+            ],
+            "index": "pypi",
+            "version": "==0.5.2"
         },
         "six": {
             "hashes": [
