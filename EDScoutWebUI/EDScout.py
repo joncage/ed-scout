@@ -16,9 +16,13 @@ from werkzeug.utils import secure_filename
 
 from EDScoutCore.ZmqWrappers import Receiver
 from EDScoutCore.EDScout import EDScout
+from EDScoutCore import EDSMInterface
 from EDScoutWebUI import HudColourAdjuster
 
 __version__ = "1.2.2"
+
+# Indicate to EDSM which version of the scout is making requests.
+EDSMInterface.set_current_version(__version__)
 
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
 parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
