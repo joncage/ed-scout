@@ -126,8 +126,9 @@
             }
 
             function startJumpTo(data) {
-                if (data.JumpType !== "HyperSpace") {
+                if (data.JumpType !== "Hyperspace") {
                     // Don't do anything if we're just entering supercruise
+                    console.log("Skipping jump");
                     return
                 }
 
@@ -146,6 +147,84 @@
 
                 locationElement.innerHTML = "";
                 locationElement.appendChild(row);
+            }
+
+            function addScannedBody(payloadContent) {
+                // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
+                let container = document.getElementById('location');
+                const newBodyEntry = createDetailedBodyEntry(payloadContent);
+                container.appendChild(newBodyEntry);
+
+            }
+
+            function createDetailedBodyEntry(payloadContent) {
+
+                let spacer = document.createElement('div');
+                spacer.classList.add("col-1", "system");
+
+                let planetSymbol = document.createElement('div');
+                planetSymbol.classList.add("col-1", "system", "charted", "text-center");
+                if (payloadContent.PlanetClass) {
+                    planetSymbol.innerText = "P";
+                    if (payloadContent.Landable) {
+                        planetSymbol.innerText += ' [L]'
+                    }
+                }
+                else if (payloadContent.StarType) {
+                    planetSymbol.innerText = "S";
+                }
+
+                // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
+
+                let bodyName = document.createElement('div');
+                bodyName.classList.add("col-1", "system", "charted");
+                bodyName.innerText = payloadContent.BodyName;
+
+                let bodyType = document.createElement('div');
+                bodyType.classList.add("col", "system", "charted");
+                if (payloadContent.PlanetClass) {
+                    bodyType.innerText = payloadContent.PlanetClass;
+                }
+                else if (payloadContent.StarType) {
+                    bodyType.innerText = payloadContent.StarType;
+                }
+
+
+                let extra_info = ""
+
+                if (!payloadContent.StarType) {
+                    if (payloadContent.Volcanism !== "") {
+                        extra_info += ' V'
+                    }
+                    if (payloadContent.TerraformState !== "") {
+                        extra_info += ' T'
+                    }
+                }
+
+                let bodyInfo = document.createElement('div');
+                bodyInfo.classList.add("col-1", "system", "charted");
+                bodyInfo.innerText = extra_info;
+
+                function numberWithCommas(x) {
+                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+
+                let bodyValue = document.createElement('div');
+                bodyValue.classList.add("col-2", "system", "charted");
+                bodyValue.innerText = payloadContent.MappedValue; //numberWithCommas(payloadContent.MappedValue);
+
+                let row = document.createElement('div');
+                row.classList.add("row");
+                row.innerHTML =
+                    spacer.outerHTML+
+                    planetSymbol.outerHTML+
+                    bodyName.outerHTML+
+                    bodyType.outerHTML+
+                    bodyInfo.outerHTML+
+                    bodyValue.outerHTML;
+                row.setAttribute('data-associatedsystem', payloadContent.SystemAddress);
+
+                return row;
             }
 
             function createSystemEntry(systemInfo) {
@@ -171,6 +250,8 @@
 
                 return row;
             }
+
+
 
             function createBodyEntry(body, system_id) {
 
@@ -237,45 +318,55 @@
                 }
             }
 
+
+
             function postData(payload) {
                 console.log(payload);
-                let systemInfo = payload.data;
-                if (systemInfo.type === 'NewRoute') {
+                let payloadContent = payload.data;
+                if (payloadContent.type === 'NewRoute') {
                     console.log('Clearing');
                     navRouteContainer.innerHTML = '';
                     // If we're about to plot a new route, it'll set the next target as the first item in the navroute.
                     hideCurrentTarget();
                 }
-                else if (systemInfo.type === 'JournalEntry')
+                else if (payloadContent.type === 'JournalEntry')
                 {
-                    if (systemInfo.event === "FSDTarget") // When you set a new jump target in the galaxy map
+                    switch(payloadContent.event)
                     {
-                        setTargetSystem(systemInfo);
-                    }
-                    else if (systemInfo.event === "Location") {
-                        setCurrentSystem(systemInfo);
-                    }
-                    else if (systemInfo.event === "StartJump") // When 3..2..1 starts
-                    {
-                        startJumpTo(systemInfo);
-                    }
-                    else if (systemInfo.event === "FSDJump") // When you drop out of hyperspace
-                    {
-                        finishJump(systemInfo);
+                        case "FSDTarget": { // When you set a new jump target in the galaxy map
+                            setTargetSystem(payloadContent);
+                            break;
+                        }
+                        case "Location": {
+                            setCurrentSystem(payloadContent);
+                            break;
+                        }
+                        case "StartJump": { // When 3..2..1 starts
+                            startJumpTo(payloadContent);
+                            break;
+                        }
+                        case "FSDJump": { // When you drop out of hyperspace
+                            finishJump(payloadContent);
+                            break;
+                        }
+                        case "Scan": { // When you identify a body in the FSS
+                            addScannedBody(payloadContent);
+                            break;
+                        }
                     }
                 }
                 else {
-                    console.log('Processing system report', systemInfo)
+                    console.log('Processing system report', payloadContent)
 
-                    if (systemInfo.type === 'System-NavRoute')
+                    if (payloadContent.type === 'System-NavRoute')
                     {
                         // If no current system set (or it matches the one that's already set because we just cleared it and we're waiting for the data to populate it), the first one we get should be current
                         let currentSystem = getCurrentSystem();
                         let container = null;
-                        let systemId = systemInfo.SystemAddress.toString();
+                        let systemId = payloadContent.SystemAddress.toString();
                         if ((currentSystem === null) || (currentSystem === "") || (currentSystem === systemId))
                         {
-                            setCurrentSystem(systemInfo);
+                            setCurrentSystem(payloadContent);
                             container = document.getElementById('location');
                         }
                         else
@@ -283,12 +374,12 @@
                             container = navRouteContainer;
                         }
 
-                        addNewSystemToContainer(systemInfo, container)
+                        addNewSystemToContainer(payloadContent, container)
                     }
                     else
                     {
                         // This is going to be oe of the other routines that wants a system report showing
-                        if (systemInfo.type === 'System-FSDTarget')
+                        if (payloadContent.type === 'System-FSDTarget')
                         {
                             // If this doesn't exist in the nav list, it's a unique target the commander has selected independently of the selected route
                             // As such, we need to...
@@ -298,23 +389,23 @@
                             let container = document.getElementById('target-sys');
                             container.innerHTML = "";
 
-                            if (document.getElementById(systemInfo.SystemAddress)) {
+                            if (document.getElementById(payloadContent.SystemAddress)) {
                                 // This element exists already so make sure the next-address is hidden
                                 hideCurrentTarget();
                             }
                             else
                             {
                                 showCurrentTarget();
-                                addNewSystemToContainer(systemInfo, container);
+                                addNewSystemToContainer(payloadContent, container);
 
                             }
 
 
                         }
-                        else if ((systemInfo.type === 'System-Location') || // Update the system recorded in 'current system'
-                            (systemInfo.type === 'System-FSDJump')) // Happens at the end of the jump so update the current system.
+                        else if ((payloadContent.type === 'System-Location') || // Update the system recorded in 'current system'
+                            (payloadContent.type === 'System-FSDJump')) // Happens at the end of the jump so update the current system.
                         {
-                            addNewSystemToContainer(systemInfo, document.getElementById('location'));
+                            addNewSystemToContainer(payloadContent, document.getElementById('location'));
                         }
 
 

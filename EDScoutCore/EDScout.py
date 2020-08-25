@@ -8,6 +8,7 @@ from .NavRouteInterface import extract_nav_route_from_file
 from . import EDSMInterface
 from .ZmqWrappers import Sender
 from .JournalInterface import JournalWatcher, JournalChangeProcessor
+from . import BodyAppraiser
 
 logger = logging.getLogger('EDScoutCore')
 
@@ -122,10 +123,37 @@ class EDScout:
         if self.is_new_nav_route(new_nav_route):
             self.on_new_route(new_nav_route)
 
+    def append_info_to_scan(self, new_entry):
+        # { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
+        new_entry["BodyName"] = new_entry["BodyName"].replace(new_entry["StarSystem"], "")
+        new_entry["BodyName"] = new_entry["BodyName"].replace("Belt Cluster ", "BC")
+        new_entry["MappedValue"] = BodyAppraiser.appraise_body(new_entry)
+        return new_entry
+
+    def get_info_tacker_method(self, event_type):
+        tacker_method = None
+        if event_type == "Scan":
+            tacker_method = self.append_info_to_scan
+        return tacker_method
+
+    def tack_on_additional_info(self, new_entry):
+        tacker = self.get_info_tacker_method(new_entry["event"])
+        if tacker:
+            new_entry = tacker(new_entry)
+        return new_entry
+
     def forward_journal_change(self, new_entry):
+
+        # Some stuff we don't care about
+        excluded_event_types = ["Music", "ReceiveText", "FuelScoop"]
+        if new_entry["event"] in excluded_event_types:
+            return
+
         if new_entry["event"] == "NavRoute":
             self.read_and_process_new_nav_route()
         else:
+            new_entry = self.tack_on_additional_info(new_entry)
+
             # Spit out the event
             self.report_new_info(new_entry)
 
@@ -143,11 +171,8 @@ class EDScout:
         logger.info("Body check: ", bodies)
 
     def on_journal_change(self, altered_journal):
-        excluded_event_types = ["Music", "ReceiveText", "FuelScoop"]
-
         for new_entry in self.journal_change_processor.process_journal_change(altered_journal):
-            if new_entry["event"] not in excluded_event_types:
-                self.forward_journal_change(new_entry)
+            self.forward_journal_change(new_entry)
 
     @staticmethod
     def get_edsm_system_report(star_system, association):

@@ -31,8 +31,7 @@ class JournalChangeProcessor:
         new_size = os.stat(changed_file).st_size
 
         if changed_file != self.latest_journal:
-            self.latest_journal = changed_file
-            self.journal_size = 0
+            self.start_reading_journal(changed_file)
 
         new_data = None
         logger.debug(f'{changed_file} - Size change: {self.journal_size} to {new_size}')
@@ -157,7 +156,6 @@ class JournalWatcher:
 
     def identify_latest_journal(self):
         journal_files = glob.glob(os.path.join(self.journal_path, journal_file_pattern))
-        #print(f"Journal file detection: {self.journal_path}: {journal_files}")
         journals = []
         for journal_file in journal_files:
             journals.append(journal_file)
