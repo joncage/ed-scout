@@ -22,6 +22,8 @@ class EDScout:
             journal_watcher=None,
             journal_change_processor=JournalChangeProcessor()):
 
+        self.last_nav_route = None
+
         if journal_watcher is None:
             journal_watcher = JournalWatcher(default_journal_path, force_polling=force_polling)
 
@@ -98,12 +100,27 @@ class EDScout:
 
         return edsm_info
 
+    def is_new_nav_route(self, nav_route):
+        route = nav_route.Route
+        if len(route) == 0:
+            self.last_nav_route = None
+            return True  # Empty route so no harm in sending that up in case it got cleared.
+
+        first_system = route[0].SystemAddress
+        last_system = route[-1].SystemAddress
+        is_new_route = (self.last_nav_route is None) or \
+                       (self.last_nav_route[0] != first_system) or \
+                       (self.last_nav_route[1] != last_system)
+        self.last_nav_route = (first_system, last_system)
+        return is_new_route
+
     def read_and_process_new_nav_route(self):
         home = str(Path.home())
         path = home + "\\Saved Games\\Frontier Developments\\Elite Dangerous\\NavRoute.json"
 
         new_nav_route = extract_nav_route_from_file(path)
-        self.on_new_route(new_nav_route)
+        if self.is_new_nav_route(new_nav_route):
+            self.on_new_route(new_nav_route)
 
     def forward_journal_change(self, new_entry):
         if new_entry["event"] == "NavRoute":
