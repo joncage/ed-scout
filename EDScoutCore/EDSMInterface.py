@@ -4,8 +4,12 @@ import os
 
 # See https://www.edsm.net/en_GB/api-v1
 
-cache_path = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'edsm_cache')
-requests_cache.install_cache(cache_path)
+# Setup the cache directory in the user area.
+cache_path = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout')
+os.makedirs(cache_path, exist_ok=True)
+cache_name = 'edsm_cache'
+requests_cache.install_cache(os.path.join(cache_path, cache_name))
+
 
 def get_system(system_name):
     requestData = {
