@@ -189,22 +189,24 @@
                 let bodyIcon = "";
                 let lowerBodyName = bodyName.toLowerCase();
                 if (lowerBodyName.includes("metal")) {
-                    bodyIcon = createIconElement("ingot")
+                    bodyIcon = createIconElement("ingot").outerHTML
                 }
-                else if (lowerBodyName.includes("ice")) {
-                    bodyIcon = createIconElement("snowflake")
+                else if (lowerBodyName.includes("icy") || lowerBodyName.includes("ice")) {
+                    bodyIcon = createIconElement("snowflake").outerHTML
                 }
                 else if (lowerBodyName.includes("earth")) {
-                    bodyIcon = createIconElement("earth")
+                    bodyIcon = createIconElement("earth").outerHTML
                 }
                 else if (lowerBodyName.includes("water")) {
-                    bodyIcon = createIconElement("water-drop")
+                    bodyIcon = createIconElement("water-drop").outerHTML
                 }
+                //rocky
+                //gas
                 return bodyIcon;
             }
 
             function createDetailedBodyEntry(payloadContent) {
-
+                
                 let spacer = document.createElement('div');
                 spacer.classList.add("col-1", "system");
 
@@ -234,7 +236,7 @@
                 let bodyType = document.createElement('div');
                 bodyType.classList.add("col", "system", "charted");
                 if (payloadContent.PlanetClass) {
-                    bodyType.innerHTML = getBodyIcon(payloadContent.PlanetClass).outerHTML+" "+payloadContent.PlanetClass;
+                    bodyType.innerHTML = getBodyIcon(payloadContent.PlanetClass)+" "+payloadContent.PlanetClass;
                 }
                 else if (payloadContent.StarType) {
                     bodyType.innerHTML = payloadContent.StarType;
@@ -247,12 +249,17 @@
                 let extra_info = ""
 
                 if (!payloadContent.StarType) {
-                    if (payloadContent.Volcanism) {
-                        extra_info += createIconElement('volcano').outerHTML;
+                    volcanism = createIconElement('volcano');
+                    if (!payloadContent.Volcanism) {
+                        volcanism.classList.add("inactive")
                     }
-                    if (payloadContent.TerraformState) {
-                        extra_info += createIconElement('eco-factory').outerHTML;
+                    extra_info += volcanism.outerHTML;
+
+                    tarraformable = createIconElement('eco-factory');
+                    if (!payloadContent.TerraformState) {
+                        tarraformable.classList.add("inactive")
                     }
+                    extra_info += tarraformable.outerHTML;
                 }
 
                 let bodyInfo = document.createElement('div');

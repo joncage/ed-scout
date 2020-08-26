@@ -33,6 +33,9 @@ body {
     color: #370C03;
     background: #F5A804;
 }
+.inactive {
+    color: #000000;
+}
 
 .currentSystemHighlight {
     background: #17EFF9;
