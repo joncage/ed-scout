@@ -257,17 +257,25 @@
                 let extra_info = ""
 
                 if (!payloadContent.StarType) {
-                    volcanism = createIconElement('volcano');
+                    let volcanism = createIconElement('volcano');
                     if (!payloadContent.Volcanism) {
                         volcanism.classList.add("inactive")
                     }
                     extra_info += volcanism.outerHTML;
 
-                    tarraformable = createIconElement('eco-factory');
+                    let terraformable = createIconElement('eco-factory');
                     if (!payloadContent.TerraformState) {
-                        tarraformable.classList.add("inactive")
+                        terraformable.classList.add("inactive")
                     }
-                    extra_info += tarraformable.outerHTML;
+                    extra_info += terraformable.outerHTML;
+
+                    // TODO: Replace with icon
+                    let mappedState = document.createElement('b');
+                    mappedState.innerText = "M";
+                    if (!payloadContent.WasMapped) {
+                        terraformable.classList.add("inactive")
+                    }
+                    extra_info += mappedState.outerHTML;
                 }
 
                 let bodyInfo = document.createElement('div');
