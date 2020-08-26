@@ -271,9 +271,9 @@
 
                     // TODO: Replace with icon
                     let mappedState = document.createElement('b');
-                    mappedState.innerText = "M";
-                    if (!payloadContent.WasMapped) {
-                        terraformable.classList.add("inactive")
+                    mappedState.innerText = "U";
+                    if (payloadContent.WasMapped) {
+                        mappedState.classList.add("inactive")
                     }
                     extra_info += mappedState.outerHTML;
                 }
@@ -290,8 +290,14 @@
                 bodyValue.classList.add("col-2", "system", chartedStyle, "text-right");
                 bodyValue.innerText = numberWithCommas(payloadContent.MappedValue);
 
+                // De-select anything that's currently selected.
+                let prevLatestScanElement = document.querySelector('latest-scan');
+                if (prevLatestScanElement) {
+                    prevLatestScanElement.classList.remove('latest-scan');
+                }
+
                 let row = document.createElement('div');
-                row.classList.add("row");
+                row.classList.add("row", "latest-scan");
                 row.innerHTML =
                     spacer.outerHTML+
                     planetSymbol.outerHTML+
@@ -300,6 +306,7 @@
                     bodyInfo.outerHTML+
                     bodyValue.outerHTML;
                 row.setAttribute('data-associatedsystem', payloadContent.SystemAddress);
+                row.scrollIntoView()
 
                 return row;
             }

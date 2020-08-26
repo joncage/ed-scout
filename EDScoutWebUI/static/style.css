@@ -47,6 +47,12 @@ body {
     border-width: 1px;
 }
 
+.latest-scan {
+    border-style: dotted;
+    border-color: #F5A804;
+    border-width: 1px;
+}
+
 .separator {
     color: #F5A804;
     border-color: #F5A804;
