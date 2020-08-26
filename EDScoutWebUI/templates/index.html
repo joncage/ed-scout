@@ -206,12 +206,20 @@
             }
 
             function createDetailedBodyEntry(payloadContent) {
-                
+
+
+                let discovered = payloadContent.WasDiscovered;
+                let chartedStyle = discovered?"charted":"uncharted";
+                let valuableSystem = payloadContent.MappedValue > 500000;
+                if (valuableSystem) {
+                    chartedStyle = "highlighted"
+                }
+
                 let spacer = document.createElement('div');
                 spacer.classList.add("col-1", "system");
 
                 let planetSymbol = document.createElement('div');
-                planetSymbol.classList.add("col-1", "system", "charted", "text-center");
+                planetSymbol.classList.add("col-1", "system", chartedStyle, "text-center");
                 if (payloadContent.PlanetClass) {
                     planetSymbol.innerHTML = createIconElement('planet').outerHTML;
                     if (payloadContent.Landable) {
@@ -230,11 +238,11 @@
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
 
                 let bodyName = document.createElement('div');
-                bodyName.classList.add("col-1", "system", "charted");
+                bodyName.classList.add("col-1", "system", chartedStyle);
                 bodyName.innerHTML = payloadContent.BodyName;
 
                 let bodyType = document.createElement('div');
-                bodyType.classList.add("col", "system", "charted");
+                bodyType.classList.add("col", "system", chartedStyle);
                 if (payloadContent.PlanetClass) {
                     bodyType.innerHTML = getBodyIcon(payloadContent.PlanetClass)+" "+payloadContent.PlanetClass;
                 }
@@ -263,7 +271,7 @@
                 }
 
                 let bodyInfo = document.createElement('div');
-                bodyInfo.classList.add("col-1", "system", "charted");
+                bodyInfo.classList.add("col-1", "system", chartedStyle);
                 bodyInfo.innerHTML = extra_info;
 
                 function numberWithCommas(x) {
@@ -271,7 +279,7 @@
                 }
 
                 let bodyValue = document.createElement('div');
-                bodyValue.classList.add("col-2", "system", "charted", "text-right");
+                bodyValue.classList.add("col-2", "system", chartedStyle, "text-right");
                 bodyValue.innerText = numberWithCommas(payloadContent.MappedValue);
 
                 let row = document.createElement('div');
