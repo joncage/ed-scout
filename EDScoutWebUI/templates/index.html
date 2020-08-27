@@ -282,7 +282,7 @@
                 }
 
                 let bodyInfo = document.createElement('div');
-                bodyInfo.classList.add("col-1", "system", chartedStyle);
+                bodyInfo.classList.add("col-auto", "system", chartedStyle);
                 bodyInfo.innerHTML = extra_info;
 
                 function numberWithCommas(x) {
@@ -294,7 +294,7 @@
                 bodyValue.innerText = numberWithCommas(payloadContent.MappedValue);
 
                 // De-select anything that's currently selected.
-                let prevLatestScanElement = document.querySelector('latest-scan');
+                let prevLatestScanElement = document.querySelector('.latest-scan');
                 if (prevLatestScanElement) {
                     prevLatestScanElement.classList.remove('latest-scan');
                 }
