@@ -222,9 +222,6 @@
                 planetSymbol.classList.add("col-1", "system", chartedStyle, "text-center");
                 if (payloadContent.PlanetClass) {
                     planetSymbol.innerHTML = createIconElement('planet').outerHTML;
-                    if (payloadContent.Landable) {
-                        planetSymbol.innerHTML += createIconElement('lander').outerHTML;
-                    }
                 }
                 else if (payloadContent.StarType) {
                     planetSymbol.innerHTML = createIconElement('stars').outerHTML;
@@ -276,6 +273,12 @@
                         mappedState.classList.add("inactive")
                     }
                     extra_info += mappedState.outerHTML;
+
+                    let landable = createIconElement('lander').outerHTML;
+                    if (!payloadContent.Landable) {
+                        landable.classList.add("inactive")
+                    }
+                    extra_info += landable.outerHTML;
                 }
 
                 let bodyInfo = document.createElement('div');
