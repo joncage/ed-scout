@@ -86,7 +86,7 @@ class TestEdScoutEntryProcessing:
         scout.report_new_info = self.mock_report_new_info
 
         # ACT
-        scout.forward_journal_change(new_entry)
+        scout.process_journal_change(new_entry)
 
         # ASSERT
         assert len(self.new_entry) == 1, "There should be one report for the FSD target command then another for the " \
