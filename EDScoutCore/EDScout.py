@@ -4,7 +4,7 @@ import logging
 import os
 from pathlib import Path
 
-from .NavRouteInterface import extract_nav_route_from_file
+from .NavRouteIntegrator import NavRouteIntegrator
 from . import EDSMInterface
 from .ZmqWrappers import Sender
 from .JournalInterface import JournalWatcher, JournalChangeProcessor
@@ -27,6 +27,8 @@ class EDScout:
 
         if journal_watcher is None:
             journal_watcher = JournalWatcher(default_journal_path, force_polling=force_polling)
+
+        self.navRouteIntegrator = NavRouteIntegrator()
 
         # Setup the journal watcher
         self.journal_change_processor = journal_change_processor
@@ -101,27 +103,6 @@ class EDScout:
 
         return edsm_info
 
-    def is_new_nav_route(self, route):
-        if len(route) == 0:
-            self.last_nav_route = None
-            return True  # Empty route so no harm in sending that up in case it got cleared.
-
-        first_system = route[0]['SystemAddress']
-        last_system = route[-1]['SystemAddress']
-        is_new_route = (self.last_nav_route is None) or \
-                       (self.last_nav_route[0] != first_system) or \
-                       (self.last_nav_route[1] != last_system)
-        self.last_nav_route = (first_system, last_system)
-        return is_new_route
-
-    def read_and_process_new_nav_route(self):
-        home = str(Path.home())
-        path = home + "\\Saved Games\\Frontier Developments\\Elite Dangerous\\NavRoute.json"
-
-        new_nav_route = extract_nav_route_from_file(path)
-        if self.is_new_nav_route(new_nav_route):
-            self.on_new_route(new_nav_route)
-
     def append_info_to_scan(self, new_entry):
         # { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
 
@@ -153,7 +134,7 @@ class EDScout:
             return
 
         if new_entry["event"] == "NavRoute":
-            self.read_and_process_new_nav_route()
+            self.on_new_route(new_entry["Route"])
         else:
             new_entry = self.tack_on_additional_info(new_entry)
 
@@ -175,7 +156,10 @@ class EDScout:
 
     def on_journal_change(self, altered_journal):
         entries = self.journal_change_processor.process_journal_change(altered_journal)
-        self.process_new_journal_entries(entries)
+
+        entries_with_populated_nav_route = self.navRouteIntegrator.process_new_journal_entries(entries)
+
+        self.process_new_journal_entries(entries_with_populated_nav_route)
 
     def process_new_journal_entries(self, entries):
         for new_entry in entries:
