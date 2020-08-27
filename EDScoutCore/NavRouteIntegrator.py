@@ -45,10 +45,11 @@ class NavRouteIntegrator:
 
     def _read_and_process_new_nav_route(self):
 
-        new_nav_route = self._extract_nav_route_from_file()
-        if not self._is_new_nav_route(new_nav_route):
-            new_nav_route = None
-        return new_nav_route
+        nav_route_event = self._extract_nav_route_from_file()
+        nav_route = nav_route_event["Route"]
+        if not self._is_new_nav_route(nav_route):
+            nav_route_event = None
+        return nav_route_event
 
     def _extract_nav_route_from_file(self):
         with open(self.nav_route_file, 'r') as read_file:
