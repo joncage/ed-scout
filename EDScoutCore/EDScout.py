@@ -145,7 +145,7 @@ class EDScout:
             new_entry = tacker(new_entry)
         return new_entry
 
-    def forward_journal_change(self, new_entry):
+    def process_journal_change(self, new_entry):
 
         # Some stuff we don't care about
         excluded_event_types = ["Music", "ReceiveText", "FuelScoop"]
@@ -174,8 +174,12 @@ class EDScout:
         logger.info("Body check: ", bodies)
 
     def on_journal_change(self, altered_journal):
-        for new_entry in self.journal_change_processor.process_journal_change(altered_journal):
-            self.forward_journal_change(new_entry)
+        entries = self.journal_change_processor.process_journal_change(altered_journal)
+        self.process_new_journal_entries(entries)
+
+    def process_new_journal_entries(self, entries):
+        for new_entry in entries:
+            self.process_journal_change(new_entry)
 
     @staticmethod
     def get_edsm_system_report(star_system, association):
