@@ -33,6 +33,9 @@ body {
     color: #370C03;
     background: #F5A804;
 }
+.inactive {
+    color: #000000;
+}
 
 .currentSystemHighlight {
     background: #17EFF9;
@@ -41,6 +44,12 @@ body {
 .current_location {
     border-style: dotted;
     border-color: #17EFF9;
+    border-width: 1px;
+}
+
+.latest-scan {
+    border-style: dotted;
+    border-color: #F5A804;
     border-width: 1px;
 }
 
@@ -54,6 +63,7 @@ body {
 .next-system {
     color: #17EFF9;
 }
+
 .next-system hr {
     border-color: #17EFF9;
 }

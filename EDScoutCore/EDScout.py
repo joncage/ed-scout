@@ -101,14 +101,13 @@ class EDScout:
 
         return edsm_info
 
-    def is_new_nav_route(self, nav_route):
-        route = nav_route.Route
+    def is_new_nav_route(self, route):
         if len(route) == 0:
             self.last_nav_route = None
             return True  # Empty route so no harm in sending that up in case it got cleared.
 
-        first_system = route[0].SystemAddress
-        last_system = route[-1].SystemAddress
+        first_system = route[0]['SystemAddress']
+        last_system = route[-1]['SystemAddress']
         is_new_route = (self.last_nav_route is None) or \
                        (self.last_nav_route[0] != first_system) or \
                        (self.last_nav_route[1] != last_system)
@@ -125,8 +124,12 @@ class EDScout:
 
     def append_info_to_scan(self, new_entry):
         # { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
+
+        if 'Belt Cluster' in new_entry["BodyName"]:
+            new_entry["BodyName"] = new_entry["BodyName"].replace("Belt Cluster ", "")
+            new_entry["BodyClass"] = "Belt Cluster"
+
         new_entry["BodyName"] = new_entry["BodyName"].replace(new_entry["StarSystem"], "")
-        new_entry["BodyName"] = new_entry["BodyName"].replace("Belt Cluster ", "BC")
         new_entry["MappedValue"] = BodyAppraiser.appraise_body(new_entry)
         return new_entry
 
@@ -142,7 +145,7 @@ class EDScout:
             new_entry = tacker(new_entry)
         return new_entry
 
-    def forward_journal_change(self, new_entry):
+    def process_journal_change(self, new_entry):
 
         # Some stuff we don't care about
         excluded_event_types = ["Music", "ReceiveText", "FuelScoop"]
@@ -171,8 +174,12 @@ class EDScout:
         logger.info("Body check: ", bodies)
 
     def on_journal_change(self, altered_journal):
-        for new_entry in self.journal_change_processor.process_journal_change(altered_journal):
-            self.forward_journal_change(new_entry)
+        entries = self.journal_change_processor.process_journal_change(altered_journal)
+        self.process_new_journal_entries(entries)
+
+    def process_new_journal_entries(self, entries):
+        for new_entry in entries:
+            self.process_journal_change(new_entry)
 
     @staticmethod
     def get_edsm_system_report(star_system, association):

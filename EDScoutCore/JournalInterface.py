@@ -43,11 +43,12 @@ class JournalChangeProcessor:
                     f.seek(-size_diff, os.SEEK_END)  # Note minus sign
                     new_data = f.read()
 
+        entries = []
+
         if new_data:
             new_journal_lines = JournalChangeProcessor.binary_file_data_to_lines(new_data)
 
             try:
-                entries = []
 
                 # Deal with all entries in one go in case the last one isn't complete and throws.
                 # This ensures we treat it as one atomic operation - nex time round we'll re-read the data to try again.
@@ -61,12 +62,12 @@ class JournalChangeProcessor:
 
                 logger.debug(f'Found {len(entries)} new entries')
 
-                for entry in entries:
-                    yield entry
-                    self.journal_size = new_size
+                self.journal_size = new_size
 
             except json.decoder.JSONDecodeError as e:
                 logger.exception(e)
+
+        return entries
 
     @staticmethod
     def binary_file_data_to_lines(binary_data):
