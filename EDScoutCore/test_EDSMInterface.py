@@ -70,6 +70,6 @@ class TestEDSMInterface:
                 first_time_taken = time_taken
                 assert time_taken > 0.1   # Typically takes > 0.5s
             else:
-                assert time_taken < 0.01  # Typically ~ 0.002 with the cache installed
+                assert time_taken < 0.1  # Typically ~ 0.002 with the cache installed
 
             start_time = time.time()
