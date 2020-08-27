@@ -19,7 +19,15 @@ from EDScoutCore.EDScout import EDScout
 from EDScoutCore import EDSMInterface
 from EDScoutWebUI import HudColourAdjuster
 
-__version__ = "Beta"
+
+try:
+    from EDScoutWebUI import version
+    __version__ = version.version
+    __release__ = version.release
+except ImportError:
+    __version__ = "Beta"
+    __release__ = "Beta"
+
 
 # Indicate to EDSM which version of the scout is making requests.
 EDSMInterface.set_current_version(__version__)
@@ -79,7 +87,7 @@ configure_logger(logging.getLogger('JournalInterface'), logging_path)
 configure_logger(logging.getLogger('flaskwebgui'), logging_path, log_level_override=logging.INFO)
 
 # Lets go!
-log.info(f"ED Scout v{__version__} Starting")
+log.info(f"ED Scout {__release__} Starting")
 
 # Kill off any previous scouts; There can be only one (due to interactions with flaskwebgui)!
 PROCNAME = "EDScout.exe"
@@ -110,12 +118,14 @@ app.config['SECRET_KEY'] = 'justasecretkeythatishouldputhere'
 if not is_deployed:
     log.info("Disabling caching")
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Stop caching to changes to content files happens right away during debug
-    app.debug = True
+    #app.debug = True
 
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
 if args.run_as_app:
     ui = FlaskUI(app, socketio=socketio, host=args.host, port=args.port)
+else:
+    ui = None
 
 # Make the global thread used to forward data.
 thread = None
@@ -204,7 +214,7 @@ if __name__ == '__main__':
         zmq_port_test = scout.port
 
         # Launch the web server either directly or as an app
-        if args.run_as_app:
+        if ui:
             ui.run()
         else:
             socketio.run(app)
