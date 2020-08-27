@@ -19,7 +19,7 @@ from EDScoutCore.EDScout import EDScout
 from EDScoutCore import EDSMInterface
 from EDScoutWebUI import HudColourAdjuster
 
-__version__ = "1.2.2"
+__version__ = "Beta"
 
 # Indicate to EDSM which version of the scout is making requests.
 EDSMInterface.set_current_version(__version__)
