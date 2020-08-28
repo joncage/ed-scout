@@ -30,6 +30,16 @@
         </div>
     </div>
 
+    <div id="location-headings" class="container-fluid">
+        <div class="row ml-1 mr-1 separator">
+            <div class="col-3 text-center">Name</div>
+            <div class="col">Type</div>
+            <div class="col-auto text-center">Distance</div>
+            <div class="col-1 text-center">Details</div>
+            <div class="col-2 text-center">Mapped Value</div>
+        </div>
+    </div>
+
     <div id="location" data-currentSystem="" class="container-fluid">
         <div class="row ml-1 mr-1 align-items-center statusInfo">
             <div class="col system highlighted text-center">Unknown</div>
@@ -41,6 +51,14 @@
             <div class="col"><hr class="separator"/></div>
             <div class="col-auto" id="nav-route-label">Nav Route</div>
             <div class="col"><hr class="separator"/></div>
+        </div>
+    </div>
+
+    <div id="navroute-headings" class="container-fluid">
+        <div class="row ml-1 mr-1 separator">
+            <div class="col-3 text-center">Name</div>
+            <div class="col">Type</div>
+            <div class="col-2 text-center">Mapped Value</div>
         </div>
     </div>
 
@@ -160,7 +178,7 @@
                 let container = document.getElementById('location');
                 const newBodyEntry = createDetailedBodyEntry(payloadContent);
                 container.appendChild(newBodyEntry);
-
+                newBodyEntry.scrollIntoView();
             }
 
             function createIconElement(iconType, elementType='i') {
@@ -239,11 +257,8 @@
                         bodySymbol = createIconElement('asteroid-4').outerHTML;
                     }
                 }
-
-                // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
-
                 let bodyName = document.createElement('div');
-                bodyName.classList.add("col-2", "system","pl-2", chartedStyle, "text-left");
+                bodyName.classList.add("col-2", "system", chartedStyle, "text-left");
                 bodyName.innerHTML = bodySymbol+" "+payloadContent.BodyName;
 
                 let bodyType = document.createElement('div');
@@ -261,8 +276,8 @@
                 let distance = document.createElement('div');
                 // DistanceFromArrivalLS
                 // numberWithCommas
-                distance.classList.add("col-auto", "pl-0", "ml-0", "system", chartedStyle);
-                distance.innerHTML = numberWithCommas(payloadContent.DistanceFromArrivalLS.toFixed(0)).toString()+" ls";
+                distance.classList.add("col-auto", "pl-2", "ml-0", "system", chartedStyle);
+                distance.innerHTML = numberWithCommas(payloadContent.DistanceFromArrivalLS.toFixed(0)).toString();
 
                 let extra_info = ""
                 if (!payloadContent.StarType) {
@@ -271,9 +286,9 @@
                     extra_info += createFlagElement('volcano', payloadContent.Volcanism).outerHTML;
                     extra_info += createFlagElement('cooling-tower', payloadContent.TerraformState).outerHTML;
                     extra_info += createFlagElement('flag-outline-on-a-pole-with-stars-around', !payloadContent.WasMapped).outerHTML;
-                    let landble = createFlagElement('lander', payloadContent.Landable);
-                    landble.classList.add('landable');
-                    extra_info += landble.outerHTML;
+                    let landable = createFlagElement('lander', payloadContent.Landable);
+                    landable.classList.add('landable');
+                    extra_info += landable.outerHTML;
                 }
 
                 let bodyInfo = document.createElement('div');
@@ -293,14 +308,13 @@
                 let row = document.createElement('div');
                 row.classList.add("row", "ml-1", "mr-1", "latest-scan");
                 row.innerHTML =
-                    //spacer.outerHTML+
+                    spacer.outerHTML+
                     bodyName.outerHTML+
                     bodyType.outerHTML+
                     distance.outerHTML+
                     bodyInfo.outerHTML+
                     bodyValue.outerHTML;
                 row.setAttribute('data-associatedsystem', payloadContent.SystemAddress);
-                row.scrollIntoView()
 
                 return row;
             }
@@ -312,19 +326,19 @@
                 let chartedSpecificStyle = systemInfo.charted?"charted":"uncharted";
                 let mappedValue = systemInfo.charted?systemInfo.estimatedValueMapped:"?";
 
-                let starClass = document.createElement('div');
-                starClass.classList.add("col-2", "system", chartedSpecificStyle);
-                starClass.innerHTML = createIconElement("solar-system").outerHTML+" "+(systemInfo.StarClass?systemInfo.StarClass:"");
-
                 let systemName = document.createElement('div');
-                systemName.classList.add("col", "system", chartedSpecificStyle);
-                systemName.innerText = systemInfo.StarSystem;
+                systemName.classList.add("col-3", "system", chartedSpecificStyle);
+                systemName.innerHTML = createIconElement("solar-system").outerHTML+" "+systemInfo.StarSystem;
+
+                let starClass = document.createElement('div');
+                starClass.classList.add("col", "system", chartedSpecificStyle);
+                starClass.innerHTML = (systemInfo.StarClass?systemInfo.StarClass+"-Class":"");
 
                 let systemValue = document.createElement('div');
                 systemValue.classList.add("col-2", "system", chartedSpecificStyle, "text-right");
-                systemValue.innerText = mappedValue;
+                systemValue.innerText = numberWithCommas(mappedValue);
 
-                row.innerHTML = starClass.outerHTML+systemName.outerHTML+systemValue.outerHTML;
+                row.innerHTML = systemName.outerHTML+starClass.outerHTML+systemValue.outerHTML;
 
                 return row;
             }
@@ -336,21 +350,17 @@
                 let spacer = document.createElement('div');
                 spacer.classList.add("col-1", "system");
 
-                let planetSymbol = document.createElement('div');
-                planetSymbol.classList.add("col-1", "system", "charted", "text-center");
-                planetSymbol.innerText = "P";
-
                 let bodyName = document.createElement('div');
                 bodyName.classList.add("col", "system", "charted");
-                bodyName.innerText = body.bodyName;
+                bodyName.innerHTML = createIconElement('jupiter-3').outerHTML+" "+body.bodyName;
 
                 let bodyValue = document.createElement('div');
-                bodyValue.classList.add("col-3", "system", "charted", "text-center");
-                bodyValue.innerText = body.valueMax;
+                bodyValue.classList.add("col-2", "system", "charted", "text-right");
+                bodyValue.innerText = numberWithCommas(body.valueMax);
 
                 let row = document.createElement('div');
                 row.classList.add("row", "ml-1", "mr-1");
-                row.innerHTML = spacer.outerHTML+planetSymbol.outerHTML+bodyName.outerHTML+bodyValue.outerHTML;
+                row.innerHTML = spacer.outerHTML+bodyName.outerHTML+bodyValue.outerHTML;
                 row.setAttribute('data-associatedsystem', system_id);
 
                 return row;
@@ -389,6 +399,10 @@
                 if (systemInfo.valuableBodies) {
                     let body;
                     for (body of systemInfo.valuableBodies) {
+
+                        let nameText = body.bodyName;
+                        const systemName = systemInfo['name'];
+                        body.bodyName = nameText.replace(systemName, "");
 
                         console.log(body);
                         container.appendChild(createBodyEntry(body, systemInfo.SystemAddress));
