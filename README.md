@@ -50,7 +50,14 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
-### v1.2.5 - More Hud customisation resiliance & Chrome location detection
+### 1.3.0 - Icontastic, live scan results & clearer info
+
+* Added live-scan results that mimics the calculations EDSM makes to identify worth of scanning a world.
+* Added icons showing volcanism, terraformability, landability and whether a planet has been mapped before.
+* Added distance from landing point.
+* Added highlighting of undiscovered vs unmapped etc
+
+### 1.2.5 - More Hud customisation resiliance & Chrome location detection
 
 * Fixes handling for HUD .xml files that don't have an entry for every matrix value (some third party tools don't specify all of them and Elite is fine with that so the scout should be too).
 * Added more thorough detection of the chrome browser (fix to third party PyWebGui library).
