@@ -284,7 +284,11 @@
 
                     let landable = createIconElement('lander');
                     if (!payloadContent.Landable) {
-                        landable.classList.add("inactive")
+                        landable.classList.add("inactive");
+                    }
+                    else
+                    {
+                        landable.classList.add('landable');
                     }
                     extra_info += landable.outerHTML;
                 }
