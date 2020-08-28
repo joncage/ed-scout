@@ -1,6 +1,6 @@
 	/*
   	Flaticon icon font: Flaticon
-  	Creation date: 25/08/2020 15:05
+  	Creation date: 28/08/2020 21:14
   	*/
 
 @font-face {
@@ -30,17 +30,35 @@
   margin-left: 20px;
    */
   font-style: normal;
-  font-weight: bold;
-    text-shadow: 0 0;
+    text-shadow: 0 0 0;
 }
 
-.flaticon-lander:before { content: "\f100";}
+.flaticon-lander:before { content: "\f100"; }
 .flaticon-volcano:before { content: "\f101"; }
-.flaticon-ingot:before { content: "\f102"; }
-.flaticon-asteroids:before { content: "\f103"; }
-.flaticon-eco-factory:before { content: "\f104"; }
-.flaticon-planet:before { content: "\f105"; }
-.flaticon-stars:before { content: "\f106"; }
+.flaticon-cooling-tower:before { content: "\f102"; }
+.flaticon-cooling-tower-1:before { content: "\f103"; }
+.flaticon-volcano-1:before { content: "\f104"; }
+.flaticon-flag-outline-on-a-pole-with-stars-around:before { content: "\f105"; }
+.flaticon-saturn:before { content: "\f106"; }
 .flaticon-earth:before { content: "\f107"; }
-.flaticon-water-drop:before { content: "\f108"; }
-.flaticon-snowflake:before { content: "\f109"; }
+.flaticon-planet:before { content: "\f108"; }
+.flaticon-planet-1:before { content: "\f109"; }
+.flaticon-globe:before { content: "\f10a"; }
+.flaticon-jupiter:before { content: "\f10b"; }
+.flaticon-venus:before { content: "\f10c"; }
+.flaticon-moon:before { content: "\f10d"; }
+.flaticon-astronomy:before { content: "\f10e"; }
+.flaticon-asteroid:before { content: "\f10f"; }
+.flaticon-asteroid-1:before { content: "\f110"; }
+.flaticon-ingot:before { content: "\f111"; }
+.flaticon-snowflake:before { content: "\f112"; }
+.flaticon-star:before { content: "\f113"; }
+.flaticon-solar-system:before { content: "\f114"; }
+.flaticon-asteroid-2:before { content: "\f115"; }
+.flaticon-water:before { content: "\f116"; }
+.flaticon-water-drops:before { content: "\f117"; }
+.flaticon-asteroid-3:before { content: "\f118"; }
+.flaticon-asteroid-4:before { content: "\f119"; }
+.flaticon-jupiter-1:before { content: "\f11a"; }
+.flaticon-jupiter-2:before { content: "\f11b"; }
+.flaticon-jupiter-3:before { content: "\f11c"; }

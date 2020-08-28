@@ -29,15 +29,35 @@ body {
     color: #EAA529;
     background: #370C03;
 }
-.highlighted {
-    color: #370C03;
-    background: #F5A804;
-}
 .inactive {
     color: #000000;
 }
 
-.landable {
+div.highlighted b.active {
+    color: #000000;
+}
+div.highlighted b.inactive {
+    color: #F5A804;
+}
+div.uncharted b.active {
+    color: #EAA529;
+}
+div.uncharted b.inactive {
+    color: #370C03;
+}
+div.charted b.active {
+    color: #9f9f9f;
+}
+div.charted b.inactive {
+    color: #333333;
+}
+
+.highlighted {
+    color: #370C03;
+    background: #F5A804;
+}
+
+div b.active.landable {
     color:#4CE0E1;
 }
 

@@ -163,9 +163,8 @@
 
             }
 
-            function createIconElement(iconType) {
-                //                 <i class="flaticon-stars"></i>
-                let iconElement = document.createElement('i')
+            function createIconElement(iconType, elementType='i') {
+                let iconElement = document.createElement(elementType)
                 iconElement.classList.add("flaticon-"+iconType)
                 return iconElement
             }
@@ -182,8 +181,17 @@
                 else if (lowerBodyName.includes("earth")) {
                     bodyIcon = createIconElement("earth").outerHTML
                 }
-                else if (lowerBodyName.includes("water")) {
-                    bodyIcon = createIconElement("water-drop").outerHTML
+                else if (lowerBodyName.includes("gas giant")) {
+                    bodyIcon = createIconElement("jupiter-1").outerHTML
+                }
+                else if (lowerBodyName.includes("rock")) {
+                    bodyIcon = createIconElement("asteroid-3").outerHTML
+                }
+                else if (lowerBodyName.includes("water") || lowerBodyName.includes("ammonia world")) {
+                    bodyIcon = createIconElement("water-drops").outerHTML
+                }
+                else if (lowerBodyName.includes("belt")) {
+                    bodyIcon = createIconElement("asteroid-4").outerHTML
                 }
                 //rocky
                 //gas
@@ -192,6 +200,18 @@
 
             function numberWithCommas(x) {
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            function createFlagElement(iconName, activeIndicator) {
+                const flagElementType = 'b';
+                let element = createIconElement(iconName, flagElementType);
+                if (!activeIndicator) {
+                    element.classList.add("inactive")
+                }
+                else {
+                    element.classList.add("active")
+                }
+                return element;
             }
 
             function createDetailedBodyEntry(payloadContent) {
@@ -209,21 +229,21 @@
 
                 let bodySymbol = "";
                 if (payloadContent.PlanetClass) {
-                    bodySymbol = createIconElement('planet').outerHTML;
+                    bodySymbol = createIconElement('jupiter-3').outerHTML;
                 }
                 else if (payloadContent.StarType) {
-                    bodySymbol = createIconElement('stars').outerHTML;
+                    bodySymbol = createIconElement('star').outerHTML;
                 }
                 else {
                     if (payloadContent.BodyClass.includes("Belt")) {
-                        bodySymbol = createIconElement('asteroids').outerHTML;
+                        bodySymbol = createIconElement('asteroid-4').outerHTML;
                     }
                 }
 
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
 
                 let bodyName = document.createElement('div');
-                bodyName.classList.add("col-2", "system", chartedStyle, "text-left");
+                bodyName.classList.add("col-2", "system","pl-2", chartedStyle, "text-left");
                 bodyName.innerHTML = bodySymbol+" "+payloadContent.BodyName;
 
                 let bodyType = document.createElement('div');
@@ -232,10 +252,10 @@
                     bodyType.innerHTML = getBodyIcon(payloadContent.PlanetClass)+" "+payloadContent.PlanetClass;
                 }
                 else if (payloadContent.StarType) {
-                    bodyType.innerHTML = payloadContent.StarType;
+                    bodyType.innerHTML = createIconElement('star').outerHTML+" "+payloadContent.StarType;
                 }
                 else if (payloadContent.BodyClass) {
-                    bodyType.innerHTML = payloadContent.BodyClass;
+                    bodyType.innerHTML = createIconElement('asteroid-4').outerHTML+" "+payloadContent.BodyClass;
                 }
 
                 let distance = document.createElement('div');
@@ -246,35 +266,14 @@
 
                 let extra_info = ""
                 if (!payloadContent.StarType) {
-                    let volcanism = createIconElement('volcano');
-                    if (!payloadContent.Volcanism) {
-                        volcanism.classList.add("inactive")
-                    }
-                    extra_info += volcanism.outerHTML;
+                    const flagElementType = 'b';
 
-                    let terraformable = createIconElement('eco-factory');
-                    if (!payloadContent.TerraformState) {
-                        terraformable.classList.add("inactive")
-                    }
-                    extra_info += terraformable.outerHTML;
-
-                    // TODO: Replace with icon
-                    let mappedState = document.createElement('b');
-                    mappedState.innerText = "U";
-                    if (payloadContent.WasMapped) {
-                        mappedState.classList.add("inactive")
-                    }
-                    extra_info += mappedState.outerHTML;
-
-                    let landable = createIconElement('lander');
-                    if (!payloadContent.Landable) {
-                        landable.classList.add("inactive");
-                    }
-                    else
-                    {
-                        landable.classList.add('landable');
-                    }
-                    extra_info += landable.outerHTML;
+                    extra_info += createFlagElement('volcano', payloadContent.Volcanism).outerHTML;
+                    extra_info += createFlagElement('cooling-tower', payloadContent.TerraformState).outerHTML;
+                    extra_info += createFlagElement('flag-outline-on-a-pole-with-stars-around', !payloadContent.WasMapped).outerHTML;
+                    let landble = createFlagElement('lander', payloadContent.Landable);
+                    landble.classList.add('landable');
+                    extra_info += landble.outerHTML;
                 }
 
                 let bodyInfo = document.createElement('div');
@@ -294,7 +293,7 @@
                 let row = document.createElement('div');
                 row.classList.add("row", "ml-1", "mr-1", "latest-scan");
                 row.innerHTML =
-                    spacer.outerHTML+
+                    //spacer.outerHTML+
                     bodyName.outerHTML+
                     bodyType.outerHTML+
                     distance.outerHTML+
@@ -314,8 +313,8 @@
                 let mappedValue = systemInfo.charted?systemInfo.estimatedValueMapped:"?";
 
                 let starClass = document.createElement('div');
-                starClass.classList.add("col-1", "system", chartedSpecificStyle,"text-center");
-                starClass.innerText = systemInfo.StarClass?systemInfo.StarClass:"";
+                starClass.classList.add("col-2", "system", chartedSpecificStyle);
+                starClass.innerHTML = createIconElement("solar-system").outerHTML+" "+(systemInfo.StarClass?systemInfo.StarClass:"");
 
                 let systemName = document.createElement('div');
                 systemName.classList.add("col", "system", chartedSpecificStyle);
@@ -579,10 +578,16 @@
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T20:55:33Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"A 10", "BodyID":13, "Parents":[ {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae RP-F d11-17", "SystemAddress":629388954035, "DistanceFromArrivalLS":5817.589961, "TidalLock":false, "TerraformState":"", "PlanetClass":"Icy body", "Atmosphere":"", "AtmosphereType":"None", "Volcanism":"", "MassEM":0.007883, "Radius":1628941.000000, "SurfaceGravity":1.184134, "SurfaceTemperature":107.449127, "SurfacePressure":0.000000, "Landable":true, "Materials":[ { "Name":"sulphur", "Percent":22.256582 }, { "Name":"carbon", "Percent":18.715481 }, { "Name":"iron", "Percent":16.512304 }, { "Name":"nickel", "Percent":12.489215 }, { "Name":"phosphorus", "Percent":11.981973 }, { "Name":"manganese", "Percent":6.819413 }, { "Name":"zinc", "Percent":4.487426 }, { "Name":"germanium", "Percent":3.436711 }, { "Name":"cadmium", "Percent":1.282255 }, { "Name":"niobium", "Percent":1.128528 }, { "Name":"tellurium", "Percent":0.890115 } ], "Composition":{ "Ice":0.617624, "Rock":0.256447, "Metal":0.125929 }, "SemiMajorAxis":1740140855312.347412, "Eccentricity":0.011868, "OrbitalInclination":9.222010, "Periapsis":353.753215, "OrbitalPeriod":1001487076.282501, "RotationPeriod":98751.115662, "AxialTilt":-0.519995, "WasDiscovered":false, "WasMapped":false }),
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T21:37:27Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"9", "BodyID":13, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae RP-F d11-2", "SystemAddress":629388954035, "DistanceFromArrivalLS":3887.502778, "TidalLock":false, "TerraformState":"", "PlanetClass":"Rocky ice body", "Atmosphere":"thick nitrogen atmosphere", "AtmosphereType":"Nitrogen", "AtmosphereComposition":[ { "Name":"Nitrogen", "Percent":99.930611 }, { "Name":"Argon", "Percent":0.068962 } ], "Volcanism":"", "MassEM":0.241041, "Radius":4597476.000000, "SurfaceGravity":4.545296, "SurfaceTemperature":150.470886, "SurfacePressure":48670292.000000, "Landable":false, "Composition":{ "Ice":0.412583, "Rock":0.393262, "Metal":0.194155 }, "SemiMajorAxis":1061343133449.554443, "Eccentricity":0.111669, "OrbitalInclination":-144.826757, "Periapsis":67.346550, "OrbitalPeriod":509246402.978897, "RotationPeriod":130196.875286, "AxialTilt":-0.337840, "WasDiscovered":false, "WasMapped":false }),
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:25:32Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"5", "BodyID":48, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae SP-F d11-19", "SystemAddress":629388954035, "DistanceFromArrivalLS":4348.969920, "TidalLock":false, "TerraformState":"", "PlanetClass":"Icy body", "Atmosphere":"thick methane rich atmosphere", "AtmosphereType":"MethaneRich", "AtmosphereComposition":[ { "Name":"Ammonia", "Percent":33.219345 }, { "Name":"Methane", "Percent":33.219345 }, { "Name":"Nitrogen", "Percent":33.219345 } ], "Volcanism":"water geysers volcanism", "MassEM":10.707685, "Radius":15074568.000000, "SurfaceGravity":18.780851, "SurfaceTemperature":485.114349, "SurfacePressure":4425951232.000000, "Landable":false, "Composition":{ "Ice":0.683452, "Rock":0.212104, "Metal":0.104443 }, "SemiMajorAxis":1302154421806.335449, "Eccentricity":0.002421, "OrbitalInclination":-1.029121, "Periapsis":53.665619, "OrbitalPeriod":795468407.869339, "RotationPeriod":74868.725071, "AxialTilt":-0.023235, "Rings":[ { "Name":"Sifeae SP-F d11-19 5 A Ring", "RingClass":"eRingClass_Icy", "MassMT":8.6698e+05, "InnerRad":2.4873e+07, "OuterRad":8.0814e+07 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
-                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:40:03Z", "event":"Scan", "MappedValue": 3123456, "ScanType":"Detailed", "BodyName":"4", "BodyID":4, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae TP-F d11-27", "SystemAddress":629388954035, "DistanceFromArrivalLS":1202.383750, "TidalLock":false, "TerraformState":"Terraformable", "PlanetClass":"Water world", "Atmosphere":"nitrogen atmosphere", "AtmosphereType":"Nitrogen", "AtmosphereComposition":[ { "Name":"Nitrogen", "Percent":97.354683 }, { "Name":"Oxygen", "Percent":2.557643 }, { "Name":"Water", "Percent":0.063727 } ], "Volcanism":"major rocky magma volcanism", "MassEM":0.800711, "Radius":5696840.500000, "SurfaceGravity":9.833697, "SurfaceTemperature":249.786743, "SurfacePressure":387579.375000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.674676, "Metal":0.325323 }, "SemiMajorAxis":360511553287.506104, "Eccentricity":0.000180, "OrbitalInclination":-0.070908, "Periapsis":154.857116, "OrbitalPeriod":109780913.591385, "RotationPeriod":168794.241913, "AxialTilt":-0.165132, "WasDiscovered":false, "WasMapped":false }),
-                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:42:20Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"4", "BodyID":12, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae QU-F d11-7", "SystemAddress":629388954035, "DistanceFromArrivalLS":5808.033260, "TidalLock":false, "TerraformState":"", "PlanetClass":"Gas giant with ammonia based life", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.353905 }, { "Name":"Helium", "Percent":25.625011 } ], "Volcanism":"", "MassEM":355.137878, "Radius":72255304.000000, "SurfaceGravity":27.112337, "SurfaceTemperature":132.713913, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1737880468368.530273, "Eccentricity":0.014049, "OrbitalInclination":-0.175683, "Periapsis":319.387555, "OrbitalPeriod":1119854152.202606, "RotationPeriod":163062.787293, "AxialTilt":-0.328957, "Rings":[ { "Name":"Sifeae QU-F d11-7 4 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.0005e+11, "InnerRad":1.1772e+08, "OuterRad":1.3081e+08 }, { "Name":"Sifeae QU-F d11-7 4 B Ring", "RingClass":"eRingClass_Icy", "MassMT":1.343e+12, "InnerRad":1.3091e+08, "OuterRad":2.4653e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
+
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:40:03Z", "event":"Scan", "MappedValue": 3123456, "ScanType":"Detailed", "BodyName":"4", "BodyID":4, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae TP-F d11-27", "SystemAddress":629388954035, "DistanceFromArrivalLS":1202.383750, "TidalLock":false, "TerraformState":"Terraformable", "PlanetClass":"Water world", "Atmosphere":"nitrogen atmosphere", "AtmosphereType":"Nitrogen", "AtmosphereComposition":[ { "Name":"Nitrogen", "Percent":97.354683 }, { "Name":"Oxygen", "Percent":2.557643 }, { "Name":"Water", "Percent":0.063727 } ], "Volcanism":"major rocky magma volcanism", "MassEM":0.800711, "Radius":5696840.500000, "SurfaceGravity":9.833697, "SurfaceTemperature":249.786743, "SurfacePressure":387579.375000, "Landable":true, "Composition":{ "Ice":0.000000, "Rock":0.674676, "Metal":0.325323 }, "SemiMajorAxis":360511553287.506104, "Eccentricity":0.000180, "OrbitalInclination":-0.070908, "Periapsis":154.857116, "OrbitalPeriod":109780913.591385, "RotationPeriod":168794.241913, "AxialTilt":-0.165132, "WasDiscovered":false, "WasMapped":false }),
+
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:42:20Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"7", "BodyID":12, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae QU-F d11-7", "SystemAddress":629388954035, "DistanceFromArrivalLS":5808.033260, "TidalLock":false, "TerraformState":"", "PlanetClass":"Gas giant with ammonia based life", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.353905 }, { "Name":"Helium", "Percent":25.625011 } ], "Volcanism":"", "MassEM":355.137878, "Radius":72255304.000000, "SurfaceGravity":27.112337, "SurfaceTemperature":132.713913, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1737880468368.530273, "Eccentricity":0.014049, "OrbitalInclination":-0.175683, "Periapsis":319.387555, "OrbitalPeriod":1119854152.202606, "RotationPeriod":163062.787293, "AxialTilt":-0.328957, "Rings":[ { "Name":"Sifeae QU-F d11-7 4 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.0005e+11, "InnerRad":1.1772e+08, "OuterRad":1.3081e+08 }, { "Name":"Sifeae QU-F d11-7 4 B Ring", "RingClass":"eRingClass_Icy", "MassMT":1.343e+12, "InnerRad":1.3091e+08, "OuterRad":2.4653e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:43:17Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"2", "BodyID":3, "Parents":[ {"Null":2}, {"Star":0} ], "StarSystem":"Sifeae QU-F d11-7", "SystemAddress":629388954035, "DistanceFromArrivalLS":4160.962580, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class II gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.369583 }, { "Name":"Helium", "Percent":25.630409 } ], "Volcanism":"", "MassEM":454.990814, "Radius":74923384.000000, "SurfaceGravity":32.305561, "SurfaceTemperature":165.127991, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":48908598.423004, "Eccentricity":0.044947, "OrbitalInclination":9.301607, "Periapsis":353.801388, "OrbitalPeriod":49028207.659721, "RotationPeriod":150021.407255, "AxialTilt":0.485325, "Rings":[ { "Name":"Sifeae QU-F d11-7 2 A Ring", "RingClass":"eRingClass_Rocky", "MassMT":2.1809e+11, "InnerRad":1.2237e+08, "OuterRad":1.5135e+08 }, { "Name":"Sifeae QU-F d11-7 2 B Ring", "RingClass":"eRingClass_Rocky", "MassMT":1.3414e+12, "InnerRad":1.5145e+08, "OuterRad":2.6776e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T23:02:14Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"AB 1", "BodyID":14, "Parents":[ {"Null":13}, {"Null":0} ], "StarSystem":"Sifeae SP-F d11-16", "SystemAddress":629388954035, "DistanceFromArrivalLS":4020.598838, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":71.664436 }, { "Name":"Helium", "Percent":28.335575 } ], "Volcanism":"", "MassEM":2197.937988, "Radius":70825648.000000, "SurfaceGravity":174.640029, "SurfaceTemperature":597.157349, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":139971697.330475, "Eccentricity":0.197751, "OrbitalInclination":7.265513, "Periapsis":98.411227, "OrbitalPeriod":35178327.560425, "RotationPeriod":17075.715066, "AxialTilt":2.175150, "Rings":[ { "Name":"Sifeae SP-F d11-16 AB 1 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":2.1331e+11, "InnerRad":1.1453e+08, "OuterRad":1.4961e+08 }, { "Name":"Sifeae SP-F d11-16 AB 1 B Ring", "RingClass":"eRingClass_Rocky", "MassMT":4.2019e+12, "InnerRad":1.4971e+08, "OuterRad":4.5263e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
+
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T20:58:37Z", "event":"Scan", "MappedValue": 1123456, "ScanType":"Detailed", "BodyName":"6", "BodyID":6, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae RP-F d11-3", "SystemAddress":114143857123, "DistanceFromArrivalLS":3141.918552, "TidalLock":false, "TerraformState":"", "PlanetClass":"Ammonia world", "Atmosphere":"", "AtmosphereType":"AmmoniaOxygen", "AtmosphereComposition":[ { "Name":"CarbonDioxide", "Percent":84.502144 }, { "Name":"Nitrogen", "Percent":11.775880 }, { "Name":"Oxygen", "Percent":2.830044 } ], "Volcanism":"", "MassEM":0.296209, "Radius":4198024.500000, "SurfaceGravity":6.699115, "SurfaceTemperature":234.536438, "SurfacePressure":294524.968750, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.673636, "Metal":0.326364 }, "SemiMajorAxis":942827576398.849487, "Eccentricity":0.001102, "OrbitalInclination":9.992684, "Periapsis":260.638759, "OrbitalPeriod":437092494.964600, "RotationPeriod":39129.182124, "AxialTilt":-0.224488, "WasDiscovered":false, "WasMapped":false }),
+
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:25:20Z", "event":"Scan", "MappedValue": 1, "ScanType":"AutoScan", "BodyName":"B 4", "BodyClass": "Belt Cluster", "BodyID":12, "Parents":[ {"Ring":8}, {"Star":0} ], "StarSystem":"Sifeae SP-F d11-19", "SystemAddress":663916448227, "DistanceFromArrivalLS":197.613961, "WasDiscovered":false, "WasMapped":false }),
 
 
 
