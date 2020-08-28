@@ -4,6 +4,8 @@ ECHO Using options: %OPTIONS%
 
 RMDIR /S /Q dist
 
+python create_version_file.py
+
 pipenv run pyinstaller ^
     --hidden-import=eventlet.hubs.epolls ^
     --hidden-import=eventlet.hubs.kqueue ^

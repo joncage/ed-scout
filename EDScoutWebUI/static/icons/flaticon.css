@@ -34,7 +34,7 @@
     text-shadow: 0 0;
 }
 
-.flaticon-lander:before { content: "\f100"; color:#4CE0E1;}
+.flaticon-lander:before { content: "\f100";}
 .flaticon-volcano:before { content: "\f101"; }
 .flaticon-ingot:before { content: "\f102"; }
 .flaticon-asteroids:before { content: "\f103"; }

@@ -37,6 +37,10 @@ body {
     color: #000000;
 }
 
+.landable {
+    color:#4CE0E1;
+}
+
 .currentSystemHighlight {
     background: #17EFF9;
 }

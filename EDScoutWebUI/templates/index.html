@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>ED Scout {{ version }}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="static/style.css?{{ timestamp }}">
     <link rel="stylesheet" type="text/css" href="css-overrides/css-overrides.css?{{ timestamp }}">
@@ -205,6 +206,10 @@
                 return bodyIcon;
             }
 
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
             function createDetailedBodyEntry(payloadContent) {
 
 
@@ -249,9 +254,13 @@
                     bodyType.innerHTML = payloadContent.BodyClass;
                 }
 
+                let distance = document.createElement('div');
+                // DistanceFromArrivalLS
+                // numberWithCommas
+                distance.classList.add("col-auto", "system", chartedStyle);
+                distance.innerHTML = numberWithCommas(payloadContent.DistanceFromArrivalLS.toFixed(0)).toString()+" ls";
 
                 let extra_info = ""
-
                 if (!payloadContent.StarType) {
                     let volcanism = createIconElement('volcano');
                     if (!payloadContent.Volcanism) {
@@ -273,27 +282,27 @@
                     }
                     extra_info += mappedState.outerHTML;
 
-                    let landable = createIconElement('lander').outerHTML;
+                    let landable = createIconElement('lander');
                     if (!payloadContent.Landable) {
-                        landable.classList.add("inactive")
+                        landable.classList.add("inactive");
+                    }
+                    else
+                    {
+                        landable.classList.add('landable');
                     }
                     extra_info += landable.outerHTML;
                 }
 
                 let bodyInfo = document.createElement('div');
-                bodyInfo.classList.add("col-1", "system", chartedStyle);
+                bodyInfo.classList.add("col-auto", "system", chartedStyle);
                 bodyInfo.innerHTML = extra_info;
-
-                function numberWithCommas(x) {
-                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                }
 
                 let bodyValue = document.createElement('div');
                 bodyValue.classList.add("col-2", "system", chartedStyle, "text-right");
                 bodyValue.innerText = numberWithCommas(payloadContent.MappedValue);
 
                 // De-select anything that's currently selected.
-                let prevLatestScanElement = document.querySelector('latest-scan');
+                let prevLatestScanElement = document.querySelector('.latest-scan');
                 if (prevLatestScanElement) {
                     prevLatestScanElement.classList.remove('latest-scan');
                 }
@@ -304,6 +313,7 @@
                     spacer.outerHTML+
                     bodyName.outerHTML+
                     bodyType.outerHTML+
+                    distance.outerHTML+
                     bodyInfo.outerHTML+
                     bodyValue.outerHTML;
                 row.setAttribute('data-associatedsystem', payloadContent.SystemAddress);
