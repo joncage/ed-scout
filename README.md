@@ -50,6 +50,16 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
+### 1.4.0 - Titles, Load on startup, Cleaner / more complete icons
+
+* Added loading of current position / nav route on startup.
+* Cleaned up the GUI a bit to combine some columns of related info.
+* Fixed the terraformable / volcanism / lander flags so they work for all discovery / valuebale-system highlighting.
+* Changed the flagging so icons for flags like volcanism only show up when they're active (instead of showing as a misleading black background.
+* Fixed (I think!) the file-prompter hookup which encourages Windows to flus ht changes to journal files.
+* Added title to highlight what's in each column.
+* Added missing icons for some of the celestial bodies & replaced some with some I think are cleaner.
+
 ### 1.3.0 - Icontastic, live scan results & clearer info
 
 * Added live-scan results that mimics the calculations EDSM makes to identify worth of scanning a world.
