@@ -137,8 +137,9 @@ class JournalWatcher:
         self.observer.stop()
         self.observer.join()
 
-    def _on_journal_change(self, event):
-        self.report_journal_change(event)
+    def _on_journal_change(self, altered_file):
+        set_current_journal(altered_file)  # Make sure we keep the prompter pointed at the current file.
+        self.report_journal_change(altered_file)
 
     def _configure_watchers(self):
         if not os.path.exists(self.journal_path):
