@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "88882ab95ebd02d552eda03926bee4ff7858df16b5db62f9ba60c5d8ea36b20d"
+            "sha256": "490fbeb3ca8e53272c6dd0e9d122e0d0d88f19f192fee5fb8b6cb20f456c3b0a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -99,11 +99,11 @@
         },
         "flaskwebgui": {
             "hashes": [
-                "sha256:410ca9d8a466fd8aa0e6af4bbcf68dc15b92fddd11d1c4231c6eccc92778d62b",
-                "sha256:dd0f9349ed945c0594f6fc2a7d8e55996f1d77adc13b2d781ee779b353fe63a9"
+                "sha256:37bbee06751c3b5fefd64a20edfeb6821b22113295cd76f51c536e1a4e581d39",
+                "sha256:666f611045561fb5b92c3ea8bcb719510153e7fd7b4391f931f655f2fb9d16dd"
             ],
             "index": "pypi",
-            "version": "==0.1.12"
+            "version": "==0.1.13"
         },
         "future": {
             "hashes": [
@@ -216,10 +216,10 @@
         },
         "more-itertools": {
             "hashes": [
-                "sha256:68c70cc7167bdf5c7c9d8f6954a7837089c6a36bf565383919bb595efb8a17e5",
-                "sha256:b78134b2063dd214000685165d81c154522c3ee0a1c0d4d113c80361c234c5a2"
+                "sha256:6f83822ae94818eae2612063a5101a7311e68ae8002005b5e05f03fd74a86a20",
+                "sha256:9b30f12df9393f0d28af9210ff8efe48d10c94f73e5daf886f10c4b0b0b4f03c"
             ],
-            "version": "==8.4.0"
+            "version": "==8.5.0"
         },
         "packaging": {
             "hashes": [
