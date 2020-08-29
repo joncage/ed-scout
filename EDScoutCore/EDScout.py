@@ -2,7 +2,6 @@ import time
 import json
 import logging
 import os
-import requests_cache
 from pathlib import Path
 
 from .NavRouteIntegrator import NavRouteIntegrator

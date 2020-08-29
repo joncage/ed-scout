@@ -61,7 +61,7 @@ class JournalChangeProcessor:
         nav_events_to_return = []
         chronological_values = sorted(values, key=lambda k: k['timestamp'])
         last_event = chronological_values[-1]
-        if last_event['event'] is 'NavRoute':
+        if last_event['event'] == 'NavRoute':
             nav_events_to_return = [last_event]
         else:
             nav_events_to_return = chronological_values
