@@ -29,7 +29,7 @@ class TestJournalWatcher:
 
         # initialise the watcher
         jcp = JournalChangeProcessor()
-        jcp.start_reading_journal(path_to_watch)
+        jcp.process_journal_change(path_to_watch)
 
         # simulate a file change event
         with open(TestJournalWatcher.get_test_file_path("FileChangeTest-PostChange.log"), "rb") as input_file:

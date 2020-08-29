@@ -30,21 +30,7 @@ def generate_key(body_info):
     return f"{main_type}-{specific_type}-{terraform_state}-{body_info['WasDiscovered']}-{body_info['WasMapped']}"
 
 
-def test_acquire_scan_data_from_journals():
-    journal_file_pattern = "Journal*.log"
-    journal_path = os.path.join(str(pathlib.Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
-    search_pattern = os.path.join(journal_path, journal_file_pattern)
-    print(f"Searching with '{search_pattern}'")
-    journal_files = glob.glob(search_pattern)
-    print(f"Found {len(journal_files)} journals")
-
-    scan_lines = []
-    for journal_file in journal_files:
-        with open(journal_file, "r", encoding='UTF-8') as journal:
-            relevant_lines = [line for line in journal.readlines() if '"Scan"' in line]
-            print(f"{len(relevant_lines)} found in {journal_file}")
-            scan_lines.extend(relevant_lines)
-
+def find_uniques(scan_lines):
     uniques = {}
     for line in scan_lines:
         data = json.loads(line)
@@ -58,6 +44,10 @@ def test_acquire_scan_data_from_journals():
         if key not in uniques:
             uniques[key] = []
         uniques[key].append((mass, data))
+    return uniques
+
+
+def identify_extremes(uniques):
 
     extremes_at_uniques = []
     for unique in uniques.values():
@@ -84,6 +74,27 @@ def test_acquire_scan_data_from_journals():
         else:  # mass-less
             (mass, data) = unique[0]
             extremes_at_uniques.append(json.dumps(data))
+    return extremes_at_uniques
+
+
+def test_acquire_scan_data_from_journals():
+    journal_file_pattern = "Journal*.log"
+    journal_path = os.path.join(str(pathlib.Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
+    search_pattern = os.path.join(journal_path, journal_file_pattern)
+    print(f"Searching with '{search_pattern}'")
+    journal_files = glob.glob(search_pattern)
+    print(f"Found {len(journal_files)} journals")
+
+    scan_lines = []
+    for journal_file in journal_files:
+        with open(journal_file, "r", encoding='UTF-8') as journal:
+            relevant_lines = [line for line in journal.readlines() if '"Scan"' in line]
+            print(f"{len(relevant_lines)} found in {journal_file}")
+            scan_lines.extend(relevant_lines)
+
+    uniques = find_uniques(scan_lines)
+
+    extremes_at_uniques = identify_extremes(uniques)
 
     with open("..\\ExampleData\\ExampleScans.json", "w") as output:
         output.writelines(s + '\n' for s in extremes_at_uniques)

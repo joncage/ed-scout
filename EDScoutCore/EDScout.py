@@ -23,8 +23,6 @@ class EDScout:
             journal_watcher=None,
             journal_change_processor=JournalChangeProcessor()):
 
-        self.last_nav_route = None
-
         if journal_watcher is None:
             journal_watcher = JournalWatcher(default_journal_path, force_polling=force_polling)
 
@@ -38,6 +36,9 @@ class EDScout:
         # Setup the ZMQ forwarder that'll pass on the log file changes
         self.sender = Sender()
         self.port = self.sender.port
+
+    def trigger_current_journal_check(self):
+        self.journalWatcher.trigger_current_journal_check()
 
     @staticmethod
     def requires_system_lookup(new_event):
@@ -134,7 +135,7 @@ class EDScout:
             return
 
         if new_entry["event"] == "NavRoute":
-            self.on_new_route(new_entry["Route"])
+            self.on_new_route(new_entry)
         else:
             new_entry = self.tack_on_additional_info(new_entry)
 
@@ -144,10 +145,10 @@ class EDScout:
             # If it needed a detailed system lookup, add that as well
             if EDScout.requires_system_lookup(new_entry):
                 self.report_new_info(EDScout.create_system_report(new_entry))
-                logger.info(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
 
-            if EDScout.requires_body_investigation(new_entry):
-                logger.info(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
+            # if EDScout.requires_system_lookup(new_entry) or EDScout.requires_body_investigation(new_entry):
+            #     with requests_cache.disabled():
+            #         logger.info(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
 
     @staticmethod
     def check_system_content(new_entry):
@@ -186,11 +187,13 @@ class EDScout:
         return report_content
 
     def on_new_route(self, nav_route):
-        logger.debug('New route: ')
+        logger.debug('New nav route detected; forwarding and looking up systems')
 
-        self.report_new_info({'type': 'NewRoute'})
+        nav_route['type'] = 'NewRoute'
 
-        for jump_dest in nav_route:
+        self.report_new_info(nav_route)
+
+        for jump_dest in nav_route['Route']:
             report_content = EDScout.get_edsm_system_report(jump_dest['StarSystem'], 'NavRoute')
             report_content.update(jump_dest)
             self.report_new_info(report_content)

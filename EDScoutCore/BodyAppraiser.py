@@ -171,95 +171,117 @@ def appraise_body(body_info):
     return calculate_estimated_value(main_type, specific_type, mass, terraform_state, options)
 
 
+def calculate_estimated_star_value(specific_type, mass):
+    value = 1200
+
+    # White Dwarf Star
+    if specific_type in [51, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514]:
+        value = 14057
+
+    # Neutron Star, Black Hole
+    if specific_type in [91, 92]:
+        value = 22628
+
+    # Super-massive Black Hole
+    if specific_type in [93]:
+        # this is applying the same scaling to the 3.2 value as a normal black hole, not confirmed in game
+        value = 33.5678
+
+    return round(value + (mass * value / 66.25))
+
+
+def calculate_planet_bonus(specific_type, terraform_state):
+    bonus = 0
+
+    if terraform_state is not None and terraform_state > 0:
+        bonus = 93328
+
+    # Metal-rich body
+    if specific_type in [1]:
+        if terraform_state is not None and terraform_state > 0:
+            bonus = 65631
+
+    # High metal content world / Class II gas giant
+    if specific_type in [2, 72]:
+        if terraform_state is not None and terraform_state > 0:
+            bonus = 100677
+
+    # Earth-like world / Water world
+    if specific_type in [31, 41]:
+        if terraform_state is not None and terraform_state > 0:
+            bonus = 116295
+
+        if specific_type == 31:  # Earth Like...
+            bonus = 116295
+
+    return bonus
+
+
+def calculate_planet_value(specific_type):
+    value = 300
+
+    # Metal-rich body
+    if specific_type in [1]:
+        value = 21790
+
+    # Ammonia world
+    if specific_type in [51]:
+        value = 96932
+
+    # Class I gas giant
+    if specific_type in [71]:
+        value = 1656
+
+    # High metal content world / Class II gas giant
+    if specific_type in [2, 72]:
+        value = 9654
+
+    # Earth-like world / Water world
+    if specific_type in [31, 41]:
+        value = 64831
+
+    return value
+
+
+def calculate_estimated_planet_value(specific_type, mass, terraform_state, options):
+
+    value = calculate_planet_value(specific_type)
+    bonus = calculate_planet_bonus(specific_type, terraform_state)
+
+    # CALCULATION
+    q = 0.56591828
+    value = value + bonus
+    map_multiplier = 1.0
+
+    if options['haveMapped']:
+        map_multiplier = 3.3333333333
+
+        if options['isFirstDiscoverer'] and options['isFirstMapper']:
+            map_multiplier = 3.699622554
+
+        elif not options['isFirstDiscoverer'] and options['isFirstMapper']:
+            map_multiplier = 8.0956
+
+        if options['efficiencyBonus']:
+            map_multiplier *= 1.25
+
+    value = max((value + (value * pow(mass, 0.2) * q)) * map_multiplier, 500)
+
+    if options['isFirstDiscoverer']:
+        value *= 2.6
+
+    return round(value)
+
+
 def calculate_estimated_value(main_type, specific_type, mass, terraform_state, options):
 
     if mass is None:
         mass = 1
 
     if main_type == 'Star' or main_type == 1:
-        value = 1200
-
-        # White Dwarf Star
-        if specific_type in [51, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514]:
-            value = 14057
-
-        # Neutron Star, Black Hole
-        if specific_type in [91, 92]:
-            value = 22628
-
-        # Super-massive Black Hole
-        if specific_type in [93]:
-            # this is applying the same scaling to the 3.2 value as a normal black hole, not confirmed in game
-            value = 33.5678
-
-        return round(value + (mass * value / 66.25))
+        return calculate_estimated_star_value(specific_type, mass)
 
     if main_type == 'Planet' or main_type == 2:
-        value = 300
-        bonus = 0
-
-        if terraform_state is not None and terraform_state > 0:
-            bonus = 93328
-
-        # Metal-rich body
-        if specific_type in [1]:
-            value = 21790
-            bonus = 0
-
-            if terraform_state is not None and terraform_state > 0:
-                bonus = 65631
-
-        # Ammonia world
-        if specific_type in [51]:
-            value = 96932
-            bonus = 0
-
-        # Class I gas giant
-        if specific_type in [71]:
-            value = 1656
-            bonus = 0
-
-        # High metal content world / Class II gas giant
-        if specific_type in [2, 72]:
-            value = 9654
-            bonus = 0
-
-            if terraform_state is not None and terraform_state > 0:
-                bonus = 100677
-
-        # Earth-like world / Water world
-        if specific_type in [31, 41]:
-            value = 64831
-            bonus = 0
-
-            if terraform_state is not None and terraform_state > 0:
-                bonus = 116295
-
-            if specific_type == 31:  # Earth Like...
-                bonus = 116295
-
-        # CALCULATION
-        q = 0.56591828
-        value = value + bonus
-        map_multiplier = 1.0
-
-        if options['haveMapped']:
-            map_multiplier = 3.3333333333
-
-            if options['isFirstDiscoverer'] and options['isFirstMapper']:
-                map_multiplier = 3.699622554
-
-            elif not options['isFirstDiscoverer'] and options['isFirstMapper']:
-                map_multiplier = 8.0956
-
-            if options['efficiencyBonus']:
-                map_multiplier *= 1.25
-
-        value = max((value + (value * pow(mass, 0.2) * q)) * map_multiplier, 500)
-
-        if options['isFirstDiscoverer']:
-            value *= 2.6
-
-        return round(value)
+        return calculate_estimated_planet_value(specific_type, mass, terraform_state, options)
 
     return 0
