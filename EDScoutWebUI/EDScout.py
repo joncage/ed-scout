@@ -134,15 +134,15 @@ zmq_port_test = None
 temp_dir = tempfile.TemporaryDirectory()
 
 
-def receive_and_forward():
+def receive_and_forward(scout):
     """
     Waits for messages sent over the ZMQ link and emits each one via the socketIO link.
     Runs until the thread it runs on is killed.
     """
 
     log.info("Background thread launched and awaiting data..")
-    global zmq_port_test
-    r = Receiver(port=zmq_port_test)
+    r = Receiver(port=scout.port)
+    scout.trigger_current_journal_check()
 
     while True:
         message = r.receive().decode('ascii')
@@ -173,7 +173,8 @@ def on_connect():
 
     global thread
     if thread is None:
-        thread = socketio.start_background_task(target=receive_and_forward)
+        global scout
+        thread = socketio.start_background_task(receive_and_forward, scout)
 
 
 def remap_css_to_match_hud():
@@ -211,7 +212,6 @@ if __name__ == '__main__':
         if args.force_polling:
             log.info("Polling enabled")
         scout = EDScout(force_polling=args.force_polling)
-        zmq_port_test = scout.port
 
         # Launch the web server either directly or as an app
         if ui:

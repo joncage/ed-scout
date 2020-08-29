@@ -23,9 +23,57 @@ class JournalChangeProcessor:
         self.journal_size = 0
 
     def start_reading_journal(self, changed_file):
-        # TODO: Scan though the file to find the last location, FSD target and if there's a navroute file, set that too.
         self.latest_journal = changed_file
-        self.journal_size = os.stat(changed_file).st_size
+
+        # Start at zero; If we have zero as the size, we'll process the whole file but just use the last entry.
+        self.journal_size = 0
+
+    @staticmethod
+    def find_latest_navigation_entries(journal_lines):
+        nav_events = {
+            'NavRoute': None,
+            'FSDTarget': None,
+            'Location': None,
+            'FSDJump': None,
+            # No point processing these as it should only matter if JSD jump i.e. arriving was there.
+            # 'StartJump': None
+        }
+
+        # Scan though the file to find the last location, FSD target and if there's a navroute file, set that too.
+        for journal_entry_str in journal_lines:
+            journal_entry = JournalChangeProcessor.entry_from_journal_line(journal_entry_str)
+            event_type = journal_entry['event']
+            if event_type in nav_events.keys():
+                needs_storing = (nav_events[event_type] is None) or \
+                                (nav_events[event_type]['timestamp'] < journal_entry['timestamp'])
+                if needs_storing:
+                    nav_events[event_type] = journal_entry
+
+        # If there's a location and any other event, we can ditch the location as it will be superceded by the later
+        # events.
+        values = [x for x in nav_events.values() if x]
+        if nav_events['Location']:
+            if len(values) > 1:
+                nav_events['Location'] = None
+                values = [x for x in nav_events.values() if x]
+
+        # If there's a jump or target after the last navroute, we should send them. Otherwise they should be ignored.
+        nav_events_to_return = []
+        chronological_values = sorted(values, key=lambda k: k['timestamp'])
+        last_event = chronological_values[-1]
+        if last_event['event'] is 'NavRoute':
+            nav_events_to_return = [last_event]
+        else:
+            nav_events_to_return = chronological_values
+
+        return nav_events_to_return
+
+    @staticmethod
+    def entry_from_journal_line(line):
+        logger.debug(f'New journal entry identified: {line}')
+        entry = json.loads(line)
+        entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.
+        return entry
 
     def process_journal_change(self, changed_file):
         new_size = os.stat(changed_file).st_size
@@ -45,27 +93,26 @@ class JournalChangeProcessor:
 
         entries = []
 
-        if new_data:
-            new_journal_lines = JournalChangeProcessor.binary_file_data_to_lines(new_data)
+        try:
+            if new_data:
+                new_journal_lines = JournalChangeProcessor.binary_file_data_to_lines(new_data)
 
-            try:
+                if self.journal_size == 0:
+                    entries = JournalChangeProcessor.find_latest_navigation_entries(new_journal_lines)
+                    logger.debug(f'New journal detected; Picked out {len(entries)} entries')
+                else:
+                    # Deal with all entries in one go in case the last one isn't complete and throws.
+                    # This ensures we treat it as one atomic operation.
+                    # Next time round we'll re-read the data to try again.
+                    for line in new_journal_lines:
+                        entry = JournalChangeProcessor.entry_from_journal_line(line)
+                        entries.append(entry)
 
-                # Deal with all entries in one go in case the last one isn't complete and throws.
-                # This ensures we treat it as one atomic operation - nex time round we'll re-read the data to try again.
-                for line in new_journal_lines:
-                    logger.debug(f'New journal entry detected: {line}')
-
-                    entry = json.loads(line)
-
-                    entry['type'] = "JournalEntry"  # Add an identifier that's common to everything we shove down the outgoing pipe so the receiver can distiguish.
-                    entries.append(entry)
-
-                logger.debug(f'Found {len(entries)} new entries')
+                    logger.debug(f'Found {len(entries)} new entries')
 
                 self.journal_size = new_size
-
-            except json.decoder.JSONDecodeError as e:
-                logger.exception(e)
+        except json.decoder.JSONDecodeError as e:
+            logger.exception(e)
 
         return entries
 
@@ -137,8 +184,11 @@ class JournalWatcher:
         self.observer.stop()
         self.observer.join()
 
+    def trigger_current_journal_check(self):
+        self._on_journal_change(self.latest_journal)
+
     def _on_journal_change(self, altered_file):
-        set_current_journal(altered_file)  # Make sure we keep the prompter pointed at the current file.
+        self.set_current_journal(altered_file)  # Make sure we keep the prompter pointed at the current file.
         self.report_journal_change(altered_file)
 
     def _configure_watchers(self):
