@@ -18,6 +18,7 @@ from EDScoutCore.ZmqWrappers import Receiver
 from EDScoutCore.EDScout import EDScout
 from EDScoutCore import EDSMInterface
 from EDScoutWebUI import HudColourAdjuster
+from EDScoutWebUI import WindowToggler
 
 
 try:
@@ -212,6 +213,9 @@ if __name__ == '__main__':
         if args.force_polling:
             log.info("Polling enabled")
         scout = EDScout(force_polling=args.force_polling)
+
+        # Enable toggling
+        toggler = WindowToggler.ScoutToggler()
 
         # Launch the web server either directly or as an app
         if ui:
