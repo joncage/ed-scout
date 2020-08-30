@@ -15,7 +15,7 @@ class ScoutToggler:
         # The currently active modifiers
         self.current = set()
 
-        self.scout_toggled = False
+        self.scout_toggled = True
 
         self.listener = keyboard.Listener(
             on_press=self.on_press,
@@ -31,16 +31,21 @@ class ScoutToggler:
         return wgui.FindWindow(None, "Elite - Dangerous (CLIENT)")
 
     @staticmethod
+    def adjust_window_visibility(window_handle, adjustment):
+        wgui.SetWindowPos(window_handle, adjustment, 0, 0, 0, 0,
+                          wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
+
+    @staticmethod
     def hide_scout():
         scout_handle = ScoutToggler.get_scout_handle()
         elite_handle = ScoutToggler.get_elite_handle()
-        wgui.SetWindowPos(scout_handle, elite_handle, 0, 0, 0, 0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
+        ScoutToggler.adjust_window_visibility(scout_handle, elite_handle)
 
     @staticmethod
     def show_scout():
         scout_handle = ScoutToggler.get_scout_handle()
-        wgui.SetWindowPos(scout_handle, wcon.HWND_TOPMOST, 0, 0, 0, 0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
-        wgui.SetWindowPos(scout_handle, wcon.HWND_NOTOPMOST, 0, 0, 0, 0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
+        ScoutToggler.adjust_window_visibility(scout_handle, wcon.HWND_TOPMOST)
+        ScoutToggler.adjust_window_visibility(scout_handle, wcon.HWND_NOTOPMOST)
 
     def toggle_scout_visibility(self):
         self.scout_toggled
