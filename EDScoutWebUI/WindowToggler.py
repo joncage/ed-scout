@@ -34,13 +34,13 @@ class ScoutToggler:
     def hide_scout():
         scout_handle = ScoutToggler.get_scout_handle()
         elite_handle = ScoutToggler.get_elite_handle()
-        wgui.SetWindowPos(scout_handle, elite_handle, 0,0,0,0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
+        wgui.SetWindowPos(scout_handle, elite_handle, 0, 0, 0, 0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
 
     @staticmethod
     def show_scout():
         scout_handle = ScoutToggler.get_scout_handle()
-        wgui.SetWindowPos(scout_handle, wcon.HWND_TOPMOST, 0,0,0,0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
-        wgui.SetWindowPos(scout_handle, wcon.HWND_NOTOPMOST, 0,0,0,0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
+        wgui.SetWindowPos(scout_handle, wcon.HWND_TOPMOST, 0, 0, 0, 0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
+        wgui.SetWindowPos(scout_handle, wcon.HWND_NOTOPMOST, 0, 0, 0, 0, wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
 
     def toggle_scout_visibility(self):
         self.scout_toggled
