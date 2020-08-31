@@ -9,6 +9,7 @@ from . import EDSMInterface
 from .ZmqWrappers import Sender
 from .JournalInterface import JournalWatcher, JournalChangeProcessor
 from . import BodyAppraiser
+from .OutputRecorder import OutputRecorder
 
 logger = logging.getLogger('EDScoutCore')
 
@@ -21,10 +22,16 @@ class EDScout:
             self,
             force_polling=False,
             journal_watcher=None,
-            journal_change_processor=JournalChangeProcessor()):
+            journal_change_processor=JournalChangeProcessor(),
+            record_output=False):
 
         if journal_watcher is None:
             journal_watcher = JournalWatcher(default_journal_path, force_polling=force_polling)
+
+        if record_output:
+            self.journal_stream_recorder = OutputRecorder('ScoutStreamRecord')
+        else:
+            self.journal_stream_recorder = None
 
         self.navRouteIntegrator = NavRouteIntegrator()
 
@@ -164,6 +171,8 @@ class EDScout:
 
     def process_new_journal_entries(self, entries):
         for new_entry in entries:
+            if self.journal_stream_recorder:
+                self.journal_stream_recorder.record('journal_output', new_entry)
             self.process_journal_change(new_entry)
 
     @staticmethod
@@ -201,6 +210,8 @@ class EDScout:
     def report_new_info(self, new_info):
         json_to_send = json.dumps(new_info)
         logger.info("Reporting: " + str(json_to_send))
+        if self.journal_stream_recorder:
+            self.journal_stream_recorder.record('core_output', new_info)
         self.sender.send(json_to_send)
 
     def stop(self):

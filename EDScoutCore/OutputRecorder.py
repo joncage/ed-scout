@@ -1,27 +1,29 @@
-from .ZmqWrappers import Receiver
 import json
-from logging import log
+import os
+from pathlib import Path
+from datetime import datetime
 
 
-class OutputRecorder():
+class OutputRecorder:
 
-    def __init__(self, port):
-        zmq_port_test = None
-        self.r = Receiver(port=zmq_port_test)
+    def __init__(self, file_name_prefix):
+        recording_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'StreamRecords')
+        if not os.path.isdir(recording_dir):
+            Path(recording_dir).mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+        file_name = file_name_prefix + '-' + timestamp + ".json"
+        file_path = os.path.join(recording_dir, file_name)
+        self.output = open(file_path, "w")
 
-    def run(self):
-        while True:
-            message = self.r.receive().decode('ascii')
-            try:
-                log.debug("Received:   '" + message + "'")
-                content = dict(data=json.loads(message))
-                log.debug("Forwarding: '" + str(content) + "'")
-                # socketio.emit('log', content, broadcast=True)
-            except Exception as pass_on_failure:
-                log.exception(pass_on_failure)
+    def record(self, stream_point, new_entry):
+        new_record = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'stream_point': stream_point,
+            'entry': new_entry
+        }
+        str_record = json.dumps(new_record)
+        self.output.write(str_record + "\n")
+        self.output.flush()
 
-
-# JournalInterface.JournalWatcher._on_journal_change
-#     JournalChangeProcessor.process_journal_change
-#         JournalChangeProcessor.binary_file_data_to_lines -> yields entries
-#               EDScout.forward_journal_change
+    def close(self):
+        self.output.close()

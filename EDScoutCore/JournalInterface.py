@@ -59,12 +59,13 @@ class JournalChangeProcessor:
 
         # If there's a jump or target after the last navroute, we should send them. Otherwise they should be ignored.
         nav_events_to_return = []
-        chronological_values = sorted(values, key=lambda k: k['timestamp'])
-        last_event = chronological_values[-1]
-        if last_event['event'] == 'NavRoute':
-            nav_events_to_return = [last_event]
-        else:
-            nav_events_to_return = chronological_values
+        if len(values) > 0:
+            chronological_values = sorted(values, key=lambda k: k['timestamp'])
+            last_event = chronological_values[-1]
+            if last_event['event'] == 'NavRoute':
+                nav_events_to_return = [last_event]
+            else:
+                nav_events_to_return = chronological_values
 
         return nav_events_to_return
 
