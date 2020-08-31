@@ -327,21 +327,18 @@
                 row.classList.add("row", "ml-1", "mr-1");
                 row.id = systemInfo.SystemAddress;
                 let chartedSpecificStyle = systemInfo.charted?"charted":"uncharted";
-                let mappedValue = systemInfo.charted?systemInfo.estimatedValueMapped:"?";
 
                 let systemName = document.createElement('div');
-                systemName.classList.add("col-3", "system", chartedSpecificStyle);
-                systemName.innerHTML = createIconElement("solar-system").outerHTML+" "+systemInfo.StarSystem;
-
-                let starClass = document.createElement('div');
-                starClass.classList.add("col", "system", chartedSpecificStyle);
-                starClass.innerHTML = (systemInfo.StarClass?systemInfo.StarClass:"");
+                systemName.classList.add("col", "system", chartedSpecificStyle);
+                let starClass = "["+(systemInfo.StarClass?systemInfo.StarClass:"?")+"]";
+                systemName.innerHTML = createIconElement("solar-system").outerHTML+" "+starClass+" "+systemInfo.StarSystem;
 
                 let systemValue = document.createElement('div');
                 systemValue.classList.add("col-2", "system", chartedSpecificStyle, "text-right");
+                let mappedValue = systemInfo.charted?systemInfo.estimatedValueMapped:"?";
                 systemValue.innerText = numberWithCommas(mappedValue);
 
-                row.innerHTML = systemName.outerHTML+starClass.outerHTML+systemValue.outerHTML;
+                row.innerHTML = systemName.outerHTML+systemValue.outerHTML;
 
                 return row;
             }
