@@ -212,7 +212,9 @@ if __name__ == '__main__':
         # Launch the background interfaces
         if args.force_polling:
             log.info("Polling enabled")
-        scout = EDScout(force_polling=args.force_polling)
+
+        record_output = not is_deployed
+        scout = EDScout(force_polling=args.force_polling, record_output=record_output)
 
         # Enable toggling
         toggler = WindowToggler.ScoutToggler()
