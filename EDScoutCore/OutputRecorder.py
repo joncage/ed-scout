@@ -22,7 +22,8 @@ class OutputRecorder:
             'entry': new_entry
         }
         str_record = json.dumps(new_record)
-        self.output.write(str_record+"\r\n")
+        self.output.write(str_record+"\n")
+        self.output.flush()
 
     def close(self):
         self.output.close()
