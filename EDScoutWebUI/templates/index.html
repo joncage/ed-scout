@@ -45,11 +45,12 @@
             <div class="col system highlighted text-center">Unknown</div>
         </div>
     </div>
-    <div id="high-value-scans" data-target-sys="" class="container-fluid d-none">
+
+    <div id="high-value-scans" class="container-fluid">
         <div class="row ml-1 mr-1 align-items-center statusInfo">
         </div>
     </div>
-    <div id="low-value-scans" data-target-sys="" class="container-fluid d-none">
+    <div id="low-value-scans" class="container-fluid">
         <div class="row ml-1 mr-1 align-items-center statusInfo">
         </div>
     </div>
@@ -122,7 +123,7 @@
                 removeSystemFromNavList(systemId);
 
                 let locationElement = document.getElementById('location');
-                locationElement.innerHTML = "";
+                clearCurrentLocation();
                 locationElement.setAttribute('data-currentSystem', systemId);
             }
 
@@ -134,17 +135,6 @@
                 else {
                     return null;
                 }
-            }
-
-            function getCurrentlySelectedSystemElement()
-            {
-                let currentTarget = null;
-                let locationElement = document.getElementById('target-sys');
-                if (locationElement.hasAttribute('data-targetSystem'))
-                {
-                    currentTarget = locationElement.getAttribute('data-targetSystem')
-                }
-                return currentTarget;
             }
 
             function setTargetSystem(data) {
@@ -177,18 +167,30 @@
                 row.classList.add("row", "ml-1", "mr-1");
                 row.appendChild(content);
 
-                locationElement.innerHTML = "";
+                clearCurrentLocation();
                 locationElement.appendChild(row);
+            }
+
+            function clearCurrentLocation() {
+                document.getElementById('location').innerHTML = "";
+                document.getElementById('high-value-scans').innerHTML = "";
+                document.getElementById('low-value-scans').innerHTML = "";
             }
 
             function addScannedBody(payloadContent) {
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
-                let container = document.getElementById('location');
                 const newBodyEntry = createDetailedBodyEntry(payloadContent);
 
-                Todo - work out where best to put this.
+                let container;
+                if (isValuableSystem(payloadContent)){
+                    container = document.getElementById('high-value-scans');
+                }
+                else
+                {
+                    container = document.getElementById('low-value-scans');
+                }
 
-                container.appendChild(newBodyEntry);
+                container.prepend(newBodyEntry);
                 newBodyEntry.scrollIntoView();
             }
 
@@ -243,13 +245,17 @@
                 return element;
             }
 
+            function isValuableSystem(payloadContent) {
+                return payloadContent.MappedValue > 500000;
+            }
+
             function createDetailedBodyEntry(payloadContent) {
 
 
                 let discovered = payloadContent.WasDiscovered;
                 let chartedStyle = discovered?"charted":"uncharted";
-                let valuableSystem = payloadContent.MappedValue > 500000;
-                if (valuableSystem) {
+
+                if (isValuableSystem(payloadContent)) {
                     chartedStyle = "highlighted"
                 }
 
