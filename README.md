@@ -50,6 +50,13 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
+### v1.5.0 - Focus hotkey, better sorting, minor fixes
+
+* Added hotkey (START+Z) to put the scout aobe or hide it behind elite.
+* Fixed going to the galaxy map wiping out the bodies scanned in the current system.
+* Added sorting so that valuable systems stick to the top of the list.
+* Removed the scroll-to-latest-entry bit that was added to 1.4
+
 ### 1.4.0 - Titles, Load on startup, Cleaner / more complete icons
 
 * Added loading of current position / nav route on startup.
