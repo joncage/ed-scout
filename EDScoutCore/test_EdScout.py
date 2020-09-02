@@ -96,4 +96,3 @@ class TestEdScoutEntryProcessing:
         assert 'MappedValue' in reported_entry
         assert 'BodyName' in reported_entry
         assert 'StarSystem' in reported_entry
-        assert reported_entry['StarSystem'] not in reported_entry['BodyName']
