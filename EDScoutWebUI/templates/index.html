@@ -428,7 +428,7 @@
             function addNewSystemToContainer(systemInfo, container) {
 
                 let currentSystem = getCurrentSystem();
-                let existingSystemEntry = document.getElementById(currentSystem);
+                let existingSystemEntry = document.getElementById(systemInfo.SystemAddress);
                 if (existingSystemEntry) {
                     return; // Do nothing if the element aready exists to avoid a duplicate.
                 }
@@ -503,11 +503,13 @@
                         let systemId = payloadContent.SystemAddress.toString();
                         if ((currentSystem === null) || (currentSystem === "") || (currentSystem === systemId))
                         {
+                            console.log('Assigning new system to current-system list; ', currentSystem)
                             setCurrentSystem(payloadContent);
                             container = document.getElementById('location');
                         }
                         else
                         {
+                            console.log('Assigning new system to nav list; ', currentSystem)
                             container = navRouteContainer;
                         }
 
@@ -559,6 +561,7 @@
 
             let tests = {};
 
+            tests["just-startup"] = [
             tests["just-startup"] = [
                 // Simulate a normal startup
                 WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
