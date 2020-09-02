@@ -118,8 +118,13 @@
 
             function setCurrentSystem(systemInfo) {
                 console.log("Setting current");
-
                 const systemId = systemInfo.SystemAddress;
+
+                let currentSystem = getCurrentSystem();
+                if (currentSystem && currentSystem === systemId.toString()){
+                    return; // Don't want to clear anything if we're not changing anything
+                }
+
                 removeSystemFromNavList(systemId);
 
                 let locationElement = document.getElementById('location');
@@ -140,7 +145,6 @@
             function setTargetSystem(data) {
                 console.log("Setting target system");
                 let systemId = data.SystemAddress;
-                let systemName = data.Name;
 
                 // Record some data about this target so we can check it easily later
                 let locationElement = document.getElementById('target-sys');
@@ -179,7 +183,11 @@
 
             function addScannedBody(payloadContent) {
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
+
                 const newBodyEntry = createDetailedBodyEntry(payloadContent);
+
+                // If this already exists somewhere on the page, delete the old one.
+                removeOldBodyEntry(newBodyEntry.id);
 
                 let container;
                 if (isValuableSystem(payloadContent)){
@@ -248,11 +256,18 @@
                 return payloadContent.MappedValue > 500000;
             }
 
-            function createDetailedBodyEntry(payloadContent) {
+            function removeOldBodyEntry(bodyId) {
+                let locationElement = document.getElementById(bodyId);
+                if (locationElement) {
+                    locationElement.parentNode.removeChild(locationElement)
+                }
+            }
 
+            function createDetailedBodyEntry(payloadContent) {
 
                 let discovered = payloadContent.WasDiscovered;
                 let chartedStyle = discovered?"charted":"uncharted";
+                let bodyId = idFromBodyName(payloadContent.BodyName);
 
                 if (isValuableSystem(payloadContent)) {
                     chartedStyle = "highlighted"
@@ -275,7 +290,8 @@
                 }
                 let bodyName = document.createElement('div');
                 bodyName.classList.add("col-2", "system", chartedStyle, "text-left");
-                bodyName.innerHTML = bodySymbol+" "+payloadContent.BodyName;
+                let simpleBodyName =  payloadContent.BodyName.replace(payloadContent.StarSystem, "")
+                bodyName.innerHTML = bodySymbol+" "+simpleBodyName;
 
                 let bodyType = document.createElement('div');
                 bodyType.classList.add("col", "pr-0", "mr-0", "system", chartedStyle);
@@ -334,6 +350,7 @@
                     bodyInfo.outerHTML+
                     bodyValue.outerHTML;
                 row.setAttribute('data-associatedsystem', payloadContent.SystemAddress);
+                row.id = bodyId;
 
                 return row;
             }
@@ -378,6 +395,7 @@
                 row.classList.add("row", "ml-1", "mr-1");
                 row.innerHTML = spacer.outerHTML+bodyName.outerHTML+bodyValue.outerHTML;
                 row.setAttribute('data-associatedsystem', system_id);
+                row.id = body.bodyId;
 
                 return row;
             }
@@ -408,17 +426,26 @@
             }
 
             function addNewSystemToContainer(systemInfo, container) {
-                                            // This needs to go in the nav list
+
+                let currentSystem = getCurrentSystem();
+                let existingSystemEntry = document.getElementById(currentSystem);
+                if (existingSystemEntry) {
+                    return; // Do nothing if the element aready exists to avoid a duplicate.
+                }
+
                 let systemEntry = createSystemEntry(systemInfo)
                 container.appendChild(systemEntry);
 
-                if (systemInfo.valuableBodies) {
+                if ((systemInfo.SystemAddress.toString() !== currentSystem) &&
+                    (systemInfo.valuableBodies))
+                {
                     let body;
                     for (body of systemInfo.valuableBodies) {
 
                         let nameText = body.bodyName;
                         const systemName = systemInfo['name'];
                         body.bodyName = nameText.replace(systemName, "");
+                        body.bodyId = idFromBodyName(body.bodyName);
 
                         console.log(body);
                         container.appendChild(createBodyEntry(body, systemInfo.SystemAddress));
@@ -426,7 +453,9 @@
                 }
             }
 
-
+            function idFromBodyName(bodyName) {
+                return bodyName.replace(" ","-");
+            }
 
             function postData(payload) {
                 console.log(payload);
@@ -486,29 +515,25 @@
                     }
                     else
                     {
-                        // This is going to be oe of the other routines that wants a system report showing
+                        // This is going to be one of the other routines that wants a system report showing
                         if (payloadContent.type === 'System-FSDTarget')
                         {
                             // If this doesn't exist in the nav list, it's a unique target the commander has selected independently of the selected route
-                            // As such, we need to...
+                            // As such, we need to update the system in the target area
+                            // Make sure we clear the ID so it doesn't interfere with other checks (we can have systems in the target area that are also in the navlist
 
-                            // ...update the system in the target area
-                            // NOTE: Make sure we clear the ID so it doesn't interfere with other checks (we can have systems in the target area that are also in the navlist).
                             let container = document.getElementById('target-sys');
                             container.innerHTML = "";
 
                             if (document.getElementById(payloadContent.SystemAddress)) {
-                                // This element exists already so make sure the next-address is hidden
+                                // This element exists already in the navlist so make sure the next-address is hidden to avoid a duplicate
                                 hideCurrentTarget();
                             }
                             else
                             {
                                 showCurrentTarget();
                                 addNewSystemToContainer(payloadContent, container);
-
                             }
-
-
                         }
                         else if ((payloadContent.type === 'System-Location') || // Update the system recorded in 'current system'
                             (payloadContent.type === 'System-FSDJump')) // Happens at the end of the jump so update the current system.
@@ -621,12 +646,20 @@
 
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:25:20Z", "event":"Scan", "MappedValue": 1, "ScanType":"AutoScan", "BodyName":"B 4", "BodyClass": "Belt Cluster", "BodyID":12, "Parents":[ {"Ring":8}, {"Star":0} ], "StarSystem":"Sifeae SP-F d11-19", "SystemAddress":663916448227, "DistanceFromArrivalLS":197.613961, "WasDiscovered":false, "WasMapped":false }),
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-07-28T23:34:03Z", "event":"Scan", "MappedValue": 3523456, "ScanType":"Detailed", "BodyName":"C 5", "BodyID":12, "Parents":[ {"Null":11}, {"Star":4}, {"Null":0} ], "StarSystem":"Pro Eurl RI-T d3-24", "SystemAddress":835463448995, "DistanceFromArrivalLS":29917.101719, "TidalLock":false, "TerraformState":"", "PlanetClass":"Earthlike body", "Atmosphere":"", "AtmosphereType":"EarthLike", "AtmosphereComposition":[ { "Name":"Nitrogen", "Percent":95.066788 }, { "Name":"Oxygen", "Percent":4.298672 }, { "Name":"Water", "Percent":0.609198 } ], "Volcanism":"major rocky magma volcanism", "MassEM":0.881002, "Radius":5857355.000000, "SurfaceGravity":10.234893, "SurfaceTemperature":303.686554, "SurfacePressure":386198.937500, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.671427, "Metal":0.328573 }, "SemiMajorAxis":924326723.814011, "Eccentricity":0.138475, "OrbitalInclination":-8.776263, "Periapsis":254.857225, "OrbitalPeriod":23820475.339890, "RotationPeriod":98249.471153, "AxialTilt":-0.254686, "WasDiscovered":true, "WasMapped":false }),
+            ];
 
 
 
-
-
-
+            tests["galaxy-map-doesnt-wipe-list"] = [
+                // Simulate a normal startup
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
+                // Simulate a few scans
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:25:20Z", "event":"Scan", "MappedValue": 1, "ScanType":"AutoScan", "BodyName":"B 4", "BodyClass": "Belt Cluster", "BodyID":12, "Parents":[ {"Ring":8}, {"Star":0} ], "StarSystem":"Sifeae SP-F d11-19", "SystemAddress":913385362290, "DistanceFromArrivalLS":197.613961, "WasDiscovered":false, "WasMapped":false }),
+                // Plot a nav route
+                WrapWithEventType("NewRoute"),
+                WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
+                WrapWithEventType("System-NavRoute", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Sifeae EH-C c13-3 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
+                WrapWithEventType("System-NavRoute", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
             ];
 
             function runTest(testId){

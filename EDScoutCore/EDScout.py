@@ -118,7 +118,6 @@ class EDScout:
             new_entry["BodyName"] = new_entry["BodyName"].replace("Belt Cluster ", "")
             new_entry["BodyClass"] = "Belt Cluster"
 
-        new_entry["BodyName"] = new_entry["BodyName"].replace(new_entry["StarSystem"], "")
         new_entry["MappedValue"] = BodyAppraiser.appraise_body(new_entry)
         return new_entry
 
