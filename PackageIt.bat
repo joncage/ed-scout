@@ -24,6 +24,8 @@ pipenv run pyinstaller ^
     --hidden-import=engineio.async_drivers.eventlet ^
     --hidden-import=engineio.server ^
     --hidden-import=flaskwebgui ^
+    --hidden-import=pynput.keyboard._win32 ^
+    --hidden-import=pynput.mouse._win32 ^
     --add-data "EDScoutWebUI\templates;templates" ^
     --add-data "EDScoutWebUI\static;static" ^
     %OPTIONS% ^
