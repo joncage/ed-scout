@@ -19,14 +19,9 @@ Enjoy this tool? Consider [donating to EDSM](https://www.edsm.net/en_GB/donation
 1. Run `EDScout.exe`
 1. Plot a new route in Galaxy Map and watch EDScout work it's magic; Scouting out which systems in your route have already been explored and how much mapping them is worth.
 
-![Nav Route Example](Images/NavRouteDisplay-TwoColours.png)
+![Nav Route Example](Images/UIExplained.png)
 
-## Key
-
-* Grey rows indicate explored systems
-* Coloured lines indicate systems that (according to EDSM) have not been mapped.
-* Main star types for each system are listed in the first column.
-* Mapped value of systems (for those that have already been discovered) are displayed in the right-most column.
+\* Note: The refers to whether EDSM knew about the system. There are plent of systems out there which have been discoverd by console players and PC players not running EDDiscovery etc.
 
 ## Command line options
 
