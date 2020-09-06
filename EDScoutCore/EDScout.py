@@ -2,6 +2,8 @@ import time
 import json
 import logging
 from .SavedGamesLocator import get_saved_games_path
+import requests
+
 
 from .NavRouteIntegrator import NavRouteIntegrator
 from . import EDSMInterface
@@ -101,8 +103,12 @@ class EDScout:
             star_class = journal_entry["StarClass"]
         else:
             # Rely on edsm to fill this in
-            system = EDSMInterface.get_system(system_name)
-            logger.debug(system)
+            try:
+                system = EDSMInterface.get_system(system_name)
+                logger.debug(system)
+            except (EDSMInterface.EDSMApiAccessException, requests.exceptions.ConnectionError):
+                logger.exception("Failed to get systm info to identify star type")
+                system = None
 
             if system and system["primaryStar"]:
                 star_class = system["primaryStar"]["type"].split(maxsplit=1)[0]
@@ -201,7 +207,11 @@ class EDScout:
 
         # print(f"EVALUATING={star_system}")
 
-        estimated_value = EDSMInterface.get_system_estimated_value(star_system)
+        try:
+            estimated_value = EDSMInterface.get_system_estimated_value(star_system)
+        except (EDSMInterface.EDSMApiAccessException, requests.exceptions.ConnectionError):
+            estimated_value = []
+            logger.exception("Failed to get estimated system value")
 
         # IC 2602 Sector GC-T b4-8 (M) Charted:
         #   {'id': 10594826, 'id64': 18269314557401, 'name': 'IC 2602 Sector GC-T b4-8', 'url': 'https://www.edsm.net/en/system/bodies/id/10594826/name/IC+2602+Sector+GC-T+b4-8', 'estimatedValue': 2413, 'estimatedValueMapped': 2413, 'valuableBodies': []}

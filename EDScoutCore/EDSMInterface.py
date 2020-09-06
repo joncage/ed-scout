@@ -23,6 +23,10 @@ headers = {
 }
 
 
+class EDSMApiAccessException(Exception) :
+    pass
+
+
 def set_current_version(version):
     headers['User-Agent'] = f"EDScout {version}"
 
@@ -38,7 +42,7 @@ def get_system(system_name):
     data = requests.get("https://www.edsm.net/api-v1/system", requestData, headers=headers)
 
     if data.status_code != 200:
-        raise Exception("request returned bad response code %d" % (data.status_code))
+        raise EDSMApiAccessException("request returned bad response code %d" % (data.status_code))
     return data.json()
 
 
@@ -51,7 +55,7 @@ def get_systems(system_name, radius):
     data = requests.get("https://www.edsm.net/api-v1/sphere-systems", requestData, headers=headers)
 
     if data.status_code != 200:
-        raise Exception("request returned bad response code %d" % (data.status_code))
+        raise EDSMApiAccessException("request returned bad response code %d" % (data.status_code))
     return data.json()
 
 
@@ -63,7 +67,7 @@ def get_bodies(system_name):
     data = requests.get("https://www.edsm.net/api-system-v1/bodies", requestData, headers=headers)
 
     if data.status_code != 200:
-        raise Exception("request returned bad response code %d" % (data.status_code))
+        raise EDSMApiAccessException("request returned bad response code %d" % (data.status_code))
 
     return data.json()
 
@@ -76,7 +80,7 @@ def get_system_estimated_value(system_name):
     data = requests.get("https://www.edsm.net/api-system-v1/estimated-value", requestData, headers=headers)
 
     if data.status_code != 200:
-        raise Exception("request returned bad response code %d" % (data.status_code))
+        raise EDSMApiAccessException("request returned bad response code %d" % (data.status_code))
 
     return data.json()
 
