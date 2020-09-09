@@ -1,5 +1,27 @@
 import os
-from jinja2 import Template
+import re
+
+
+def extract_version_parts(git_response):
+    regex = r"v(\d)\.(\d)\.(\d)(?:-(\d+)-([a-z0-9]+)(?:-([a-z0-9]+))?)?"
+
+    matches = re.finditer(regex, git_response, re.MULTILINE)
+
+    groups = list(matches)[0].groups()
+    if len(groups) > 3:
+        commits_since_tag = groups[3]
+        commit_sha = groups[4]
+    else:
+        commits_since_tag = 0
+        commit_sha = None
+    four_part_version = list(groups[0:3]) + [commits_since_tag]
+
+    version_info = {
+        'four_part_version': four_part_version,
+        'is_dirty': (len(groups) > 4)
+    }
+    return version_info
+
 
 # The full version, including alpha/beta/rc tags.
 release = os.popen('git describe --tags --dirty').read().strip()
@@ -27,11 +49,9 @@ env = Environment(
 
 template = env.get_template('version_template.txt')
 
-version_parts = basic_version.split()
-csv_version = ''  # Something like 1,5,1,0
-short_version = basic_version  # Something like 1.5.1
+version_parts = extract_version_parts(release)
+csv_version = ', '.join(version_parts['four_part_version'])  # Something like 1,5,1,0
+short_version = '.'.join(version_parts['four_part_version'][0:3])  # Something like 1.5.1
 long_version = release  # Something like v1.5.1-4-gc25ef16-dirty
 
-print(template.render(csv_version='1,2,3,4', short_version=short_version, long_version=long_version))
-
-exit(0)
+print(template.render(csv_version=csv_version, short_version=short_version, long_version=long_version))
