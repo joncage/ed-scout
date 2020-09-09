@@ -1,9 +1,10 @@
 SET OPTIONS=%~1
+SET DIST_NAME=%~2
 
 ECHO Using options: %OPTIONS%
 
-if exist dist (
-RMDIR /S /Q dist
+if exist %DIST_NAME% (
+RMDIR /S /Q %DIST_NAME%
 )
 
 pipenv run create_version_file.py
@@ -28,6 +29,7 @@ pipenv run pyinstaller ^
     --hidden-import=flaskwebgui ^
     --hidden-import=pynput.keyboard._win32 ^
     --hidden-import=pynput.mouse._win32 ^
+    --distpath=%DIST_NAME% ^
     -p "../" ^
     --add-data "..\EDScoutWebUI\templates;templates" ^
     --add-data "..\EDScoutWebUI\static;static" ^

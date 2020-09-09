@@ -3,7 +3,7 @@
 ; Start Menu instead of in a subfolder, and also creates a desktop icon.
 
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
-#define Version GetFileVersion('..\release\v1.5.1-1-gece663a-dirty\EdScout.exe')
+#define Version GetFileVersion('dist-singlefile\EdScout.exe')
 
 [Setup]
 AppName=Elite Dangerous Scout
@@ -17,11 +17,12 @@ UninstallDisplayIcon={app}\EDScout.exe
 
 Compression=lzma2
 SolidCompression=yes
-OutputDir="..\release\v1.5.1-1-gece663a-dirty"
-OutputBaseFilename="EdScout-{#Version}"
+OutputDir="dist-installer"
+OutputBaseFilename="Setup-EdScout-{#Version}"
+SetupIconFile=..\EDScoutWebUI\static\favicon.ico
 
 [Files]
-Source: "..\release\v1.5.1-1-gece663a-dirty\EDScout.exe"; DestDir: "{app}"
+Source: "dist-singlefile\EDScout.exe"; DestDir: "{app}"
 ; Source: "Readme.txt"; DestDir: "{app}"; Flags: isreadme
 
 [Icons]

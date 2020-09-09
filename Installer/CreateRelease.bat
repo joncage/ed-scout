@@ -7,9 +7,7 @@ MKDIR %RELEASE_DIR%
 )
 
 CALL PackageItForSingleFile.bat
-COPY /Y dist\EDScout.exe %RELEASE_DIR%
+COPY /Y dist-singlefile\EDScout.exe %RELEASE_DIR%
 
 CALL PackageItForDiagnostics.bat
-COPY /Y dist\EDScout-DiagnosticBuild.zip %RELEASE_DIR%
-
-PAUSE
+COPY /Y dist-diagnostics\EDScout-DiagnosticBuild.zip %RELEASE_DIR%
