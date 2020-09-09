@@ -28,5 +28,7 @@ pipenv run pyinstaller ^
     --hidden-import=pynput.mouse._win32 ^
     --add-data "EDScoutWebUI\templates;templates" ^
     --add-data "EDScoutWebUI\static;static" ^
+    -i "EDScoutWebUI\static\favicon.ico" ^
+    --version-file "versiontest.txt" ^
     %OPTIONS% ^
     EDScoutWebUI\EDScout.py 

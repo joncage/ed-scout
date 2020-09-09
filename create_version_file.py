@@ -13,3 +13,6 @@ dirty_flag = release_parts[3] if len(release_parts) > 3 else None
 with open(os.path.join("EDScoutWebUI", "version.py"), "w") as f:
     f.write(f'release = "{release}"\n')
     f.write(f'version = "{basic_version}"\n')
+
+with open(os.path.join("Installer", "version.txt"), "w") as f:
+    f.write(f'{release}')
