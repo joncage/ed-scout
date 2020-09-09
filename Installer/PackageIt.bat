@@ -6,7 +6,7 @@ if exist dist (
 RMDIR /S /Q dist
 )
 
-python create_version_file.py
+pipenv run create_version_file.py
 
 pipenv run pyinstaller ^
     --hidden-import=eventlet.hubs.epolls ^
@@ -32,6 +32,6 @@ pipenv run pyinstaller ^
     --add-data "..\EDScoutWebUI\templates;templates" ^
     --add-data "..\EDScoutWebUI\static;static" ^
     -i "..\EDScoutWebUI\static\favicon.ico" ^
-    --version-file "versiontest.txt" ^
+    --version-file "version_for_installer.txt" ^
     %OPTIONS% ^
     ..\EDScoutWebUI\EDScout.py 
