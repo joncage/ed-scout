@@ -1,6 +1,6 @@
 import os
 import re
-
+from jinja2 import Environment, FileSystemLoader
 
 def extract_version_parts(git_response):
     regex = r"v(\d)\.(\d)\.(\d)(?:-(\d+)-([a-z0-9]+)(?:-([a-z0-9]+))?)?"
@@ -42,7 +42,6 @@ with open(os.path.join("../EDScoutWebUI", "version.py"), "w") as f:
 with open("version.txt", "w") as f:
     f.write(f'{release}')
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 env = Environment(
     loader=FileSystemLoader('.'),
 )
@@ -54,4 +53,8 @@ csv_version = ', '.join(version_parts['four_part_version'])  # Something like 1,
 short_version = '.'.join(version_parts['four_part_version'][0:3])  # Something like 1.5.1
 long_version = release  # Something like v1.5.1-4-gc25ef16-dirty
 
-print(template.render(csv_version=csv_version, short_version=short_version, long_version=long_version))
+rendered_verion_file = template.render(csv_version=csv_version, short_version=short_version, long_version=long_version)
+# print(rendered_verion_file)
+
+with open("version_for_installer.txt", "w") as f:
+    f.write(rendered_verion_file)
