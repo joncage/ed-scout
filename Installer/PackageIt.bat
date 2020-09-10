@@ -1,10 +1,13 @@
 SET OPTIONS=%~1
+SET DIST_NAME=%~2
 
 ECHO Using options: %OPTIONS%
 
-RMDIR /S /Q dist
+if exist %DIST_NAME% (
+RMDIR /S /Q %DIST_NAME%
+)
 
-python create_version_file.py
+pipenv run create_version_file.py
 
 pipenv run pyinstaller ^
     --hidden-import=eventlet.hubs.epolls ^
@@ -26,7 +29,11 @@ pipenv run pyinstaller ^
     --hidden-import=flaskwebgui ^
     --hidden-import=pynput.keyboard._win32 ^
     --hidden-import=pynput.mouse._win32 ^
-    --add-data "EDScoutWebUI\templates;templates" ^
-    --add-data "EDScoutWebUI\static;static" ^
+    --distpath=%DIST_NAME% ^
+    -p "../" ^
+    --add-data "..\EDScoutWebUI\templates;templates" ^
+    --add-data "..\EDScoutWebUI\static;static" ^
+    -i "..\EDScoutWebUI\static\favicon.ico" ^
+    --version-file "version_for_installer.txt" ^
     %OPTIONS% ^
-    EDScoutWebUI\EDScout.py 
+    ..\EDScoutWebUI\EDScout.py 
