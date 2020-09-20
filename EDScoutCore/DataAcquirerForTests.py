@@ -1,7 +1,6 @@
 import os
 import sys
 import glob
-import pathlib
 import json
 
 from EDScoutCore import BodyAppraiser

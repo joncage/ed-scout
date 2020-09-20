@@ -2,10 +2,8 @@ import json
 import time
 import logging
 
-from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
-import os
 from .SavedGamesLocator import get_saved_games_path
 
 log = logging.getLogger('NavRouteWatcher')

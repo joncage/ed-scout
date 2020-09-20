@@ -2,6 +2,7 @@ import os
 import re
 from jinja2 import Environment, FileSystemLoader
 
+
 def extract_version_parts(git_response):
     regex = r"v(\d)\.(\d)\.(\d)(?:-(\d+)-([a-z0-9]+)(?:-([a-z0-9]+))?)?"
 

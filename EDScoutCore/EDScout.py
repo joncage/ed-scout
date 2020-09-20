@@ -1,7 +1,6 @@
 import time
 import json
 import logging
-import os
 from .SavedGamesLocator import get_saved_games_path
 
 from .NavRouteIntegrator import NavRouteIntegrator
