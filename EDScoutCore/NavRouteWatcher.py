@@ -5,6 +5,8 @@ import logging
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+import os
+from .SavedGamesLocator import get_saved_games_path
 
 log = logging.getLogger('NavRouteWatcher')
 
@@ -12,8 +14,8 @@ log = logging.getLogger('NavRouteWatcher')
 class NavRouteWatcher:
 
     def __init__(self):
-        home = str(Path.home())
-        path = home + "\\Saved Games\\Frontier Developments\\Elite Dangerous"
+
+        path = os.path.join(get_saved_games_path(), "Saved Games", "Frontier Developments", "Elite Dangerous")
         self.event_handler = NavRouteWatcher._NewRouteHandler()
 
         self.observer = Observer()

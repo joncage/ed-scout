@@ -2,7 +2,7 @@ import time
 import json
 import logging
 import os
-from pathlib import Path
+from .SavedGamesLocator import get_saved_games_path
 
 from .NavRouteIntegrator import NavRouteIntegrator
 from . import EDSMInterface
@@ -13,7 +13,7 @@ from .OutputRecorder import OutputRecorder
 
 logger = logging.getLogger('EDScoutCore')
 
-default_journal_path = os.path.join(str(Path.home()), "Saved Games/Frontier Developments/Elite Dangerous")
+default_journal_path = os.path.join(get_saved_games_path(), "Frontier Developments","Elite Dangerous")
 
 
 class EDScout:
