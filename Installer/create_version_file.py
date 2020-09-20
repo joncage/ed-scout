@@ -11,9 +11,13 @@ def extract_version_parts(git_response):
     groups = list(matches)[0].groups()
     if len(groups) > 3:
         commits_since_tag = groups[3]
+        if groups[3]:
+            commits_since_tag = groups[3]
+        else:
+            commits_since_tag = '0'
         commit_sha = groups[4]
     else:
-        commits_since_tag = 0
+        commits_since_tag = '0'
         commit_sha = None
     four_part_version = list(groups[0:3]) + [commits_since_tag]
 
