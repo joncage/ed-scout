@@ -45,11 +45,16 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
-### v1.5.1 - Fixed bad packaging of 1.5.0
+### 1.5.3 - Fixed detection of relocated saved-games folder.
+
+* Fixed detection of the Saved Games folder in case a user as moved it to another folder / drive.
+* Fixed a minor bug in the installer code that stopped auto-detection of the version from a clean repo (no commits after the version tag).
+
+### 1.5.1 - Fixed bad packaging of 1.5.0
 
 * Fixed an oversight where PyInstaller was once again failing to spot a dynamicalyl loaded dependency.
 
-### v1.5.0 - Focus hotkey, better sorting, minor fixes
+### 1.5.0 - Focus hotkey, better sorting, minor fixes
 
 * Added hotkey (START+Z) to put the scout aobe or hide it behind elite.
 * Fixed going to the galaxy map wiping out the bodies scanned in the current system.
