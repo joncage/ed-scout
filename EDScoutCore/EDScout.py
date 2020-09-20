@@ -13,7 +13,7 @@ from .OutputRecorder import OutputRecorder
 
 logger = logging.getLogger('EDScoutCore')
 
-default_journal_path = os.path.join(get_saved_games_path(), "Frontier Developments","Elite Dangerous")
+default_journal_path = get_saved_games_path()
 
 
 class EDScout:

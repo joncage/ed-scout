@@ -14,7 +14,7 @@ class NavRouteIntegrator:
 
         if not nav_route_file:
             home = str(Path.home())
-            self.nav_route_file = os.path.join(get_saved_games_path(), "Frontier Developments","Elite Dangerous","NavRoute.json")
+            self.nav_route_file = os.path.join(get_saved_games_path(), "NavRoute.json")
         else:
             self.nav_route_file = nav_route_file
 

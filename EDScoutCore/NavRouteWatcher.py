@@ -15,7 +15,7 @@ class NavRouteWatcher:
 
     def __init__(self):
 
-        path = os.path.join(get_saved_games_path(), "Saved Games", "Frontier Developments", "Elite Dangerous")
+        path = get_saved_games_path()
         self.event_handler = NavRouteWatcher._NewRouteHandler()
 
         self.observer = Observer()
