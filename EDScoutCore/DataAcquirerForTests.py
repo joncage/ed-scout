@@ -1,10 +1,11 @@
 import os
 import sys
 import glob
-import pathlib
 import json
 
-import BodyAppraiser
+from EDScoutCore import BodyAppraiser
+
+from EDScoutCore.SavedGamesLocator import get_saved_games_path
 
 
 def generate_key(body_info):
@@ -79,7 +80,7 @@ def identify_extremes(uniques):
 
 def test_acquire_scan_data_from_journals():
     journal_file_pattern = "Journal*.log"
-    journal_path = os.path.join(str(pathlib.Path.home()), "Saved Games\\Frontier Developments\\Elite Dangerous")
+    journal_path = get_saved_games_path()
     search_pattern = os.path.join(journal_path, journal_file_pattern)
     print(f"Searching with '{search_pattern}'")
     journal_files = glob.glob(search_pattern)
