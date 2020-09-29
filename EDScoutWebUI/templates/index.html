@@ -184,10 +184,14 @@
             function addScannedBody(payloadContent) {
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
 
-                const newBodyEntry = createDetailedBodyEntry(payloadContent);
+                // If this already exists somewhere on the page, we should stop processing as we don't want to eliminate any work done by a detailed scan
+                if (document.getElementById(idFromBodyName(payloadContent.BodyName)))
+                {
+                    return;
+                }
+                //removeOldBodyEntry(newBodyEntry.id);
 
-                // If this already exists somewhere on the page, delete the old one.
-                removeOldBodyEntry(newBodyEntry.id);
+                const newBodyEntry = createDetailedBodyEntry(payloadContent);
 
                 let container;
                 if (isValuableSystem(payloadContent)){
@@ -457,6 +461,48 @@
                 return bodyName.replace(" ","-");
             }
 
+            function finishScanningBody(data) {
+                let existingBodyEntry = document.getElementById(idFromBodyName(data.BodyName));
+                if (existingBodyEntry) {
+                    console.log("Updating existing body")
+
+                    for (child of existingBodyEntry.childNodes) {
+                        let styleChanged = false;
+                        // Clear any uncharted styles as this has now been mapped.
+                        if (child.classList.contains("uncharted")) {
+                            child.classList.remove("uncharted");
+                            styleChanged = true;
+                        }
+
+                        // Clear any high value styles
+                        if (child.classList.contains("highlighted")) {
+                            child.classList.remove("highlighted");
+                            styleChanged = true;
+                        }
+
+                        // Format it as a charted system now.
+                        if (styleChanged) {
+                            child.classList.add("charted");
+                        }
+                    }
+
+                    // Clear the un-mapped flag
+                    let mappedIcon = existingBodyEntry.querySelector(".flaticon-flag-outline-on-a-pole-with-stars-around");
+                    mappedIcon.classList.remove("active")
+                    mappedIcon.classList.add("inactive")
+                    //mappedIcon.style.color = "#4CE0E1";
+
+                    // If it's in the valuable list, move it into the less valuable list
+                    document.getElementById('low-value-scans').prepend(existingBodyEntry)
+                }
+                else
+                {
+                    console.log("Couldn't find: "+data.BodyName)
+                }
+            }
+
+
+
             function postData(payload) {
                 console.log(payload);
                 let payloadContent = payload.data;
@@ -489,6 +535,9 @@
                         case "Scan": { // When you identify a body in the FSS
                             addScannedBody(payloadContent);
                             break;
+                        }
+                        case "SAAScanComplete" : { // When you do a detailed scan
+                            finishScanningBody(payloadContent);
                         }
                     }
                 }
@@ -561,7 +610,6 @@
 
             let tests = {};
 
-            tests["just-startup"] = [
             tests["just-startup"] = [
                 // Simulate a normal startup
                 WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
@@ -663,6 +711,18 @@
                 WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
                 WrapWithEventType("System-NavRoute", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Sifeae EH-C c13-3 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
                 WrapWithEventType("System-NavRoute", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
+            ];
+
+            tests["detailed-scan-drops-down-list"] = [
+                // In a system.
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:19:02Z", "event":"FSDJump", "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "StarPos":[3517.00000,52.18750,680.09375], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Sifeae GF-R d4-115 A", "BodyID":1, "BodyType":"Star", "JumpDist":48.958, "FuelUsed":4.264605, "FuelLevel":27.735395 }),
+                // Some scans
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:20:07Z", "event":"Scan", "MappedValue": 1000000, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 1", "BodyID":5, "Parents":[ {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":1092.825009, "TidalLock":false, "TerraformState":"Terraformable", "PlanetClass":"High metal content body", "Atmosphere":"hot thick carbon dioxide atmosphere", "AtmosphereType":"CarbonDioxide", "AtmosphereComposition":[ { "Name":"CarbonDioxide", "Percent":95.848160 }, { "Name":"Nitrogen", "Percent":3.193112 }, { "Name":"SulphurDioxide", "Percent":0.958482 } ], "Volcanism":"major silicate vapour geysers volcanism", "MassEM":3.094303, "Radius":8427145.000000, "SurfaceGravity":17.366460, "SurfaceTemperature":956.388855, "SurfacePressure":44952200.000000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.669245, "Metal":0.330755 }, "SemiMajorAxis":326312464475.631714, "Eccentricity":0.004013, "OrbitalInclination":-0.188240, "Periapsis":187.106421, "OrbitalPeriod":79173184.037209, "RotationPeriod":168728.632391, "AxialTilt":0.334432, "WasDiscovered":true, "WasMapped":false }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:20:16Z", "event":"Scan", "MappedValue": 1, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 7", "BodyID":14, "Parents":[ {"Null":12}, {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":3772.247374, "TidalLock":false, "TerraformState":"", "PlanetClass":"High metal content body", "Atmosphere":"thick methane rich atmosphere", "AtmosphereType":"MethaneRich", "AtmosphereComposition":[ { "Name":"Ammonia", "Percent":32.688076 }, { "Name":"Methane", "Percent":32.688076 }, { "Name":"Nitrogen", "Percent":32.688076 } ], "Volcanism":"minor silicate vapour geysers volcanism", "MassEM":1.378427, "Radius":6685303.500000, "SurfaceGravity":12.292803, "SurfaceTemperature":416.637970, "SurfacePressure":2200182.250000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.669251, "Metal":0.330749 }, "SemiMajorAxis":2948085606.098175, "Eccentricity":0.080099, "OrbitalInclination":-2.887471, "Periapsis":319.350979, "OrbitalPeriod":48950456.380844, "RotationPeriod":81034.086164, "AxialTilt":-0.196478, "WasDiscovered":true, "WasMapped":false }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:20:21Z", "event":"Scan", "MappedValue": 1, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 6", "BodyID":13, "Parents":[ {"Null":12}, {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":3778.986417, "TidalLock":false, "TerraformState":"", "PlanetClass":"High metal content body", "Atmosphere":"thick methane rich atmosphere", "AtmosphereType":"MethaneRich", "AtmosphereComposition":[ { "Name":"Ammonia", "Percent":32.486629 }, { "Name":"Methane", "Percent":32.486629 }, { "Name":"Nitrogen", "Percent":32.486629 } ], "Volcanism":"metallic magma volcanism", "MassEM":2.528601, "Radius":7946843.500000, "SurfaceGravity":15.958809, "SurfaceTemperature":448.047302, "SurfacePressure":3692897.000000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.662390, "Metal":0.337610 }, "SemiMajorAxis":1607102572.917938, "Eccentricity":0.080099, "OrbitalInclination":-2.887471, "Periapsis":139.350985, "OrbitalPeriod":48950456.380844, "RotationPeriod":138931.744666, "AxialTilt":-0.758665, "WasDiscovered":true, "WasMapped":false }),
+                // detailed surface map
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:23:40Z", "event":"SAAScanComplete", "BodyName":"Sifeae GF-R d4-115 A 1", "SystemAddress":3962585483691, "BodyID":5, "ProbesUsed":6, "EfficiencyTarget":7 }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:23:40Z", "event":"Scan", "MappedValue": 1000000, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 1", "BodyID":5, "Parents":[ {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":1092.825012, "TidalLock":false, "TerraformState":"Terraformable", "PlanetClass":"High metal content body", "Atmosphere":"hot thick carbon dioxide atmosphere", "AtmosphereType":"CarbonDioxide", "AtmosphereComposition":[ { "Name":"CarbonDioxide", "Percent":95.848160 }, { "Name":"Nitrogen", "Percent":3.193112 }, { "Name":"SulphurDioxide", "Percent":0.958482 } ], "Volcanism":"major silicate vapour geysers volcanism", "MassEM":3.094303, "Radius":8427145.000000, "SurfaceGravity":17.366460, "SurfaceTemperature":956.388855, "SurfacePressure":44952200.000000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.669245, "Metal":0.330755 }, "SemiMajorAxis":326312464475.631714, "Eccentricity":0.004013, "OrbitalInclination":-0.188240, "Periapsis":187.106421, "OrbitalPeriod":79173184.037209, "RotationPeriod":168728.632391, "AxialTilt":0.334432, "WasDiscovered":true, "WasMapped":false }),
             ];
 
             function runTest(testId){
