@@ -109,6 +109,8 @@ for proc in psutil.process_iter():
 base_dir = '.'
 if is_deployed:
     base_dir = os.path.join(sys._MEIPASS)
+else:
+    base_dir = os.path.dirname(__file__)
 
 # Setup the app
 static_path = os.path.join(base_dir, 'static')
