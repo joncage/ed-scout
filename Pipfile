@@ -13,7 +13,7 @@ pyinstaller = "*"
 flaskwebgui = "*"
 pytest = "*"
 requests-cache = "*"
-"pywin32" = {version = "*", sys_platform = "== 'win32'"}
+pywin32 = {version = "*", sys_platform = "== 'win32'"}
 pynput = "*"
 
 [dev-packages]
