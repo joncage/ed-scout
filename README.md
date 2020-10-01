@@ -37,7 +37,7 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 * No GUI appears.
   * Check you have Chrome installed.
-  * Check the logs in `C:\Users\<YOUR USER NAME>\Documents\EDScout\EDScout.log` for clues.
+  * Check the logs in `C:\Users\<YOUR USER NAME>\AppData\Local\EDScout\Logs\EDScout-YYYY-MM-DD-HH-MM-SS.log` for clues.
 * Multiple entries appear in task manager.
   * This is  normal (due to the architecture of the software) and is down to the fact we have a Python back end doing the hard work and a chrome instance displaying the results.
 * When I launch multiple copies, the second one crashes.
