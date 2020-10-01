@@ -13,7 +13,7 @@ pyinstaller = "*"
 flaskwebgui = "*"
 pytest = "*"
 requests-cache = "*"
-pywin32 = "*"
+pywin32 = {version = "*", platform_system = "== 'Windows'"}
 pynput = "*"
 dnspython = "*"
 
