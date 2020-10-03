@@ -270,42 +270,45 @@
             function getRingInfo(payloadContent) {
                 let ringInfo = "";
                 if (payloadContent.Rings) {
-                    let ringLeft = document.createElement("div");
-                    ringLeft.classList.add("ring-left", "align-middle");
-                    ringInfo += ringLeft.outerHTML;
+                    let ringLeft = document.createElement("span");
+                    ringLeft.classList.add("ring-left");
+                    ringLeft.innerText = " )";
+                    ringInfo += ")";//ringLeft.outerHTML;
 
                     for (let [index, ring] of payloadContent.Rings.entries()) {
                         if (index != 0) {
-                            let ringMid = document.createElement("div");
-                            ringMid.classList.add("ring-mid", "align-middle");
-                            ringInfo += ringMid.outerHTML;
+                            let ringMid = document.createElement("span");
+                            ringMid.classList.add("ring-mid");
+                            ringMid.innerText = ")";
+                            ringInfo += ")";//ringMid.outerHTML;
                         }
 
                         let ringClass = ring.RingClass.replace('eRingClass_', '')[0];
                         let ringIcon = null;
                         switch (ringClass) {
                             case 'M': {
-                                ringIcon = createIconElement("ingot").outerHTML
+                                ringIcon = createIconElement("ingot")
                                 break;
                             }
                             case 'I': {
-                                ringIcon = createIconElement("snowflake").outerHTML
+                                ringIcon = createIconElement("snowflake")
                                 break;
                             }
                             case 'R': {
-                                ringIcon = createIconElement("asteroid-3").outerHTML
+                                ringIcon = createIconElement("asteroid-3")
                                 break;
                             }
                         }
-                        let ringContainer = document.createElement("div");
-                        ringContainer.classList.add("ring", "align-middle");
-                        ringContainer.innerHTML = ringIcon;
+                        let ringContainer = document.createElement("span");
+                        ringContainer.classList.add("ring");
+                        ringContainer.innerHTML = ringIcon.outerHTML;
                         ringInfo += ringContainer.outerHTML;
                     }
 
-                    let ringRight = document.createElement("div");
-                    ringRight.classList.add("ring-right", "align-middle");
-                    ringInfo += ringRight.outerHTML;
+                    let ringRight = document.createElement("span");
+                    ringRight.classList.add("ring-right");
+                    ringRight.innerText = ")";
+                    ringInfo += ")"; //ringRight.outerHTML;
                 }
 
                 return ringInfo;
