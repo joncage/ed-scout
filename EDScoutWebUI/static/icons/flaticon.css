@@ -1,6 +1,6 @@
 	/*
   	Flaticon icon font: Flaticon
-  	Creation date: 28/08/2020 21:14
+  	Creation date: 03/10/2020 00:54
   	*/
 
 @font-face {
@@ -25,12 +25,9 @@
 [class^="flaticon-"]:before, [class*=" flaticon-"]:before,
 [class^="flaticon-"]:after, [class*=" flaticon-"]:after {   
   font-family: Flaticon;
-  /*
-  font-size: 20px;
-  margin-left: 20px;
-   */
-  font-style: normal;
-    text-shadow: 0 0 0;
+        font-size: 20px;
+font-style: normal;
+margin-left: 20px;
 }
 
 .flaticon-lander:before { content: "\f100"; }
@@ -62,3 +59,9 @@
 .flaticon-jupiter-1:before { content: "\f11a"; }
 .flaticon-jupiter-2:before { content: "\f11b"; }
 .flaticon-jupiter-3:before { content: "\f11c"; }
+.flaticon-pickaxe:before { content: "\f11d"; }
+.flaticon-gold-ingots:before { content: "\f11e"; }
+.flaticon-curved-line:before { content: "\f11f"; }
+.flaticon-bacteria:before { content: "\f120"; }
+.flaticon-dna:before { content: "\f121"; }
+.flaticon-ingot-1:before { content: "\f122"; }
