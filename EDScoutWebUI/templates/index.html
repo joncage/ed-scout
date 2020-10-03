@@ -270,17 +270,12 @@
             function getRingInfo(payloadContent) {
                 let ringInfo = "";
                 if (payloadContent.Rings) {
-                    let ringLeft = document.createElement("span");
-                    ringLeft.classList.add("ring-left");
-                    ringLeft.innerText = " )";
-                    ringInfo += ")";//ringLeft.outerHTML;
+                    ringInfo += ")";
 
                     for (let [index, ring] of payloadContent.Rings.entries()) {
                         if (index != 0) {
-                            let ringMid = document.createElement("span");
-                            ringMid.classList.add("ring-mid");
-                            ringMid.innerText = ")";
-                            ringInfo += ")";//ringMid.outerHTML;
+
+                            ringInfo += ")";
                         }
 
                         let ringClass = ring.RingClass.replace('eRingClass_', '')[0];
@@ -305,9 +300,6 @@
                         ringInfo += ringContainer.outerHTML;
                     }
 
-                    let ringRight = document.createElement("span");
-                    ringRight.classList.add("ring-right");
-                    ringRight.innerText = ")";
                     ringInfo += ")"; //ringRight.outerHTML;
                 }
 
