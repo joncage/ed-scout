@@ -32,6 +32,55 @@ body {
 .inactive {
     color: #000000;
 }
+/* */
+div.highlighted div.ring-start {
+    display: inline-block;
+    background-image: linear-gradient(to right, rgba(245,168,4,0), rgba(245,168,4,255));
+    width: 3px;
+}
+div.highlighted div.ring-mid {
+    display: inline-block;
+    background-image: linear-gradient(to right, rgba(245,168,4,255), rgba(245,168,4,0), rgba(245,168,4,255));
+    width: 3px;
+}
+div.highlighted div.ring-right {
+    display: inline-block;
+    background-image: linear-gradient(to right, rgba(245,168,4,255), rgba(245,168,4,0));
+    width: 3px;
+}
+
+div.highlighted div.ring {
+    display: inline-block;
+    background-image: linear-gradient(to right, rgba(245,168,4,255), rgba(245,168,4,0));
+    width: 3px;
+}
+
+/* */
+div.uncharted div.ring-left {
+    display: inline-block;
+    background-image: linear-gradient(to right, #F5A80400, #F5A804FF);
+    width: 3px;
+    height: 20px;
+}
+div.uncharted div.ring-mid {
+    display: inline-block;
+    background-image: linear-gradient(to right, #F5A804FF, #F5A80400, #F5A804FF);
+    width: 6px;
+    height: 20px;
+}
+div.uncharted div.ring-right {
+    display: inline-block;
+    background-image: linear-gradient(to right, rgba(245,168,4,255), rgba(245,168,4,0));
+    width: 3px;
+    height: 20px;
+}
+
+div.uncharted div.ring {
+    display: inline-block;
+    color: #370C03;
+    background: #F5A804;
+    font-size: smaller;
+}
 
 div.highlighted b.active {
     color: #000000;

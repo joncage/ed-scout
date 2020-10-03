@@ -24,10 +24,13 @@
 
 [class^="flaticon-"]:before, [class*=" flaticon-"]:before,
 [class^="flaticon-"]:after, [class*=" flaticon-"]:after {   
-  font-family: Flaticon;
-        font-size: 20px;
-font-style: normal;
-margin-left: 20px;
+    font-family: Flaticon;
+    /*
+    font-size: 20px;
+    font-style: normal;
+    */
+    margin-left: 20px;
+    text-shadow: 0 0 0;
 }
 
 .flaticon-lander:before { content: "\f100"; }
@@ -65,3 +68,5 @@ margin-left: 20px;
 .flaticon-bacteria:before { content: "\f120"; }
 .flaticon-dna:before { content: "\f121"; }
 .flaticon-ingot-1:before { content: "\f122"; }
+
+.flaticon-ring-metal:before { content: "\f111"; }

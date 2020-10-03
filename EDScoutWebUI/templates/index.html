@@ -270,8 +270,17 @@
             function getRingInfo(payloadContent) {
                 let ringInfo = "";
                 if (payloadContent.Rings) {
-                    let ring = null;
-                    for (ring of payloadContent.Rings) {
+                    let ringLeft = document.createElement("div");
+                    ringLeft.classList.add("ring-left", "align-middle");
+                    ringInfo += ringLeft.outerHTML;
+
+                    for (let [index, ring] of payloadContent.Rings.entries()) {
+                        if (index != 0) {
+                            let ringMid = document.createElement("div");
+                            ringMid.classList.add("ring-mid", "align-middle");
+                            ringInfo += ringMid.outerHTML;
+                        }
+
                         let ringClass = ring.RingClass.replace('eRingClass_', '')[0];
                         let ringIcon = null;
                         switch (ringClass) {
@@ -287,12 +296,16 @@
                                 ringIcon = createIconElement("asteroid-3").outerHTML
                                 break;
                             }
-
                         }
-
-                        ringInfo += ")"+ringIcon;
+                        let ringContainer = document.createElement("div");
+                        ringContainer.classList.add("ring", "align-middle");
+                        ringContainer.innerHTML = ringIcon;
+                        ringInfo += ringContainer.outerHTML;
                     }
-                    ringInfo += ")";
+
+                    let ringRight = document.createElement("div");
+                    ringRight.classList.add("ring-right", "align-middle");
+                    ringInfo += ringRight.outerHTML;
                 }
 
                 return ringInfo;
@@ -632,7 +645,7 @@
             var enableBackendConnections = true;
 
             // Uncomment to debug without needing the backend
-            /**
+            /**/
 
             function WrapWithEventType(type, entryContent) {
                 let wrap = {'data': {'type': type}};
