@@ -33,6 +33,19 @@ body {
     color: #000000;
 }
 
+.ring {
+    font-size: smaller;
+    padding: 0px;
+    margin: 0px;
+}
+
+.ring-separator {
+    font-size: smaller;
+    padding: 0px;
+    position: relative;
+    top: -3px;
+}
+
 div.highlighted b.active {
     color: #000000;
 }
