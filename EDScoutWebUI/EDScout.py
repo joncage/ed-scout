@@ -19,6 +19,7 @@ from EDScoutCore.EDScout import EDScout
 from EDScoutCore import EDSMInterface
 from EDScoutWebUI import HudColourAdjuster
 from EDScoutWebUI import WindowToggler
+from EdScoutConfig import ConfigHandler
 
 
 try:
@@ -33,13 +34,24 @@ except ImportError:
 # Indicate to EDSM which version of the scout is making requests.
 EDSMInterface.set_current_version(__version__)
 
+# Load settings from the config file
+config = ConfigHandler.Config()
+
+# Make any overrides from commandline params the user may have specified.
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
-parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
-parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
+parser.add_argument('-port', action="store", dest="port", type=int, default=int(config.get_option('port')))
+parser.add_argument('-host', action="store", dest="host", type=str, default=config.get_option('host'))
+parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=config.get_option('log_level'))
 parser.add_argument('-no_app', action="store_false", dest="run_as_app")
-parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=logging.INFO)
 parser.add_argument('-force_polling', action="store_true", dest="force_polling")
 args = parser.parse_args()
+
+# This looks a bit backwards but these options are designed to disable settings.
+# So if they're true, we should check the default from the config.
+if args.run_as_app is True:
+    args.run_as_app = (config.get_option('no_app').lower() == 'false')
+if args.force_polling is False:
+    args.force_polling = (config.get_option('force_polling').lower() == 'true')
 
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
