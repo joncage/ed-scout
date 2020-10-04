@@ -18,11 +18,11 @@ class Config:
         self.set_defaults()
 
         self.config_path = os.path.join(self.config_dir, 'EdScout.ini')
-        if not os.path.isfile(self.config_path):
-            with open(self.config_path, "w") as f:
-                self.config.write(f)
-        else:
+        if os.path.isfile(self.config_path):
             self.config.read(self.config_path)
+        # Always write the file so that any new config options get added to it.
+        with open(self.config_path, "w") as f:
+            self.config.write(f) #
 
     def set_defaults(self):
         self.config['General'] = {
