@@ -32,50 +32,18 @@ body {
 .inactive {
     color: #000000;
 }
-/* */
-div.highlighted div.ring-start {
-    display: inline-block;
-    background-image: linear-gradient(to right, rgba(245,168,4,0), rgba(245,168,4,255));
-    width: 3px;
-}
-div.highlighted div.ring-mid {
-    display: inline-block;
-    background-image: linear-gradient(to right, rgba(245,168,4,255), rgba(245,168,4,0), rgba(245,168,4,255));
-    width: 3px;
-}
-div.highlighted div.ring-right {
-    display: inline-block;
-    background-image: linear-gradient(to right, rgba(245,168,4,255), rgba(245,168,4,0));
-    width: 3px;
-}
 
-div.highlighted div.ring {
-    display: inline-block;
-    background-image: linear-gradient(to right, rgba(245,168,4,255), rgba(245,168,4,0));
-    width: 3px;
-}
-
-/* */
-div.uncharted span.ring-left {
-    font-size: smaller;
-    padding: 0px;
-    margin: 0px;
-}
-div.uncharted span.ring-mid {
-    font-size: smaller;
-    padding: 0px;
-    margin: 0px;
-}
-div.uncharted span.ring-right {
+.ring {
     font-size: smaller;
     padding: 0px;
     margin: 0px;
 }
 
-div.uncharted .ring {
+.ring-separator {
     font-size: smaller;
     padding: 0px;
-    margin: 0px;
+    position: relative;
+    top: -3px;
 }
 
 div.highlighted b.active {

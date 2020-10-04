@@ -270,19 +270,19 @@
             function getRingInfo(payloadContent) {
                 let ringInfo = "";
                 if (payloadContent.Rings) {
-                    ringInfo += ")";
+
+                    let ringSeparator = document.createElement("span");
+                    ringSeparator.classList.add("ring-separator");
+                    ringSeparator.innerHTML = " ) ";
 
                     for (let [index, ring] of payloadContent.Rings.entries()) {
-                        if (index != 0) {
-
-                            ringInfo += ")";
-                        }
+                        ringInfo += ringSeparator.outerHTML;
 
                         let ringClass = ring.RingClass.replace('eRingClass_', '');
                         let ringIcon = null;
                         switch (ringClass) {
                             case 'MetalRich': {
-                                ringIcon = createIconElement("gold-ingots")
+                                ringIcon = createIconElement("gold-bars")
                                 break;
                             }
                             case 'Metallic': {
@@ -298,16 +298,16 @@
                                 break;
                             }
                         }
-                        let ringContainer = document.createElement("span");
-                        ringContainer.classList.add("ring");
-                        ringContainer.innerHTML = ringIcon.outerHTML;
-                        ringInfo += ringContainer.outerHTML;
+                        ringInfo += ringIcon.outerHTML
                     }
 
-                    ringInfo += ")"; //ringRight.outerHTML;
+                    ringInfo += ringSeparator.outerHTML;
                 }
 
-                return ringInfo;
+                let ringContainer = document.createElement("span");
+                ringContainer.classList.add("ring");
+                ringContainer.innerHTML = ringInfo;
+                return ringContainer.outerHTML;
             }
 
             function createDetailedBodyEntry(payloadContent) {
