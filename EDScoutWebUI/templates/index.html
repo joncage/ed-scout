@@ -55,6 +55,8 @@
         </div>
     </div>
 
+    {% if not disable_nav_route %}
+
     <div class="container-fluid">
         <div class="row separator align-items-center">
             <div class="col"><hr class="separator"/></div>
@@ -80,6 +82,7 @@
             <div class="col system highlighted text-center">Waiting for nav data...</div>
         </div>
     </div>
+    {% endif %}
 
     <div class="container-fluid">
         <div class="row separator align-items-center">
