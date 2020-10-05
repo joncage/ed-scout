@@ -104,3 +104,8 @@ div b.active.landable {
 .next-system hr {
     border-color: #17EFF9;
 }
+
+.alert {
+    top: 1em;
+    bottom: 1em;
+}

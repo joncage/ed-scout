@@ -6,6 +6,10 @@ import argparse
 import tempfile
 import psutil
 import time
+import threading
+import requests
+import re
+
 from datetime import datetime
 from pathlib import Path
 
@@ -87,6 +91,34 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
         logger_to_configure.addHandler(ch)
 
 
+def version_check(current_version):
+    latest_release_url = 'https://github.com/joncage/ed-scout/releases/latest'
+    try:
+        r = requests.get(latest_release_url)
+    except Exception as pass_on_failure:
+        log.exception(pass_on_failure)
+        return
+
+    latest_version = r.url.split('/')[-1]
+
+    regex = r"[vV]?\d+\.\d+\.\d+\.?\d?"
+    if re.search(regex, latest_version) is not None:
+        new_version_available = latest_version != current_version
+        content = {
+            'current_version': current_version,
+            'latest_version': latest_version,
+            'new_release_detected': new_version_available,
+            'url': latest_release_url
+        }
+
+        version_check_description = 'New version available: '+latest_version if new_version_available else 'Up to date'
+        log.info(f"Version check: {version_check_description}")
+
+        socketio.emit('version', content, broadcast=True)
+    else:
+        log.error(f"Failed to identify latest version from '{latest_version}'")
+
+
 # Work out where to stick the logs and make sure it exists
 logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
 if not os.path.isdir(logging_dir):
@@ -160,6 +192,10 @@ def receive_and_forward(scout):
     r = Receiver(port=scout.port)
     scout.trigger_current_journal_check()
 
+    # Launch the version check. Note that we only do this after the client has connected to avoid them missing this.
+    version_check_thread = threading.Thread(target=version_check, args=(__version__,))
+    version_check_thread.start()
+
     while True:
         message = r.receive().decode('ascii')
         try:
@@ -171,7 +207,7 @@ def receive_and_forward(scout):
             log.exception(pass_on_failure)
 
 
-@app.route('/')Disabling caching
+@app.route('/')
 def index():
     return render_template('index.html',
                            version=__version__,
@@ -236,6 +272,7 @@ if __name__ == '__main__':
 
         # Enable toggling
         toggler = WindowToggler.ScoutToggler()
+
 
         # Launch the web server either directly or as an app
         if ui:
