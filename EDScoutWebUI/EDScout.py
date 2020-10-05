@@ -6,6 +6,9 @@ import argparse
 import tempfile
 import psutil
 import time
+import threading
+import requests
+
 from datetime import datetime
 from pathlib import Path
 
@@ -85,6 +88,22 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
         ch = logging.StreamHandler()
         ch.setFormatter(formatter)
         logger_to_configure.addHandler(ch)
+
+
+def version_check(current_version):
+    r = requests.get('https://github.com/joncage/ed-scout/releases/latest')
+    latest_version = r.url.split('/')[-1]
+    new_version_available = latest_version != current_version
+    content = {
+        'current_version': current_version,
+        'latest_version': latest_version,
+        'new_release_detected': new_version_available,
+    }
+
+    version_check_description = 'New version available: '+latest_version if new_version_available else 'Up to date'
+    log.info(f"Version check: {version_check_description}")
+
+    socketio.emit('version', content, broadcast=True)
 
 
 # Work out where to stick the logs and make sure it exists
@@ -171,7 +190,7 @@ def receive_and_forward(scout):
             log.exception(pass_on_failure)
 
 
-@app.route('/')Disabling caching
+@app.route('/')
 def index():
     return render_template('index.html',
                            version=__version__,
@@ -236,6 +255,10 @@ if __name__ == '__main__':
 
         # Enable toggling
         toggler = WindowToggler.ScoutToggler()
+
+        # Launch the version check
+        version_check_thread = threading.Thread(target=version_check, args=(__version__,))
+        version_check_thread.start()
 
         # Launch the web server either directly or as an app
         if ui:
