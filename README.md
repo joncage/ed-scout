@@ -45,6 +45,14 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
+### v1.6.0 - Rings, Mapping Tracking, Update Checking & More..
+
+* Added icons to indicate rings and their composition.
+* Added a mechanism that drops mapped-bodies down from the highlighted section at the top to the un-valuable group at the bottom when you map them.
+* Added update detection so that when future releases are made, EDScout indicates there's something new available.
+* Added a config file (note that command line options override the settings in there). See C:\Users\<Your Username>\AppData\Local\EDScout\EdScout.ini
+* Added a config option to turn off the nav list as apparetly it's just clutter when you're out in the deep black where nobody else has been.
+
 ### 1.5.3 - Fixed detection of relocated saved-games folder.
 
 * Fixed detection of the Saved Games folder in case a user as moved it to another folder / drive.
