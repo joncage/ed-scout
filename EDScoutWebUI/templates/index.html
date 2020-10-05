@@ -20,7 +20,12 @@
 
 <body>
 
-
+    <div id="new-version-alert-wrapper" class="alert alert-info alert-dismissible fade show" role="alert" hidden>
+      <strong>New Version Available</strong>: <span id="version-link-wrapper"></span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
 
     <div class="container-fluid">
         <div class="row separator align-items-center">
@@ -801,9 +806,28 @@
 
             /**/
 
+            function versionCheckReport(versionCheck) {
+                console.log(versionCheck);
+
+                if (versionCheck['new_release_detected']) {
+                    let versionInfoElement = document.getElementById('version-link-wrapper')
+                    let link = document.createElement('a')
+                    link.href = versionCheck['url']
+                    link.text = versionCheck['latest_version']
+                    link.target = '_blank'
+                    link.classList.add('alert-link')
+                    versionInfoElement.innerHTML = link.outerHTML
+
+                    let alertDiv = document.getElementById('new-version-alert-wrapper')
+                    alertDiv.hidden = false;
+                }
+            }
+
+
             if (enableBackendConnections) {
                 var socket = io()
                 socket.on('log', postData)
+                socket.on('version', versionCheckReport)
 
                 document.addEventListener('DOMContentLoaded', function() {
                     var url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';
