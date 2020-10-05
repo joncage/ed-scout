@@ -21,7 +21,7 @@ Enjoy this tool? Consider [donating to EDSM](https://www.edsm.net/en_GB/donation
 
 ![Nav Route Example](Images/UIExplained.png)
 
-\* Note: The refers to whether EDSM knew about the system. There are plent of systems out there which have been discoverd by console players and PC players not running EDDiscovery etc.
+\* Note: This refers to whether EDSM knew about the system. There are plenty of systems out there which have been discoverd by console players and PC players not running EDDiscovery etc.
 
 ## Command line options
 
