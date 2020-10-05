@@ -91,13 +91,16 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
 
 def version_check(current_version):
-    r = requests.get('https://github.com/joncage/ed-scout/releases/latest')
+    latest_release_url = 'https://github.com/joncage/ed-scout/releases/latest'
+    r = requests.get(latest_release_url)
     latest_version = r.url.split('/')[-1]
+
     new_version_available = latest_version != current_version
     content = {
         'current_version': current_version,
         'latest_version': latest_version,
         'new_release_detected': new_version_available,
+        'url': latest_release_url
     }
 
     version_check_description = 'New version available: '+latest_version if new_version_available else 'Up to date'
@@ -179,6 +182,10 @@ def receive_and_forward(scout):
     r = Receiver(port=scout.port)
     scout.trigger_current_journal_check()
 
+    # Launch the version check. Note that we only do this after the client has connected to avoid them missing this.
+    version_check_thread = threading.Thread(target=version_check, args=(__version__,))
+    version_check_thread.start()
+
     while True:
         message = r.receive().decode('ascii')
         try:
@@ -256,9 +263,6 @@ if __name__ == '__main__':
         # Enable toggling
         toggler = WindowToggler.ScoutToggler()
 
-        # Launch the version check
-        version_check_thread = threading.Thread(target=version_check, args=(__version__,))
-        version_check_thread.start()
 
         # Launch the web server either directly or as an app
         if ui:
