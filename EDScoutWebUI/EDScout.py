@@ -8,6 +8,7 @@ import psutil
 import time
 import threading
 import requests
+import re
 
 from datetime import datetime
 from pathlib import Path
@@ -92,21 +93,30 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
 def version_check(current_version):
     latest_release_url = 'https://github.com/joncage/ed-scout/releases/latest'
-    r = requests.get(latest_release_url)
+    try:
+        r = requests.get(latest_release_url)
+    except Exception as pass_on_failure:
+        log.exception(pass_on_failure)
+        return
+
     latest_version = r.url.split('/')[-1]
 
-    new_version_available = latest_version != current_version
-    content = {
-        'current_version': current_version,
-        'latest_version': latest_version,
-        'new_release_detected': new_version_available,
-        'url': latest_release_url
-    }
+    regex = r"[vV]?\d+\.\d+\.\d+\.?\d?"
+    if re.search(regex, latest_version) is not None:
+        new_version_available = latest_version != current_version
+        content = {
+            'current_version': current_version,
+            'latest_version': latest_version,
+            'new_release_detected': new_version_available,
+            'url': latest_release_url
+        }
 
-    version_check_description = 'New version available: '+latest_version if new_version_available else 'Up to date'
-    log.info(f"Version check: {version_check_description}")
+        version_check_description = 'New version available: '+latest_version if new_version_available else 'Up to date'
+        log.info(f"Version check: {version_check_description}")
 
-    socketio.emit('version', content, broadcast=True)
+        socketio.emit('version', content, broadcast=True)
+    else:
+        log.error(f"Failed to identify latest version from '{latest_version}'")
 
 
 # Work out where to stick the logs and make sure it exists
