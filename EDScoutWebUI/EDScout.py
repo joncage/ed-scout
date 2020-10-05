@@ -44,6 +44,7 @@ parser.add_argument('-host', action="store", dest="host", type=str, default=conf
 parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=config.get_option('log_level'))
 parser.add_argument('-no_app', action="store_false", dest="run_as_app")
 parser.add_argument('-force_polling', action="store_true", dest="force_polling")
+parser.add_argument('-disable_nav_route', action="store_true", dest="disable_nav_route")
 args = parser.parse_args()
 
 # This looks a bit backwards but these options are designed to disable settings.
@@ -52,6 +53,8 @@ if args.run_as_app is True:
     args.run_as_app = (config.get_option('no_app').lower() == 'false')
 if args.force_polling is False:
     args.force_polling = (config.get_option('force_polling').lower() == 'true')
+if args.disable_nav_route is False:
+    args.disable_nav_route = (config.get_option('disable_nav_route').lower() == 'true')
 
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
@@ -168,9 +171,12 @@ def receive_and_forward(scout):
             log.exception(pass_on_failure)
 
 
-@app.route('/')
+@app.route('/')Disabling caching
 def index():
-    return render_template('index.html', version=__version__, timestamp=str(datetime.utcnow()))
+    return render_template('index.html',
+                           version=__version__,
+                           timestamp=str(datetime.utcnow()),
+                           disable_nav_route=args.disable_nav_route)
 
 
 @app.route('/css-overrides/<path:filename>')

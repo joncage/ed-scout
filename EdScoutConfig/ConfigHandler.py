@@ -31,7 +31,7 @@ class Config:
             'no_app': 'False',
             'log_level': str(logging.INFO),
             'force_polling': 'False',
-            'show_nav_route': 'True'
+            'disable_nav_route': 'False'
         }
 
     def get_option(self, option_name):
