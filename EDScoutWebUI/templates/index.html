@@ -203,7 +203,6 @@
                 {
                     return;
                 }
-                //removeOldBodyEntry(newBodyEntry.id);
 
                 const newBodyEntry = createDetailedBodyEntry(payloadContent);
 
@@ -272,13 +271,6 @@
 
             function isValuableSystem(payloadContent) {
                 return payloadContent.MappedValue > 500000;
-            }
-
-            function removeOldBodyEntry(bodyId) {
-                let locationElement = document.getElementById(bodyId);
-                if (locationElement) {
-                    locationElement.parentNode.removeChild(locationElement)
-                }
             }
 
             function getRingInfo(payloadContent) {
@@ -658,7 +650,7 @@
             var enableBackendConnections = true;
 
             // Uncomment to debug without needing the backend
-            /**
+            /**/
 
             function WrapWithEventType(type, entryContent) {
                 let wrap = {'data': {'type': type}};
