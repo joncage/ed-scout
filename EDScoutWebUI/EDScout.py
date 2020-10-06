@@ -24,6 +24,7 @@ from EDScoutCore import EDSMInterface
 from EDScoutWebUI import HudColourAdjuster
 from EDScoutWebUI import WindowToggler
 from EdScoutConfig import ConfigHandler
+from EDScoutWebUI.VersionChecker import check_version
 
 
 try:
@@ -92,31 +93,9 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
 
 def version_check(current_version):
-    latest_release_url = 'https://github.com/joncage/ed-scout/releases/latest'
-    try:
-        r = requests.get(latest_release_url)
-    except Exception as pass_on_failure:
-        log.exception(pass_on_failure)
-        return
-
-    latest_version = r.url.split('/')[-1]
-
-    regex = r"[vV]?\d+\.\d+\.\d+\.?\d?"
-    if re.search(regex, latest_version) is not None:
-        new_version_available = latest_version != current_version
-        content = {
-            'current_version': current_version,
-            'latest_version': latest_version,
-            'new_release_detected': new_version_available,
-            'url': latest_release_url
-        }
-
-        version_check_description = 'New version available: '+latest_version if new_version_available else 'Up to date'
-        log.info(f"Version check: {version_check_description}")
-
-        socketio.emit('version', content, broadcast=True)
-    else:
-        log.error(f"Failed to identify latest version from '{latest_version}'")
+    version_check_response = check_version()
+    if version_check_response:
+        socketio.emit('version', version_check_response, broadcast=True)
 
 
 # Work out where to stick the logs and make sure it exists
@@ -132,6 +111,7 @@ configure_logger(log, logging_path)
 configure_logger(logging.getLogger('EDScoutCore'), logging_path)
 configure_logger(logging.getLogger('NavRouteWatcher'), logging_path)
 configure_logger(logging.getLogger('JournalInterface'), logging_path)
+configure_logger(logging.getLogger('VersionChecker'), logging_path)
 configure_logger(logging.getLogger('flaskwebgui'), logging_path, log_level_override=logging.INFO)
 
 # Lets go!
