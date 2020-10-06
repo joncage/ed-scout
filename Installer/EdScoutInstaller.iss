@@ -6,10 +6,11 @@
 #define Version GetFileVersion('dist-singlefile\EdScout.exe')
 
 [Setup]
+AppId={{2C9BD960-4759-4484-80D2-70047F48AAC4}
 AppName=Elite Dangerous Scout
 AppVersion=LoadStringFromFile('version.txt', ANSIStr)
 WizardStyle=modern
-DefaultDirName={autopf}\EdScout
+DefaultDirName={autopf}\EDScout
 ; Since no icons will be created in "{group}", we don't need the wizard
 ; to ask for a Start Menu folder name:
 DisableProgramGroupPage=yes
@@ -29,3 +30,5 @@ Source: "dist-singlefile\EDScout.exe"; DestDir: "{app}"
 Name: "{autoprograms}\EDScout"; Filename: "{app}\EDScout.exe"
 Name: "{autodesktop}\EDScout"; Filename: "{app}\EDScout.exe"
 
+[Run]
+Filename: {app}\EDScout.exe; Description: Run EDScout now; Flags: postinstall nowait skipifsilent
