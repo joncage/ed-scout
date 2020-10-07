@@ -33,7 +33,7 @@
     text-shadow: 0 0 0;
 }
 
-.flaticon-lander:before { content: "\f100"; }
+.flaticon-lander:before { content: "\f100"; margin-left: 2px;}
 .flaticon-volcano:before { content: "\f101"; }
 .flaticon-cooling-tower:before { content: "\f102"; }
 .flaticon-cooling-tower-1:before { content: "\f103"; }

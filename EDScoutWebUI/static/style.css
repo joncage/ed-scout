@@ -114,11 +114,11 @@ div b.active.landable {
     background-color: #000;
     padding-left: 2px;
     padding-right: 2px;
+    margin-left: 2px;
 }
 
 .gravity-good {
-    color: #00000000;
-    background-color: #00000000;
+    color: #0F0;
 }
 
 .gravity-alert {
@@ -127,4 +127,9 @@ div b.active.landable {
 
 .gravity-warning {
     color: #F60;
+}
+
+.gravity-hidden {
+    color: #00000000;
+    background-color: #00000000;
 }
