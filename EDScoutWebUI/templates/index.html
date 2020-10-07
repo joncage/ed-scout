@@ -203,7 +203,6 @@
                 {
                     return;
                 }
-                //removeOldBodyEntry(newBodyEntry.id);
 
                 const newBodyEntry = createDetailedBodyEntry(payloadContent);
 
@@ -274,13 +273,6 @@
                 return payloadContent.MappedValue > 500000;
             }
 
-            function removeOldBodyEntry(bodyId) {
-                let locationElement = document.getElementById(bodyId);
-                if (locationElement) {
-                    locationElement.parentNode.removeChild(locationElement)
-                }
-            }
-
             function getRingInfo(payloadContent) {
                 let ringInfo = "";
                 if (payloadContent.Rings) {
@@ -322,6 +314,47 @@
                 ringContainer.classList.add("ring");
                 ringContainer.innerHTML = ringInfo;
                 return ringContainer.outerHTML;
+            }
+
+            function createGravityIndicator(payloadContent) {
+
+                let gravityIndicator = document.createElement("span")
+
+                // Only bother highlighting if the planet is landable and the gravity is worrying enough
+                const gravityWarningThresh = 1.0
+                const gravityAlertThresh = 2.0
+                let severityClass = null;
+                let gravityText = null;
+                if (payloadContent.Landable) {
+                    let surfaceGravity = payloadContent.SurfaceGravity
+                    console.log("Surface gravity: " + surfaceGravity.toString())
+
+                    if (surfaceGravity >= gravityAlertThresh) {
+                        severityClass = "gravity-alert"
+                    }
+                    else if (surfaceGravity >= gravityWarningThresh) {
+                        severityClass = "gravity-warning"
+                    }
+                    else {
+                        severityClass = "gravity-good"
+                    }
+                    gravityText = surfaceGravity.toFixed(1)+""
+                }
+                else
+                {
+                    gravityText = "X.X"; // Add some essentially blank text to pad things out as it's mono-spaced.
+                    severityClass = "gravity-hidden";
+                    gravityIndicator.classList.add("inactive")
+                }
+                gravityIndicator.classList.add("gravity-indicator", "rounded", "border-0", severityClass)
+
+                let landable = createFlagElement('lander', payloadContent.Landable);
+                landable.classList.add('landable');
+
+                gravityIndicator.innerHTML = landable.outerHTML + " " +  gravityText
+
+
+                return gravityIndicator.outerHTML
             }
 
             function createDetailedBodyEntry(payloadContent) {
@@ -380,13 +413,10 @@
                     payloadContent.Landable = false;
                 }
 
-                const flagElementType = 'b';
                 extra_info += createFlagElement('volcano', payloadContent.Volcanism).outerHTML;
                 extra_info += createFlagElement('cooling-tower', payloadContent.TerraformState).outerHTML;
                 extra_info += createFlagElement('flag-outline-on-a-pole-with-stars-around', !payloadContent.WasMapped).outerHTML;
-                let landable = createFlagElement('lander', payloadContent.Landable);
-                landable.classList.add('landable');
-                extra_info += landable.outerHTML;
+                extra_info += createGravityIndicator(payloadContent)
 
                 let bodyInfo = document.createElement('div');
                 bodyInfo.classList.add("col-auto", "system", chartedStyle);
