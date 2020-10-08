@@ -326,7 +326,7 @@
                 let severityClass = null;
                 let gravityText = null;
                 if (payloadContent.Landable) {
-                    let surfaceGravity = payloadContent.SurfaceGravity
+                    let surfaceGravity = payloadContent.SurfaceGravity/10.0; // Divided the values by 10 as they appear to be a factor of 10 too large for some reason (compared to the system map + EDSM).
                     console.log("Surface gravity: " + surfaceGravity.toString())
 
                     if (surfaceGravity >= gravityAlertThresh) {
