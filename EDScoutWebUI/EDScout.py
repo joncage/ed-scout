@@ -172,10 +172,6 @@ def receive_and_forward(scout):
     r = Receiver(port=scout.port)
     scout.trigger_current_journal_check()
 
-    # Launch the version check. Note that we only do this after the client has connected to avoid them missing this.
-    version_check_thread = threading.Thread(target=version_check, args=(__version__,))
-    version_check_thread.start()
-
     while True:
         message = r.receive().decode('ascii')
         try:
@@ -205,6 +201,9 @@ def css_override_route(filename):
 @socketio.on('connect')
 def on_connect():
     log.debug("Client connected.")
+
+    # Launch the version check. Note that we only do this after the client has connected to avoid them missing this.
+    version_thread = socketio.start_background_task(version_check, __version__)
 
     global thread
     if thread is None:
