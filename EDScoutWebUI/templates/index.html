@@ -218,9 +218,12 @@
                 container.prepend(newBodyEntry);
             }
 
-            function createIconElement(iconType, elementType='i') {
+            function createIconElement(iconType, description='', elementType='i') {
                 let iconElement = document.createElement(elementType)
                 iconElement.classList.add("flaticon-"+iconType)
+                if (description != "") {
+                    iconElement.setAttribute("title", description)
+                }
                 return iconElement
             }
 
@@ -228,25 +231,25 @@
                 let bodyIcon = "";
                 let lowerBodyName = bodyName.toLowerCase();
                 if (lowerBodyName.includes("metal")) {
-                    bodyIcon = createIconElement("ingot").outerHTML
+                    bodyIcon = createIconElement("ingot", "Metal").outerHTML
                 }
                 else if (lowerBodyName.includes("icy") || lowerBodyName.includes("ice")) {
-                    bodyIcon = createIconElement("snowflake").outerHTML
+                    bodyIcon = createIconElement("snowflake", "Icy").outerHTML
                 }
                 else if (lowerBodyName.includes("earth")) {
-                    bodyIcon = createIconElement("earth").outerHTML
+                    bodyIcon = createIconElement("earth", "Earth-like").outerHTML
                 }
                 else if (lowerBodyName.includes("gas giant")) {
-                    bodyIcon = createIconElement("jupiter-1").outerHTML
+                    bodyIcon = createIconElement("jupiter-1", "Gas giant").outerHTML
                 }
                 else if (lowerBodyName.includes("rock")) {
-                    bodyIcon = createIconElement("asteroid-3").outerHTML
+                    bodyIcon = createIconElement("asteroid-3", "Rocky").outerHTML
                 }
                 else if (lowerBodyName.includes("water") || lowerBodyName.includes("ammonia world")) {
-                    bodyIcon = createIconElement("water-drops").outerHTML
+                    bodyIcon = createIconElement("water-drops", "Water/Ammonia").outerHTML
                 }
                 else if (lowerBodyName.includes("belt")) {
-                    bodyIcon = createIconElement("asteroid-4").outerHTML
+                    bodyIcon = createIconElement("asteroid-4", "Asteroid belt").outerHTML
                 }
                 //rocky
                 //gas
@@ -257,11 +260,12 @@
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
 
-            function createFlagElement(iconName, activeIndicator) {
+            function createFlagElement(iconName, description, activeIndicator) {
                 const flagElementType = 'b';
-                let element = createIconElement(iconName, flagElementType);
+                let element = createIconElement(iconName, description, flagElementType);
                 if (!activeIndicator) {
                     element.classList.add("inactive")
+                    element.removeAttribute("title")
                 }
                 else {
                     element.classList.add("active")
@@ -348,7 +352,7 @@
                 }
                 gravityIndicator.classList.add("gravity-indicator", "rounded", "border-0", severityClass)
 
-                let landable = createFlagElement('lander', payloadContent.Landable);
+                let landable = createFlagElement('lander', 'Landable', payloadContent.Landable);
                 landable.classList.add('landable');
 
                 gravityIndicator.innerHTML = landable.outerHTML + " " +  gravityText
@@ -413,9 +417,9 @@
                     payloadContent.Landable = false;
                 }
 
-                extra_info += createFlagElement('volcano', payloadContent.Volcanism).outerHTML;
-                extra_info += createFlagElement('cooling-tower', payloadContent.TerraformState).outerHTML;
-                extra_info += createFlagElement('flag-outline-on-a-pole-with-stars-around', !payloadContent.WasMapped).outerHTML;
+                extra_info += createFlagElement('volcano', 'Volcanism', payloadContent.Volcanism).outerHTML;
+                extra_info += createFlagElement('cooling-tower', 'Terraformable', payloadContent.TerraformState).outerHTML;
+                extra_info += createFlagElement('flag-outline-on-a-pole-with-stars-around', 'Unmapped', !payloadContent.WasMapped).outerHTML;
                 extra_info += createGravityIndicator(payloadContent)
 
                 let bodyInfo = document.createElement('div');
