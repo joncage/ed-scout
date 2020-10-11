@@ -4,6 +4,7 @@ import sys
 import logging
 import argparse
 import tempfile
+import platform
 import psutil
 import time
 from datetime import datetime
@@ -73,7 +74,13 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 
 
 # Work out where to stick the logs and make sure it exists
-logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
+osname = platform.system()
+if osname == 'Windows':
+    logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
+elif osname == 'Linux':
+    logging_dir = os.path.join(os.path.expanduser('~'), '.local', 'share', 'EDScout', 'logs')
+else:
+    raise Exception(f"EDScout does not support {osname}")
 if not os.path.isdir(logging_dir):
     Path(logging_dir).mkdir(parents=True, exist_ok=True)
 timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')

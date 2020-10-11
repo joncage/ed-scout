@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 from pathlib import Path
 from datetime import datetime
 
@@ -7,7 +8,14 @@ from datetime import datetime
 class OutputRecorder:
 
     def __init__(self, file_name_prefix):
-        recording_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'StreamRecords')
+        osname = platform.system()
+        if osname == 'Windows':
+            recording_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'StreamRecords')
+        elif osname == 'Linux':
+            recording_dir = os.path.join(os.path.expanduser('~'), '.local', 'share', 'EDScout', 'StreamRecords')
+        else:
+            raise Exception(f"EDScout does not support {osname}")
+
         if not os.path.isdir(recording_dir):
             Path(recording_dir).mkdir(parents=True, exist_ok=True)
         timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
