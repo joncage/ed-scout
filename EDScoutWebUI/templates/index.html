@@ -221,7 +221,7 @@
             function createIconElement(iconType, description='', elementType='i') {
                 let iconElement = document.createElement(elementType)
                 iconElement.classList.add("flaticon-"+iconType)
-                if (description != "") {
+                if (description !== '') {
                     iconElement.setAttribute("title", description)
                 }
                 return iconElement
