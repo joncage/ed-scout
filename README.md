@@ -2,7 +2,7 @@
 
 ![GitHub](https://img.shields.io/github/license/joncage/ed-scout)
 ![Downloads](https://img.shields.io/github/downloads/joncage/ed-scout/total)
-![Build Status](https://github.com/joncage/ed-scout/workflows/Python%20application/badge.svg)
+![Build Status](https://github.com/joncage/ed-scout/workflows/Build%20&%20Test/badge.svg)
 
 Greetings commander and welcome to EDScout; an Elite Dangerous companion app to simplify finding unexplored worlds.
 
@@ -36,14 +36,27 @@ Assuming your computer's firewall allows it, you should then be able to access i
 ## Troubleshooting
 
 * No GUI appears.
-  * Check you have Chrome installed.
-  * Check the logs in `C:\Users\<YOUR USER NAME>\AppData\Local\EDScout\Logs\EDScout-YYYY-MM-DD-HH-MM-SS.log` for clues.
+    * Check you have Chrome installed.
+    * Check the logs in `C:\Users\<YOUR USER NAME>\AppData\Local\EDScout\Logs\EDScout-YYYY-MM-DD-HH-MM-SS.log` for clues.
 * Multiple entries appear in task manager.
-  * This is  normal (due to the architecture of the software) and is down to the fact we have a Python back end doing the hard work and a chrome instance displaying the results.
+    * This is  normal (due to the architecture of the software) and is down to the fact we have a Python back end doing the hard work and a chrome instance displaying the results.
 * When I launch multiple copies, the second one crashes.
-  * This is due to the way a background watcher looks for changes in the navroute files and (via a local network link) hands over the data to the web service. Don't run more than one copy and it'll work fine :-)
+    * This is due to the way a background watcher looks for changes in the navroute files and (via a local network link) hands over the data to the web service. Don't run more than one copy and it'll work fine :-)
 
 ## Version History
+
+### v1.7.1 - Fixed Gravity Indicators
+
+* Turns out the gravity values in the journal files are a factor of 10 out. I altered the UI to divide them to fix this.
+
+### v1.7.0 - Gravity Indicators, Launch After Install, Improved New-Version-Check
+
+* Added indicator highlighting the gravity on landable planets:
+    * 0-1G = Green
+    * 1-2G = Amber
+    * 2+G = Red
+* Altered the installer to offer an option to launch the scout after install. Also set a GUI so the installer recognises old installs properly.
+* Fixed the version check (v1.6 was inadvertently using a cached result if it's ever made a check before).
 
 ### v1.6.0 - Rings, Mapping Tracking, Update Checking & More..
 
