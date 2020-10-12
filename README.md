@@ -21,7 +21,7 @@ Enjoy this tool? Consider [donating to EDSM](https://www.edsm.net/en_GB/donation
 
 ![Nav Route Example](Images/UIExplained.png)
 
-\* Note: The refers to whether EDSM knew about the system. There are plent of systems out there which have been discoverd by console players and PC players not running EDDiscovery etc.
+\* Note: This refers to whether EDSM knew about the system. There are plenty of systems out there which have been discoverd by console players and PC players not running EDDiscovery etc.
 
 ## Command line options
 
@@ -37,7 +37,7 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 * No GUI appears.
   * Check you have Chrome installed.
-  * Check the logs in `C:\Users\<YOUR USER NAME>\Documents\EDScout\EDScout.log` for clues.
+  * Check the logs in `C:\Users\<YOUR USER NAME>\AppData\Local\EDScout\Logs\EDScout-YYYY-MM-DD-HH-MM-SS.log` for clues.
 * Multiple entries appear in task manager.
   * This is  normal (due to the architecture of the software) and is down to the fact we have a Python back end doing the hard work and a chrome instance displaying the results.
 * When I launch multiple copies, the second one crashes.
@@ -45,11 +45,24 @@ Assuming your computer's firewall allows it, you should then be able to access i
 
 ## Version History
 
-### v1.5.1 - Fixed bad packaging of 1.5.0
+### v1.6.0 - Rings, Mapping Tracking, Update Checking & More..
+
+* Added icons to indicate rings and their composition.
+* Added a mechanism that drops mapped-bodies down from the highlighted section at the top to the un-valuable group at the bottom when you map them.
+* Added update detection so that when future releases are made, EDScout indicates there's something new available.
+* Added a config file (note that command line options override the settings in there). See C:\Users\<Your Username>\AppData\Local\EDScout\EdScout.ini
+* Added a config option to turn off the nav list as apparetly it's just clutter when you're out in the deep black where nobody else has been.
+
+### 1.5.3 - Fixed detection of relocated saved-games folder.
+
+* Fixed detection of the Saved Games folder in case a user as moved it to another folder / drive.
+* Fixed a minor bug in the installer code that stopped auto-detection of the version from a clean repo (no commits after the version tag).
+
+### 1.5.1 - Fixed bad packaging of 1.5.0
 
 * Fixed an oversight where PyInstaller was once again failing to spot a dynamicalyl loaded dependency.
 
-### v1.5.0 - Focus hotkey, better sorting, minor fixes
+### 1.5.0 - Focus hotkey, better sorting, minor fixes
 
 * Added hotkey (START+Z) to put the scout aobe or hide it behind elite.
 * Fixed going to the galaxy map wiping out the bodies scanned in the current system.

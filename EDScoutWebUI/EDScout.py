@@ -7,6 +7,10 @@ import tempfile
 import platform
 import psutil
 import time
+import threading
+import requests
+import re
+
 from datetime import datetime
 from pathlib import Path
 
@@ -20,6 +24,8 @@ from EDScoutCore.EDScout import EDScout
 from EDScoutCore import EDSMInterface
 from EDScoutWebUI import HudColourAdjuster
 from EDScoutWebUI import WindowToggler
+from EdScoutConfig import ConfigHandler
+from EDScoutWebUI.VersionChecker import check_version
 
 
 try:
@@ -34,13 +40,27 @@ except ImportError:
 # Indicate to EDSM which version of the scout is making requests.
 EDSMInterface.set_current_version(__version__)
 
+# Load settings from the config file
+config = ConfigHandler.Config()
+
+# Make any overrides from commandline params the user may have specified.
 parser = argparse.ArgumentParser(description='Elite Dangerous Scout.')
-parser.add_argument('-port', action="store", dest="port", type=int, default=5000)
-parser.add_argument('-host', action="store", dest="host", type=str, default="127.0.0.1")
+parser.add_argument('-port', action="store", dest="port", type=int, default=int(config.get_option('port')))
+parser.add_argument('-host', action="store", dest="host", type=str, default=config.get_option('host'))
+parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=config.get_option('log_level'))
 parser.add_argument('-no_app', action="store_false", dest="run_as_app")
-parser.add_argument('-log_level', action="store", dest="log_level", type=int, default=logging.INFO)
 parser.add_argument('-force_polling', action="store_true", dest="force_polling")
+parser.add_argument('-disable_nav_route', action="store_true", dest="disable_nav_route")
 args = parser.parse_args()
+
+# This looks a bit backwards but these options are designed to disable settings.
+# So if they're true, we should check the default from the config.
+if args.run_as_app is True:
+    args.run_as_app = (config.get_option('no_app').lower() == 'false')
+if args.force_polling is False:
+    args.force_polling = (config.get_option('force_polling').lower() == 'true')
+if args.disable_nav_route is False:
+    args.disable_nav_route = (config.get_option('disable_nav_route').lower() == 'true')
 
 # Check if this has been packaged up for distribution
 is_deployed = hasattr(sys, '_MEIPASS')
@@ -73,6 +93,12 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
         logger_to_configure.addHandler(ch)
 
 
+def version_check(current_version):
+    version_check_response = check_version()
+    if version_check_response:
+        socketio.emit('version', version_check_response, broadcast=True)
+
+
 # Work out where to stick the logs and make sure it exists
 osname = platform.system()
 if osname == 'Windows':
@@ -92,6 +118,7 @@ configure_logger(log, logging_path)
 configure_logger(logging.getLogger('EDScoutCore'), logging_path)
 configure_logger(logging.getLogger('NavRouteWatcher'), logging_path)
 configure_logger(logging.getLogger('JournalInterface'), logging_path)
+configure_logger(logging.getLogger('VersionChecker'), logging_path)
 configure_logger(logging.getLogger('flaskwebgui'), logging_path, log_level_override=logging.INFO)
 
 # Lets go!
@@ -167,7 +194,10 @@ def receive_and_forward(scout):
 
 @app.route('/')
 def index():
-    return render_template('index.html', version=__version__, timestamp=str(datetime.utcnow()))
+    return render_template('index.html',
+                           version=__version__,
+                           timestamp=str(datetime.utcnow()),
+                           disable_nav_route=args.disable_nav_route)
 
 
 @app.route('/css-overrides/<path:filename>')
@@ -180,6 +210,9 @@ def css_override_route(filename):
 @socketio.on('connect')
 def on_connect():
     log.debug("Client connected.")
+
+    # Launch the version check. Note that we only do this after the client has connected to avoid them missing this.
+    version_thread = socketio.start_background_task(version_check, __version__)
 
     global thread
     if thread is None:
@@ -227,6 +260,7 @@ if __name__ == '__main__':
 
         # Enable toggling
         toggler = WindowToggler.ScoutToggler()
+
 
         # Launch the web server either directly or as an app
         if ui:

@@ -20,7 +20,18 @@
 
 <body>
 
-
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <div id="new-version-alert-wrapper" class="alert alert-info alert-dismissible fade show" role="alert" hidden>
+                  <span>New Version Available</span>: <strong id="version-link-wrapper"></strong>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container-fluid">
         <div class="row separator align-items-center">
@@ -55,6 +66,8 @@
         </div>
     </div>
 
+    {% if not disable_nav_route %}
+
     <div class="container-fluid">
         <div class="row separator align-items-center">
             <div class="col"><hr class="separator"/></div>
@@ -80,6 +93,7 @@
             <div class="col system highlighted text-center">Waiting for nav data...</div>
         </div>
     </div>
+    {% endif %}
 
     <div class="container-fluid">
         <div class="row separator align-items-center">
@@ -184,10 +198,13 @@
             function addScannedBody(payloadContent) {
                 // { "timestamp":"2020-08-20T23:57:05Z", "event":"Scan", "ScanType":"Detailed", "BodyName":"Pro Eurl MO-H d10-11 2", "BodyID":27, "Parents":[ {"Star":0} ], "StarSystem":"Pro Eurl MO-H d10-11", "SystemAddress":388770122203, "DistanceFromArrivalLS":5502.835374, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.636978 }, { "Name":"Helium", "Percent":25.363026 } ], "Volcanism":"", "MassEM":1115.081787, "Radius":76789080.000000, "SurfaceGravity":75.373241, "SurfaceTemperature":272.228607, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1634133458137.512207, "Eccentricity":0.018997, "OrbitalInclination":-4.741432, "Periapsis":30.585864, "OrbitalPeriod":1122406125.068665, "RotationPeriod":113532.553386, "AxialTilt":-0.182964, "Rings":[ { "Name":"Pro Eurl MO-H d10-11 2 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.8852e+12, "InnerRad":1.1586e+08, "OuterRad":3.61e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }
 
-                const newBodyEntry = createDetailedBodyEntry(payloadContent);
+                // If this already exists somewhere on the page, we should stop processing as we don't want to eliminate any work done by a detailed scan
+                if (document.getElementById(idFromBodyName(payloadContent.BodyName)))
+                {
+                    return;
+                }
 
-                // If this already exists somewhere on the page, delete the old one.
-                removeOldBodyEntry(newBodyEntry.id);
+                const newBodyEntry = createDetailedBodyEntry(payloadContent);
 
                 let container;
                 if (isValuableSystem(payloadContent)){
@@ -201,9 +218,12 @@
                 container.prepend(newBodyEntry);
             }
 
-            function createIconElement(iconType, elementType='i') {
+            function createIconElement(iconType, description='', elementType='i') {
                 let iconElement = document.createElement(elementType)
                 iconElement.classList.add("flaticon-"+iconType)
+                if (description !== '') {
+                    iconElement.setAttribute("title", description)
+                }
                 return iconElement
             }
 
@@ -211,25 +231,25 @@
                 let bodyIcon = "";
                 let lowerBodyName = bodyName.toLowerCase();
                 if (lowerBodyName.includes("metal")) {
-                    bodyIcon = createIconElement("ingot").outerHTML
+                    bodyIcon = createIconElement("ingot", "Metal").outerHTML
                 }
                 else if (lowerBodyName.includes("icy") || lowerBodyName.includes("ice")) {
-                    bodyIcon = createIconElement("snowflake").outerHTML
+                    bodyIcon = createIconElement("snowflake", "Icy").outerHTML
                 }
                 else if (lowerBodyName.includes("earth")) {
-                    bodyIcon = createIconElement("earth").outerHTML
+                    bodyIcon = createIconElement("earth", "Earth-like").outerHTML
                 }
                 else if (lowerBodyName.includes("gas giant")) {
-                    bodyIcon = createIconElement("jupiter-1").outerHTML
+                    bodyIcon = createIconElement("jupiter-1", "Gas giant").outerHTML
                 }
                 else if (lowerBodyName.includes("rock")) {
-                    bodyIcon = createIconElement("asteroid-3").outerHTML
+                    bodyIcon = createIconElement("asteroid-3", "Rocky").outerHTML
                 }
                 else if (lowerBodyName.includes("water") || lowerBodyName.includes("ammonia world")) {
-                    bodyIcon = createIconElement("water-drops").outerHTML
+                    bodyIcon = createIconElement("water-drops", "Water/Ammonia").outerHTML
                 }
                 else if (lowerBodyName.includes("belt")) {
-                    bodyIcon = createIconElement("asteroid-4").outerHTML
+                    bodyIcon = createIconElement("asteroid-4", "Asteroid belt").outerHTML
                 }
                 //rocky
                 //gas
@@ -240,11 +260,12 @@
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
 
-            function createFlagElement(iconName, activeIndicator) {
+            function createFlagElement(iconName, description, activeIndicator) {
                 const flagElementType = 'b';
-                let element = createIconElement(iconName, flagElementType);
+                let element = createIconElement(iconName, description, flagElementType);
                 if (!activeIndicator) {
                     element.classList.add("inactive")
+                    element.removeAttribute("title")
                 }
                 else {
                     element.classList.add("active")
@@ -256,11 +277,88 @@
                 return payloadContent.MappedValue > 500000;
             }
 
-            function removeOldBodyEntry(bodyId) {
-                let locationElement = document.getElementById(bodyId);
-                if (locationElement) {
-                    locationElement.parentNode.removeChild(locationElement)
+            function getRingInfo(payloadContent) {
+                let ringInfo = "";
+                if (payloadContent.Rings) {
+
+                    let ringSeparator = document.createElement("span");
+                    ringSeparator.classList.add("ring-separator");
+                    ringSeparator.innerHTML = " ) ";
+
+                    for (let [index, ring] of payloadContent.Rings.entries()) {
+                        ringInfo += ringSeparator.outerHTML;
+
+                        let ringClass = ring.RingClass.replace('eRingClass_', '');
+                        let ringIcon = null;
+                        switch (ringClass) {
+                            case 'MetalRich': {
+                                ringIcon = createIconElement("gold-bars")
+                                break;
+                            }
+                            case 'Metallic': {
+                                ringIcon = createIconElement("ingot")
+                                break;
+                            }
+                            case 'Icy': {
+                                ringIcon = createIconElement("snowflake")
+                                break;
+                            }
+                            case 'Rocky': {
+                                ringIcon = createIconElement("asteroid-3")
+                                break;
+                            }
+                        }
+                        ringInfo += ringIcon.outerHTML
+                    }
+
+                    ringInfo += ringSeparator.outerHTML;
                 }
+
+                let ringContainer = document.createElement("span");
+                ringContainer.classList.add("ring");
+                ringContainer.innerHTML = ringInfo;
+                return ringContainer.outerHTML;
+            }
+
+            function createGravityIndicator(payloadContent) {
+
+                let gravityIndicator = document.createElement("span")
+
+                // Only bother highlighting if the planet is landable and the gravity is worrying enough
+                const gravityWarningThresh = 1.0
+                const gravityAlertThresh = 2.0
+                let severityClass = null;
+                let gravityText = null;
+                if (payloadContent.Landable) {
+                    let surfaceGravity = payloadContent.SurfaceGravity/10.0; // Divided the values by 10 as they appear to be a factor of 10 too large for some reason (compared to the system map + EDSM).
+                    console.log("Surface gravity: " + surfaceGravity.toString())
+
+                    if (surfaceGravity >= gravityAlertThresh) {
+                        severityClass = "gravity-alert"
+                    }
+                    else if (surfaceGravity >= gravityWarningThresh) {
+                        severityClass = "gravity-warning"
+                    }
+                    else {
+                        severityClass = "gravity-good"
+                    }
+                    gravityText = surfaceGravity.toFixed(1)+""
+                }
+                else
+                {
+                    gravityText = "X.X"; // Add some essentially blank text to pad things out as it's mono-spaced.
+                    severityClass = "gravity-hidden";
+                    gravityIndicator.classList.add("inactive")
+                }
+                gravityIndicator.classList.add("gravity-indicator", "rounded", "border-0", severityClass)
+
+                let landable = createFlagElement('lander', 'Landable', payloadContent.Landable);
+                landable.classList.add('landable');
+
+                gravityIndicator.innerHTML = landable.outerHTML + " " +  gravityText
+
+
+                return gravityIndicator.outerHTML
             }
 
             function createDetailedBodyEntry(payloadContent) {
@@ -288,6 +386,7 @@
                         bodySymbol = createIconElement('asteroid-4').outerHTML;
                     }
                 }
+                let rings = getRingInfo(payloadContent);
                 let bodyName = document.createElement('div');
                 bodyName.classList.add("col-2", "system", chartedStyle, "text-left");
                 let simpleBodyName =  payloadContent.BodyName.replace(payloadContent.StarSystem, "")
@@ -296,7 +395,7 @@
                 let bodyType = document.createElement('div');
                 bodyType.classList.add("col", "pr-0", "mr-0", "system", chartedStyle);
                 if (payloadContent.PlanetClass) {
-                    bodyType.innerHTML = getBodyIcon(payloadContent.PlanetClass)+" "+payloadContent.PlanetClass;
+                    bodyType.innerHTML = getBodyIcon(payloadContent.PlanetClass)+" "+rings+" "+payloadContent.PlanetClass;
                 }
                 else if (payloadContent.StarType) {
                     bodyType.innerHTML = createIconElement('star').outerHTML+" "+payloadContent.StarType;
@@ -318,13 +417,10 @@
                     payloadContent.Landable = false;
                 }
 
-                const flagElementType = 'b';
-                extra_info += createFlagElement('volcano', payloadContent.Volcanism).outerHTML;
-                extra_info += createFlagElement('cooling-tower', payloadContent.TerraformState).outerHTML;
-                extra_info += createFlagElement('flag-outline-on-a-pole-with-stars-around', !payloadContent.WasMapped).outerHTML;
-                let landable = createFlagElement('lander', payloadContent.Landable);
-                landable.classList.add('landable');
-                extra_info += landable.outerHTML;
+                extra_info += createFlagElement('volcano', 'Volcanism', payloadContent.Volcanism).outerHTML;
+                extra_info += createFlagElement('cooling-tower', 'Terraformable', payloadContent.TerraformState).outerHTML;
+                extra_info += createFlagElement('flag-outline-on-a-pole-with-stars-around', 'Unmapped', !payloadContent.WasMapped).outerHTML;
+                extra_info += createGravityIndicator(payloadContent)
 
                 let bodyInfo = document.createElement('div');
                 bodyInfo.classList.add("col-auto", "system", chartedStyle);
@@ -457,6 +553,48 @@
                 return bodyName.replace(" ","-");
             }
 
+            function finishScanningBody(data) {
+                let existingBodyEntry = document.getElementById(idFromBodyName(data.BodyName));
+                if (existingBodyEntry) {
+                    console.log("Updating existing body")
+
+                    for (child of existingBodyEntry.childNodes) {
+                        let styleChanged = false;
+                        // Clear any uncharted styles as this has now been mapped.
+                        if (child.classList.contains("uncharted")) {
+                            child.classList.remove("uncharted");
+                            styleChanged = true;
+                        }
+
+                        // Clear any high value styles
+                        if (child.classList.contains("highlighted")) {
+                            child.classList.remove("highlighted");
+                            styleChanged = true;
+                        }
+
+                        // Format it as a charted system now.
+                        if (styleChanged) {
+                            child.classList.add("charted");
+                        }
+                    }
+
+                    // Clear the un-mapped flag
+                    let mappedIcon = existingBodyEntry.querySelector(".flaticon-flag-outline-on-a-pole-with-stars-around");
+                    mappedIcon.classList.remove("active")
+                    mappedIcon.classList.add("inactive")
+                    //mappedIcon.style.color = "#4CE0E1";
+
+                    // If it's in the valuable list, move it into the less valuable list
+                    document.getElementById('low-value-scans').prepend(existingBodyEntry)
+                }
+                else
+                {
+                    console.log("Couldn't find: "+data.BodyName)
+                }
+            }
+
+
+
             function postData(payload) {
                 console.log(payload);
                 let payloadContent = payload.data;
@@ -489,6 +627,9 @@
                         case "Scan": { // When you identify a body in the FSS
                             addScannedBody(payloadContent);
                             break;
+                        }
+                        case "SAAScanComplete" : { // When you do a detailed scan
+                            finishScanningBody(payloadContent);
                         }
                     }
                 }
@@ -561,7 +702,6 @@
 
             let tests = {};
 
-            tests["just-startup"] = [
             tests["just-startup"] = [
                 // Simulate a normal startup
                 WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:06Z", "event":"Location", "Docked":false, "StarSystem":"Sifeae EH-C c13-3", "SystemAddress":913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"V447 Lacertae", "BodyID":0, "BodyType":"Star" }),
@@ -641,8 +781,8 @@
 
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:40:03Z", "event":"Scan", "MappedValue": 3123456, "ScanType":"Detailed", "BodyName":"4", "BodyID":4, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae TP-F d11-27", "SystemAddress":629388954035, "DistanceFromArrivalLS":1202.383750, "TidalLock":false, "TerraformState":"Terraformable", "PlanetClass":"Water world", "Atmosphere":"nitrogen atmosphere", "AtmosphereType":"Nitrogen", "AtmosphereComposition":[ { "Name":"Nitrogen", "Percent":97.354683 }, { "Name":"Oxygen", "Percent":2.557643 }, { "Name":"Water", "Percent":0.063727 } ], "Volcanism":"major rocky magma volcanism", "MassEM":0.800711, "Radius":5696840.500000, "SurfaceGravity":9.833697, "SurfaceTemperature":249.786743, "SurfacePressure":387579.375000, "Landable":true, "Composition":{ "Ice":0.000000, "Rock":0.674676, "Metal":0.325323 }, "SemiMajorAxis":360511553287.506104, "Eccentricity":0.000180, "OrbitalInclination":-0.070908, "Periapsis":154.857116, "OrbitalPeriod":109780913.591385, "RotationPeriod":168794.241913, "AxialTilt":-0.165132, "WasDiscovered":false, "WasMapped":false }),
 
-                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:42:20Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"7", "BodyID":12, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae QU-F d11-7", "SystemAddress":629388954035, "DistanceFromArrivalLS":5808.033260, "TidalLock":false, "TerraformState":"", "PlanetClass":"Gas giant with ammonia based life", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.353905 }, { "Name":"Helium", "Percent":25.625011 } ], "Volcanism":"", "MassEM":355.137878, "Radius":72255304.000000, "SurfaceGravity":27.112337, "SurfaceTemperature":132.713913, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1737880468368.530273, "Eccentricity":0.014049, "OrbitalInclination":-0.175683, "Periapsis":319.387555, "OrbitalPeriod":1119854152.202606, "RotationPeriod":163062.787293, "AxialTilt":-0.328957, "Rings":[ { "Name":"Sifeae QU-F d11-7 4 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":1.0005e+11, "InnerRad":1.1772e+08, "OuterRad":1.3081e+08 }, { "Name":"Sifeae QU-F d11-7 4 B Ring", "RingClass":"eRingClass_Icy", "MassMT":1.343e+12, "InnerRad":1.3091e+08, "OuterRad":2.4653e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
-                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:43:17Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"2", "BodyID":3, "Parents":[ {"Null":2}, {"Star":0} ], "StarSystem":"Sifeae QU-F d11-7", "SystemAddress":629388954035, "DistanceFromArrivalLS":4160.962580, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class II gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.369583 }, { "Name":"Helium", "Percent":25.630409 } ], "Volcanism":"", "MassEM":454.990814, "Radius":74923384.000000, "SurfaceGravity":32.305561, "SurfaceTemperature":165.127991, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":48908598.423004, "Eccentricity":0.044947, "OrbitalInclination":9.301607, "Periapsis":353.801388, "OrbitalPeriod":49028207.659721, "RotationPeriod":150021.407255, "AxialTilt":0.485325, "Rings":[ { "Name":"Sifeae QU-F d11-7 2 A Ring", "RingClass":"eRingClass_Rocky", "MassMT":2.1809e+11, "InnerRad":1.2237e+08, "OuterRad":1.5135e+08 }, { "Name":"Sifeae QU-F d11-7 2 B Ring", "RingClass":"eRingClass_Rocky", "MassMT":1.3414e+12, "InnerRad":1.5145e+08, "OuterRad":2.6776e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:42:20Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"7", "BodyID":12, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae QU-F d11-7", "SystemAddress":629388954035, "DistanceFromArrivalLS":5808.033260, "TidalLock":false, "TerraformState":"", "PlanetClass":"Gas giant with ammonia based life", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.353905 }, { "Name":"Helium", "Percent":25.625011 } ], "Volcanism":"", "MassEM":355.137878, "Radius":72255304.000000, "SurfaceGravity":27.112337, "SurfaceTemperature":132.713913, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":1737880468368.530273, "Eccentricity":0.014049, "OrbitalInclination":-0.175683, "Periapsis":319.387555, "OrbitalPeriod":1119854152.202606, "RotationPeriod":163062.787293, "AxialTilt":-0.328957, "Rings":[ { "Name":"Sifeae QU-F d11-7 4 A Ring", "RingClass":"eRingClass_Metallic", "MassMT":1.0005e+11, "InnerRad":1.1772e+08, "OuterRad":1.3081e+08 }, { "Name":"Sifeae QU-F d11-7 4 B Ring", "RingClass":"eRingClass_Icy", "MassMT":1.343e+12, "InnerRad":1.3091e+08, "OuterRad":2.4653e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:43:17Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"2", "BodyID":3, "Parents":[ {"Null":2}, {"Star":0} ], "StarSystem":"Sifeae QU-F d11-7", "SystemAddress":629388954035, "DistanceFromArrivalLS":4160.962580, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class II gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":74.369583 }, { "Name":"Helium", "Percent":25.630409 } ], "Rings":[ { "Name":"Wregoe NT-X c28-8 A Belt", "RingClass":"eRingClass_Rocky", "MassMT":4.987e+06, "InnerRad":9.0376e+08, "OuterRad":1.9639e+09 } ], "Volcanism":"", "MassEM":454.990814, "Radius":74923384.000000, "SurfaceGravity":32.305561, "SurfaceTemperature":165.127991, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":48908598.423004, "Eccentricity":0.044947, "OrbitalInclination":9.301607, "Periapsis":353.801388, "OrbitalPeriod":49028207.659721, "RotationPeriod":150021.407255, "AxialTilt":0.485325, "Rings":[ { "Name":"Sifeae QU-F d11-7 2 A Ring", "RingClass":"eRingClass_Rocky", "MassMT":2.1809e+11, "InnerRad":1.2237e+08, "OuterRad":1.5135e+08 }, { "Name":"Sifeae QU-F d11-7 2 B Ring", "RingClass":"eRingClass_Rocky", "MassMT":1.3414e+12, "InnerRad":1.5145e+08, "OuterRad":2.6776e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T23:02:14Z", "event":"Scan", "MappedValue": 123, "ScanType":"Detailed", "BodyName":"AB 1", "BodyID":14, "Parents":[ {"Null":13}, {"Null":0} ], "StarSystem":"Sifeae SP-F d11-16", "SystemAddress":629388954035, "DistanceFromArrivalLS":4020.598838, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":71.664436 }, { "Name":"Helium", "Percent":28.335575 } ], "Volcanism":"", "MassEM":2197.937988, "Radius":70825648.000000, "SurfaceGravity":174.640029, "SurfaceTemperature":597.157349, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":139971697.330475, "Eccentricity":0.197751, "OrbitalInclination":7.265513, "Periapsis":98.411227, "OrbitalPeriod":35178327.560425, "RotationPeriod":17075.715066, "AxialTilt":2.175150, "Rings":[ { "Name":"Sifeae SP-F d11-16 AB 1 A Ring", "RingClass":"eRingClass_MetalRich", "MassMT":2.1331e+11, "InnerRad":1.1453e+08, "OuterRad":1.4961e+08 }, { "Name":"Sifeae SP-F d11-16 AB 1 B Ring", "RingClass":"eRingClass_Rocky", "MassMT":4.2019e+12, "InnerRad":1.4971e+08, "OuterRad":4.5263e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
 
                 WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T20:58:37Z", "event":"Scan", "MappedValue": 1123456, "ScanType":"Detailed", "BodyName":"6", "BodyID":6, "Parents":[ {"Star":0} ], "StarSystem":"Sifeae RP-F d11-3", "SystemAddress":114143857123, "DistanceFromArrivalLS":3141.918552, "TidalLock":false, "TerraformState":"", "PlanetClass":"Ammonia world", "Atmosphere":"", "AtmosphereType":"AmmoniaOxygen", "AtmosphereComposition":[ { "Name":"CarbonDioxide", "Percent":84.502144 }, { "Name":"Nitrogen", "Percent":11.775880 }, { "Name":"Oxygen", "Percent":2.830044 } ], "Volcanism":"", "MassEM":0.296209, "Radius":4198024.500000, "SurfaceGravity":6.699115, "SurfaceTemperature":234.536438, "SurfacePressure":294524.968750, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.673636, "Metal":0.326364 }, "SemiMajorAxis":942827576398.849487, "Eccentricity":0.001102, "OrbitalInclination":9.992684, "Periapsis":260.638759, "OrbitalPeriod":437092494.964600, "RotationPeriod":39129.182124, "AxialTilt":-0.224488, "WasDiscovered":false, "WasMapped":false }),
@@ -663,6 +803,18 @@
                 WrapWithEventType("JournalEntry", {"timestamp":"2020-08-08T23:07:12Z", "event":"FSDTarget", "Name":'Pro Eurl YJ-Q d5-18', "SystemAddress":629388954035, "StarClass":"F", "RemainingJumpsInRoute":1 }),
                 WrapWithEventType("System-NavRoute", {'StarSystem': 'Sifeae EH-C c13-3', 'SystemAddress': 913385362290, 'StarPos': [2899.96875, 206.34375, 801.6875], 'StarClass': 'K', 'id': 55216390, 'id64': 913385362290, 'name': 'Sifeae EH-C c13-3', 'url': 'https://www.edsm.net/en/system/bodies/id/55216390/name/Sifeae+EH-C+c13-3', 'estimatedValue': 112130, 'estimatedValueMapped': 368117, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Sifeae EH-C c13-3 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Sifeae EH-C c13-3 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
                 WrapWithEventType("System-NavRoute", {'StarSystem': 'Pro Eurl YJ-Q d5-18', 'SystemAddress': 629388954035, 'StarPos': [2035.6875, 381.59375, 739.6875], 'StarClass': 'F', 'id': 55108083, 'id64': 629388954035, 'name': 'Pro Eurl YJ-Q d5-18', 'url': 'https://www.edsm.net/en/system/bodies/id/55108083/name/Pro+Eurl+YJ-Q+d5-18', 'estimatedValue': 39863, 'estimatedValueMapped': 127197, 'valuableBodies': [{'bodyId': 226907740, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 1', 'distance': 1250, 'valueMax': 365696},{'bodyId': 226907741, 'bodyName': 'Pro Eurl YJ-Q d5-18 A 2', 'distance': 120, 'valueMax': 36596}], 'charted': true}),
+            ];
+
+            tests["detailed-scan-drops-down-list"] = [
+                // In a system.
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:19:02Z", "event":"FSDJump", "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "StarPos":[3517.00000,52.18750,680.09375], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Sifeae GF-R d4-115 A", "BodyID":1, "BodyType":"Star", "JumpDist":48.958, "FuelUsed":4.264605, "FuelLevel":27.735395 }),
+                // Some scans
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:20:07Z", "event":"Scan", "MappedValue": 1000000, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 1", "BodyID":5, "Parents":[ {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":1092.825009, "TidalLock":false, "TerraformState":"Terraformable", "PlanetClass":"High metal content body", "Atmosphere":"hot thick carbon dioxide atmosphere", "AtmosphereType":"CarbonDioxide", "AtmosphereComposition":[ { "Name":"CarbonDioxide", "Percent":95.848160 }, { "Name":"Nitrogen", "Percent":3.193112 }, { "Name":"SulphurDioxide", "Percent":0.958482 } ], "Volcanism":"major silicate vapour geysers volcanism", "MassEM":3.094303, "Radius":8427145.000000, "SurfaceGravity":17.366460, "SurfaceTemperature":956.388855, "SurfacePressure":44952200.000000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.669245, "Metal":0.330755 }, "SemiMajorAxis":326312464475.631714, "Eccentricity":0.004013, "OrbitalInclination":-0.188240, "Periapsis":187.106421, "OrbitalPeriod":79173184.037209, "RotationPeriod":168728.632391, "AxialTilt":0.334432, "WasDiscovered":true, "WasMapped":false }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:20:16Z", "event":"Scan", "MappedValue": 1, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 7", "BodyID":14, "Parents":[ {"Null":12}, {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":3772.247374, "TidalLock":false, "TerraformState":"", "PlanetClass":"High metal content body", "Atmosphere":"thick methane rich atmosphere", "AtmosphereType":"MethaneRich", "AtmosphereComposition":[ { "Name":"Ammonia", "Percent":32.688076 }, { "Name":"Methane", "Percent":32.688076 }, { "Name":"Nitrogen", "Percent":32.688076 } ], "Volcanism":"minor silicate vapour geysers volcanism", "MassEM":1.378427, "Radius":6685303.500000, "SurfaceGravity":12.292803, "SurfaceTemperature":416.637970, "SurfacePressure":2200182.250000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.669251, "Metal":0.330749 }, "SemiMajorAxis":2948085606.098175, "Eccentricity":0.080099, "OrbitalInclination":-2.887471, "Periapsis":319.350979, "OrbitalPeriod":48950456.380844, "RotationPeriod":81034.086164, "AxialTilt":-0.196478, "WasDiscovered":true, "WasMapped":false }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:20:21Z", "event":"Scan", "MappedValue": 1, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 6", "BodyID":13, "Parents":[ {"Null":12}, {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":3778.986417, "TidalLock":false, "TerraformState":"", "PlanetClass":"High metal content body", "Atmosphere":"thick methane rich atmosphere", "AtmosphereType":"MethaneRich", "AtmosphereComposition":[ { "Name":"Ammonia", "Percent":32.486629 }, { "Name":"Methane", "Percent":32.486629 }, { "Name":"Nitrogen", "Percent":32.486629 } ], "Volcanism":"metallic magma volcanism", "MassEM":2.528601, "Radius":7946843.500000, "SurfaceGravity":15.958809, "SurfaceTemperature":448.047302, "SurfacePressure":3692897.000000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.662390, "Metal":0.337610 }, "SemiMajorAxis":1607102572.917938, "Eccentricity":0.080099, "OrbitalInclination":-2.887471, "Periapsis":139.350985, "OrbitalPeriod":48950456.380844, "RotationPeriod":138931.744666, "AxialTilt":-0.758665, "WasDiscovered":true, "WasMapped":false }),
+                // detailed surface map
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:23:40Z", "event":"SAAScanComplete", "BodyName":"Sifeae GF-R d4-115 A 1", "SystemAddress":3962585483691, "BodyID":5, "ProbesUsed":6, "EfficiencyTarget":7 }),
+                WrapWithEventType("JournalEntry", { "timestamp":"2020-09-04T22:23:40Z", "event":"Scan", "MappedValue": 1000000, "ScanType":"Detailed", "BodyName":"Sifeae GF-R d4-115 A 1", "BodyID":5, "Parents":[ {"Star":1}, {"Null":0} ], "StarSystem":"Sifeae GF-R d4-115", "SystemAddress":3962585483691, "DistanceFromArrivalLS":1092.825012, "TidalLock":false, "TerraformState":"Terraformable", "PlanetClass":"High metal content body", "Atmosphere":"hot thick carbon dioxide atmosphere", "AtmosphereType":"CarbonDioxide", "AtmosphereComposition":[ { "Name":"CarbonDioxide", "Percent":95.848160 }, { "Name":"Nitrogen", "Percent":3.193112 }, { "Name":"SulphurDioxide", "Percent":0.958482 } ], "Volcanism":"major silicate vapour geysers volcanism", "MassEM":3.094303, "Radius":8427145.000000, "SurfaceGravity":17.366460, "SurfaceTemperature":956.388855, "SurfacePressure":44952200.000000, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.669245, "Metal":0.330755 }, "SemiMajorAxis":326312464475.631714, "Eccentricity":0.004013, "OrbitalInclination":-0.188240, "Periapsis":187.106421, "OrbitalPeriod":79173184.037209, "RotationPeriod":168728.632391, "AxialTilt":0.334432, "WasDiscovered":true, "WasMapped":false }),
             ];
 
             function runTest(testId){
@@ -694,9 +846,28 @@
 
             /**/
 
+            function versionCheckReport(versionCheck) {
+                console.log(versionCheck);
+
+                if (versionCheck['new_release_detected']) {
+                    let versionInfoElement = document.getElementById('version-link-wrapper')
+                    let link = document.createElement('a')
+                    link.href = versionCheck['url']
+                    link.text = versionCheck['latest_version']
+                    link.target = '_blank'
+                    link.classList.add('alert-link')
+                    versionInfoElement.innerHTML = link.outerHTML
+
+                    let alertDiv = document.getElementById('new-version-alert-wrapper')
+                    alertDiv.hidden = false;
+                }
+            }
+
+
             if (enableBackendConnections) {
                 var socket = io()
                 socket.on('log', postData)
+                socket.on('version', versionCheckReport)
 
                 document.addEventListener('DOMContentLoaded', function() {
                     var url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';

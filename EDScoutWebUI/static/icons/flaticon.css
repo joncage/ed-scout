@@ -1,6 +1,6 @@
 	/*
   	Flaticon icon font: Flaticon
-  	Creation date: 28/08/2020 21:14
+  	Creation date: 04/10/2020 20:48
   	*/
 
 @font-face {
@@ -24,16 +24,16 @@
 
 [class^="flaticon-"]:before, [class*=" flaticon-"]:before,
 [class^="flaticon-"]:after, [class*=" flaticon-"]:after {   
-  font-family: Flaticon;
-  /*
-  font-size: 20px;
-  margin-left: 20px;
-   */
-  font-style: normal;
+    font-family: Flaticon;
+    /*
+    font-size: 20px;
+    margin-left: 20px;
+    */
+    font-style: normal;
     text-shadow: 0 0 0;
 }
 
-.flaticon-lander:before { content: "\f100"; }
+.flaticon-lander:before { content: "\f100"; margin-left: 2px;}
 .flaticon-volcano:before { content: "\f101"; }
 .flaticon-cooling-tower:before { content: "\f102"; }
 .flaticon-cooling-tower-1:before { content: "\f103"; }
@@ -62,3 +62,9 @@
 .flaticon-jupiter-1:before { content: "\f11a"; }
 .flaticon-jupiter-2:before { content: "\f11b"; }
 .flaticon-jupiter-3:before { content: "\f11c"; }
+.flaticon-pickaxe:before { content: "\f11d"; }
+.flaticon-curved-line:before { content: "\f11e"; }
+.flaticon-bacteria:before { content: "\f11f"; }
+.flaticon-dna:before { content: "\f120"; }
+.flaticon-ingot-1:before { content: "\f121"; }
+.flaticon-gold-bars:before { content: "\f122"; }.flaticon-ring-metal:before { content: "\f111"; }

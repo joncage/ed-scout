@@ -33,6 +33,19 @@ body {
     color: #000000;
 }
 
+.ring {
+    font-size: smaller;
+    padding: 0px;
+    margin: 0px;
+}
+
+.ring-separator {
+    font-size: smaller;
+    padding: 0px;
+    position: relative;
+    top: -3px;
+}
+
 div.highlighted b.active {
     color: #000000;
 }
@@ -90,4 +103,33 @@ div b.active.landable {
 
 .next-system hr {
     border-color: #17EFF9;
+}
+
+.alert {
+    top: 1em;
+    bottom: 1em;
+}
+
+.gravity-indicator {
+    background-color: #000;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 2px;
+}
+
+.gravity-good {
+    color: #0F0;
+}
+
+.gravity-alert {
+    color: #F00;
+}
+
+.gravity-warning {
+    color: #F60;
+}
+
+.gravity-hidden {
+    color: #00000000;
+    background-color: #00000000;
 }
