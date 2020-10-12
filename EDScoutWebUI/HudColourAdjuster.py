@@ -1,8 +1,32 @@
 import xml.etree.ElementTree as ET
 import re
 import os
+import platform
 
-default_config_file = os.path.join(os.path.expanduser('~'), r"AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml")
+osname = platform.system()
+if osname == 'Windows':
+    default_config_file = os.path.join(os.path.expanduser('~'), r"AppData\Local\Frontier Developments\Elite Dangerous\Options\Graphics\GraphicsConfigurationOverride.xml")
+elif osname == 'Linux':
+    default_config_file = os.path.join(os.path.expanduser('~'),
+                                       ".local",
+                                       "share",
+                                       "Steam",
+                                       "steamapps",
+                                       "compatdata",
+                                       "359320",
+                                       "pfx",
+                                       "drive_c",
+                                       "users",
+                                       "steamuser",
+                                       "Local Settings",
+                                       "Application Data",
+                                       "Frontier Developments",
+                                       "Elite Dangerous",
+                                       "Options",
+                                       "Graphics",
+                                       "GraphicsConfigurationOverride.xml")
+else:
+    raise Exception(f"EDScout does not support {osname}")
 # print(f'default_config_file={default_config_file}')
 
 # Worked out the transform from here:
