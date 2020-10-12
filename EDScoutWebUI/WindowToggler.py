@@ -1,7 +1,33 @@
-import win32con as wcon
-import win32gui as wgui
+import platform
+if platform.system() == 'Windows':
+    import win32con as wcon
+    import win32gui as wgui
 from pynput import keyboard
 
+
+class WindowFinder:
+
+    @staticmethod
+    def get_scout_handle():
+        if platform.system() == 'Windows':
+            return wgui.FindWindow(None, "ED Scout v1.4.0")
+        else:
+            return None
+
+    @staticmethod
+    def get_elite_handle():
+        if platform.system() == 'Windows':
+            return wgui.FindWindow(None, "Elite - Dangerous (CLIENT)")
+        else:
+            return None
+
+    @staticmethod
+    def adjust_window_visibility(window_handle, adjustment):
+        if platform.system() == 'Windows':
+            wgui.SetWindowPos(window_handle, adjustment, 0, 0, 0, 0,
+                              wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
+        else:
+            pass
 
 class ScoutToggler:
 
@@ -23,29 +49,17 @@ class ScoutToggler:
         self.listener.start()
 
     @staticmethod
-    def get_scout_handle():
-        return wgui.FindWindow(None, "ED Scout v1.4.0")
-
-    @staticmethod
-    def get_elite_handle():
-        return wgui.FindWindow(None, "Elite - Dangerous (CLIENT)")
-
-    @staticmethod
-    def adjust_window_visibility(window_handle, adjustment):
-        wgui.SetWindowPos(window_handle, adjustment, 0, 0, 0, 0,
-                          wcon.SWP_NOMOVE | wcon.SWP_NOSIZE | wcon.SWP_NOACTIVATE)
-
-    @staticmethod
     def hide_scout():
-        scout_handle = ScoutToggler.get_scout_handle()
-        elite_handle = ScoutToggler.get_elite_handle()
-        ScoutToggler.adjust_window_visibility(scout_handle, elite_handle)
+        scout_handle = WindowFinder.get_scout_handle()
+        elite_handle = WindowFinder.get_elite_handle()
+        WindowFinder.adjust_window_visibility(scout_handle, elite_handle)
 
     @staticmethod
     def show_scout():
-        scout_handle = ScoutToggler.get_scout_handle()
-        ScoutToggler.adjust_window_visibility(scout_handle, wcon.HWND_TOPMOST)
-        ScoutToggler.adjust_window_visibility(scout_handle, wcon.HWND_NOTOPMOST)
+        scout_handle = WindowFinder.get_scout_handle()
+        if platform.system() == 'Windows':
+            WindowFinder.adjust_window_visibility(scout_handle, wcon.HWND_TOPMOST)
+            WindowFinder.adjust_window_visibility(scout_handle, wcon.HWND_NOTOPMOST)
 
     def toggle_scout_visibility(self):
         self.scout_toggled

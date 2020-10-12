@@ -4,6 +4,7 @@ import sys
 import logging
 import argparse
 import tempfile
+import platform
 import psutil
 import time
 import threading
@@ -99,7 +100,13 @@ def version_check(current_version):
 
 
 # Work out where to stick the logs and make sure it exists
-logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
+osname = platform.system()
+if osname == 'Windows':
+    logging_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout', 'Logs')
+elif osname == 'Linux':
+    logging_dir = os.path.join(os.path.expanduser('~'), '.local', 'share', 'EDScout', 'logs')
+else:
+    raise Exception(f"EDScout does not support {osname}")
 if not os.path.isdir(logging_dir):
     Path(logging_dir).mkdir(parents=True, exist_ok=True)
 timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
@@ -136,6 +143,8 @@ for proc in psutil.process_iter():
 base_dir = '.'
 if is_deployed:
     base_dir = os.path.join(sys._MEIPASS)
+else:
+    base_dir = os.path.dirname(__file__)
 
 # Setup the app
 static_path = os.path.join(base_dir, 'static')

@@ -1,11 +1,18 @@
 import requests
 import requests_cache
 import os
+import platform
 
 # See https://www.edsm.net/en_GB/api-v1
 
 # Setup the cache directory in the user area.
-cache_path = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout')
+osname = platform.system()
+if  osname == 'Windows':
+    cache_path = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout')
+elif osname == 'Linux':
+    cache_path = os.path.join(os.path.expanduser('~'), '.local', 'share', 'EDScout')
+else:
+    raise Exception(f"EDScout does not support {osname}")
 os.makedirs(cache_path, exist_ok=True)
 cache_name = 'edsm_cache'
 requests_cache.install_cache(os.path.join(cache_path, cache_name))
