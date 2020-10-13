@@ -395,8 +395,6 @@
         setCurrentSystem(data);
     }
 
-    var navRouteContainer = document.getElementById('nav-route')
-
     function hideCurrentTarget() {
         // <div id="target-sys" data-target-sys="" class="container statusInfo d-none">
         let nextTargetContainer = document.getElementById('target-sys');
@@ -491,6 +489,7 @@
         let payloadContent = payload.data;
         if (payloadContent.type === 'NewRoute') {
             console.log('Clearing');
+            let navRouteContainer = document.getElementById('nav-route')
             navRouteContainer.innerHTML = '';
             // If we're about to plot a new route, it'll set the next target as the first item in the navroute.
             hideCurrentTarget();
@@ -542,6 +541,7 @@
                 else
                 {
                     console.log('Assigning new system to nav list; ', currentSystem)
+                    let navRouteContainer = document.getElementById('nav-route')
                     container = navRouteContainer;
                 }
 
@@ -754,19 +754,24 @@
         }
     }
 
+    document.addEventListener('DOMContentLoaded', function() {
 
+        console.log('Launching backend connections')
 
-    if (enableBackendConnections) {
-        var socket = io()
-        socket.on('log', postData)
-        socket.on('version', versionCheckReport)
+        if (enableBackendConnections) {
+            let socket = io()
+            socket.on('log', postData)
+            socket.on('version', versionCheckReport)
+        }
+        else
+        {
+            console.log('Backend connections are disabled')
+        }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';
-            fetch(url, { mode: 'no-cors'});
-            setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
-        });
-    }
+        let url = 'http://'+window.location.hostname+':5001/GUI-is-still-open';
+        fetch(url, { mode: 'no-cors'});
+        setInterval(function(){ fetch(url, { mode: 'no-cors'});}, 5000);
+    });
 
 })()
 
