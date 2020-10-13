@@ -185,6 +185,7 @@
                         ringIcon = createIconElement("gold-bars")
                         break;
                     }
+                    case 'Metalic':
                     case 'Metallic': {
                         ringIcon = createIconElement("ingot")
                         break;
@@ -582,9 +583,6 @@
 
     let enableBackendConnections = true;
 
-    // Uncomment to debug without needing the backend
-    /**
-
     function WrapWithEventType(type, entryContent) {
         let wrap = {'data': {'type': type}};
         wrap.data = $.extend(true, {}, wrap.data, entryContent);
@@ -680,6 +678,9 @@
 
         WrapWithEventType("JournalEntry", { "timestamp":"2020-08-27T22:25:20Z", "event":"Scan", "MappedValue": 1, "ScanType":"AutoScan", "BodyName":"B 4", "BodyClass": "Belt Cluster", "BodyID":12, "Parents":[ {"Ring":8}, {"Star":0} ], "StarSystem":"Sifeae SP-F d11-19", "SystemAddress":663916448227, "DistanceFromArrivalLS":197.613961, "WasDiscovered":false, "WasMapped":false }),
         WrapWithEventType("JournalEntry", { "timestamp":"2020-07-28T23:34:03Z", "event":"Scan", "MappedValue": 3523456, "ScanType":"Detailed", "BodyName":"C 5", "BodyID":12, "Parents":[ {"Null":11}, {"Star":4}, {"Null":0} ], "StarSystem":"Pro Eurl RI-T d3-24", "SystemAddress":835463448995, "DistanceFromArrivalLS":29917.101719, "TidalLock":false, "TerraformState":"", "PlanetClass":"Earthlike body", "Atmosphere":"", "AtmosphereType":"EarthLike", "AtmosphereComposition":[ { "Name":"Nitrogen", "Percent":95.066788 }, { "Name":"Oxygen", "Percent":4.298672 }, { "Name":"Water", "Percent":0.609198 } ], "Volcanism":"major rocky magma volcanism", "MassEM":0.881002, "Radius":5857355.000000, "SurfaceGravity":10.234893, "SurfaceTemperature":303.686554, "SurfacePressure":386198.937500, "Landable":false, "Composition":{ "Ice":0.000000, "Rock":0.671427, "Metal":0.328573 }, "SemiMajorAxis":924326723.814011, "Eccentricity":0.138475, "OrbitalInclination":-8.776263, "Periapsis":254.857225, "OrbitalPeriod":23820475.339890, "RotationPeriod":98249.471153, "AxialTilt":-0.254686, "WasDiscovered":true, "WasMapped":false }),
+
+        // badly spelt metallic in ring
+        WrapWithEventType("JournalEntry", { "timestamp":"2020-10-13T21:34:30Z", "event":"Scan", "MappedValue": 1, "ScanType":"Detailed", "BodyName":"Sleguae AN-M c23-4 A 2", "BodyID":22, "Parents":[ {"Null":21}, {"Star":1}, {"Null":0} ], "StarSystem":"Sleguae AN-M c23-4", "SystemAddress":1178599166154, "DistanceFromArrivalLS":1614.812718, "TidalLock":false, "TerraformState":"", "PlanetClass":"Sudarsky class III gas giant", "Atmosphere":"", "AtmosphereComposition":[ { "Name":"Hydrogen", "Percent":73.104919 }, { "Name":"Helium", "Percent":26.895090 } ], "Volcanism":"", "MassEM":1664.134521, "Radius":74779944.000000, "SurfaceGravity":118.611691, "SurfaceTemperature":393.255524, "SurfacePressure":0.000000, "Landable":false, "SemiMajorAxis":794658607.244492, "Eccentricity":0.033201, "OrbitalInclination":-7.229987, "Periapsis":249.203960, "OrbitalPeriod":8435987.770557, "RotationPeriod":212952.984035, "AxialTilt":-0.975308, "Rings":[ { "Name":"Sleguae AN-M c23-4 A 2 A Ring", "RingClass":"eRingClass_Metalic", "MassMT":1.525e+11, "InnerRad":1.1955e+08, "OuterRad":1.3837e+08 }, { "Name":"Sleguae AN-M c23-4 A 2 B Ring", "RingClass":"eRingClass_MetalRich", "MassMT":4.7453e+12, "InnerRad":1.3847e+08, "OuterRad":4.1255e+08 } ], "ReserveLevel":"PristineResources", "WasDiscovered":false, "WasMapped":false }),
     ];
 
 
@@ -727,15 +728,6 @@
         document.body.appendChild(document.createElement("br"))
     }
 
-    let testId;
-    for (testId of Object.keys(tests))
-    {
-        addTest(testId);
-    }
-
-    enableBackendConnections = false;
-
-    /**/
 
     function versionCheckReport(versionCheck) {
         console.log(versionCheck);
@@ -754,9 +746,22 @@
         }
     }
 
+    function populateTests() {
+        let testId;
+        for (testId of Object.keys(tests))
+        {
+            addTest(testId);
+        }
+
+        enableBackendConnections = false;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
 
         console.log('Launching backend connections')
+
+        // Uncomment to debug without needing the backend
+        //populateTests();
 
         if (enableBackendConnections) {
             let socket = io()
