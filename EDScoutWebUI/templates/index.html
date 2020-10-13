@@ -415,6 +415,7 @@
                     payloadContent.Volcanism = false;
                     payloadContent.TerraformState = "";
                     payloadContent.Landable = false;
+                    payloadContent.WasMapped = true; // Not strictly true but you can't map stars
                 }
 
                 extra_info += createFlagElement('volcano', 'Volcanism', payloadContent.Volcanism).outerHTML;
