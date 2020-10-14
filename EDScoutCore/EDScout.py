@@ -43,6 +43,8 @@ class EDScout:
         self.sender = Sender()
         self.port = self.sender.port
 
+        self.star_cache = {}
+
     def trigger_current_journal_check(self):
         self.journalWatcher.trigger_current_journal_check()
 
@@ -53,6 +55,16 @@ class EDScout:
     @staticmethod
     def requires_body_investigation(new_event):
         return new_event["event"] in ["FSSDiscoveryScan", "FSSAllBodiesFound"]
+
+    def add_to_star_cache(self, journal_entry):
+        if "SystemAddress" and "StarClass" in journal_entry:
+            logger.info(f"Storing {journal_entry['SystemAddress']} => {journal_entry['StarClass']}")
+            self.star_cache[journal_entry['SystemAddress']] = journal_entry["StarClass"]
+
+    def lookup_star_class(self, journal_entry):
+        logger.info(f"Looking up system {journal_entry['SystemAddress']}")
+        return self.star_cache.get(journal_entry["SystemAddress"], "?")
+
 
     @staticmethod
     def identify_system_name(journal_entry):
@@ -69,8 +81,7 @@ class EDScout:
 
         return system_name
 
-    @staticmethod
-    def create_system_report(journal_entry):
+    def create_system_report(self, journal_entry):
         # Simulating something like a nav event:
         # { "timestamp":"2020-08-12T00:19:35Z", "event":"NavRoute", "Route":[
         # { "StarSystem":"Col 285 Sector GL-T b18-4", "SystemAddress":9470537180601, "StarPos":[259.00000,3.62500,36.81250], "StarClass":"M" },
@@ -96,7 +107,7 @@ class EDScout:
             if system and system["primaryStar"]:
                 star_class = system["primaryStar"]["type"].split(maxsplit=1)[0]
             else:
-                star_class = "?"
+                star_class = self.lookup_star_class(journal_entry)
 
         additional_info = {
             'StarSystem': system_name,
@@ -120,10 +131,16 @@ class EDScout:
         new_entry["MappedValue"] = BodyAppraiser.appraise_body(new_entry)
         return new_entry
 
+    def append_info_to_fsdjump(self, new_entry):
+        new_entry["StarClass"] = self.lookup_star_class(new_entry)
+        return new_entry
+
     def get_info_tacker_method(self, event_type):
         tacker_method = None
         if event_type == "Scan":
             tacker_method = self.append_info_to_scan
+        elif event_type == "FSDJump":
+            tacker_method = self.append_info_to_fsdjump
         return tacker_method
 
     def tack_on_additional_info(self, new_entry):
@@ -149,7 +166,7 @@ class EDScout:
 
             # If it needed a detailed system lookup, add that as well
             if EDScout.requires_system_lookup(new_entry):
-                self.report_new_info(EDScout.create_system_report(new_entry))
+                self.report_new_info(self.create_system_report(new_entry))
 
             # if EDScout.requires_system_lookup(new_entry) or EDScout.requires_body_investigation(new_entry):
             #     with requests_cache.disabled():
@@ -171,6 +188,7 @@ class EDScout:
         for new_entry in entries:
             if self.journal_stream_recorder:
                 self.journal_stream_recorder.record('journal_output', new_entry)
+            self.add_to_star_cache(new_entry)
             self.process_journal_change(new_entry)
 
     @staticmethod
@@ -201,6 +219,7 @@ class EDScout:
         self.report_new_info(nav_route)
 
         for jump_dest in nav_route['Route']:
+            self.add_to_star_cache(jump_dest)
             report_content = EDScout.get_edsm_system_report(jump_dest['StarSystem'], 'NavRoute')
             report_content.update(jump_dest)
             self.report_new_info(report_content)
