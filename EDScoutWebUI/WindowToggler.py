@@ -29,6 +29,54 @@ class WindowFinder:
         else:
             pass
 
+
+class TransparencySetter:
+
+    def __init__(self, window_title):
+        self.transparency = 255
+        self.window_title = window_title
+
+        # The key combination to check
+        self.COMBINATIONS = [
+            {keyboard.Key.cmd, keyboard.KeyCode(char='[')},
+            {keyboard.Key.cmd, keyboard.KeyCode(char=']')}
+        ]
+
+        # The currently active modifiers
+        self.current = set()
+
+        self.listener = keyboard.Listener(
+            on_press=self.on_press,
+            on_release=self.on_release)
+        self.listener.start()
+
+    def on_press(self, key):
+        if any([key in COMBO for COMBO in self.COMBINATIONS]):
+            self.current.add(key)
+            if any(all(k in self.current for k in COMBO) for COMBO in self.COMBINATIONS):
+                if key.char == ']':
+                    self.increase_transparency()
+                else:
+                    self.decrease_transparency()
+
+    def on_release(self, key):
+        if any([key in COMBO for COMBO in self.COMBINATIONS]):
+            self.current.remove(key)
+
+    def decrease_transparency(self):
+        self.transparency = max(self.transparency-10, 5)
+        self.set_transparency()
+
+    def increase_transparency(self):
+        self.transparency = min(self.transparency+10, 255)
+        self.set_transparency()
+
+    def set_transparency(self):
+        if platform.system() == 'Windows':
+            from EDScoutWebUI.TransparencyAdjuster import set_transparency_by_window
+            set_transparency_by_window(self.window_title, self.transparency)
+
+
 class ScoutToggler:
 
     def __init__(self):
