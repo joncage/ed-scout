@@ -260,7 +260,9 @@ if __name__ == '__main__':
 
         # Enable toggling
         toggler = WindowToggler.ScoutToggler()
-
+        # Enable transparency adjustment
+        window_title = "ED Scout " + __version__
+        trans = WindowToggler.TransparencySetter(window_title)
 
         # Launch the web server either directly or as an app
         if ui:
