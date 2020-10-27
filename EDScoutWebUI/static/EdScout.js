@@ -416,14 +416,13 @@
         let currentSystem = getCurrentSystem();
         let existingSystemEntry = document.getElementById(systemInfo.SystemAddress);
         if (existingSystemEntry) {
-            return; // Do nothing if the element aready exists to avoid a duplicate.
+            return; // Do nothing if the element already exists to avoid a duplicate.
         }
 
         let systemEntry = createSystemEntry(systemInfo)
         container.appendChild(systemEntry);
 
-        if ((systemInfo.SystemAddress.toString() !== currentSystem) &&
-            (systemInfo.valuableBodies))
+        if (systemInfo.valuableBodies)
         {
             let body;
             for (body of systemInfo.valuableBodies) {
