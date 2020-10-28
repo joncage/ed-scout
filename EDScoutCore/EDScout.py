@@ -133,6 +133,11 @@ class EDScout:
 
     def append_info_to_fsdjump(self, new_entry):
         new_entry["StarClass"] = self.lookup_star_class(new_entry)
+
+        edsm_report = EDScout.get_edsm_system_report(new_entry['StarSystem'], 'FSDJump')
+        new_entry["valuableBodies"] = edsm_report["valuableBodies"]
+        new_entry["estimatedValueMapped"] = edsm_report["estimatedValueMapped"]
+
         return new_entry
 
     def get_info_tacker_method(self, event_type):
