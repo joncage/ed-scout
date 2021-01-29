@@ -2,6 +2,9 @@ import requests
 import requests_cache
 import os
 import platform
+import logging
+
+logger = logging.getLogger('EDScoutCore')
 
 # See https://www.edsm.net/en_GB/api-v1
 
@@ -34,11 +37,18 @@ def get_system(system_name):
         "showCoordinates": 1,
         "showPrimaryStar": 1
     }
-
-    data = requests.get("https://www.edsm.net/api-v1/system", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
+    retry_count = 10
+    data = None
+    while not data and retry_count:
+        try:
+            data = requests.get("https://www.edsm.net/api-v1/system", requestData, headers=headers)
+            if data.status_code != 200:
+                raise ("request returned bad response code %d" % (data.status_code))
+        except Exception as e:
+            data = None
+            logger.error(e)
+            retry_count -= 1
+        
     return data.json()
 
 
@@ -47,11 +57,19 @@ def get_systems(system_name, radius):
         "systemName": system_name,
         "radius": radius
     }
-
-    data = requests.get("https://www.edsm.net/api-v1/sphere-systems", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
+    
+    retry_count = 10
+    data = None
+    while not data and retry_count:
+        try:
+            data = requests.get("https://www.edsm.net/api-v1/sphere-systems", requestData, headers=headers)
+            if data.status_code != 200:
+                raise ("request returned bad response code %d" % (data.status_code))
+        except Exception as e:
+            data = None
+            logger.error(e)
+            retry_count -= 1
+    
     return data.json()
 
 
@@ -59,12 +77,19 @@ def get_bodies(system_name):
     requestData = {
         "systemName": system_name
     }
-
-    data = requests.get("https://www.edsm.net/api-system-v1/bodies", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
-
+    
+    retry_count = 10
+    data = None
+    while not data and retry_count:
+        try:
+            data = requests.get("https://www.edsm.net/api-system-v1/bodies", requestData, headers=headers)
+            if data.status_code != 200:
+                raise ("request returned bad response code %d" % (data.status_code))
+        except Exception as e:
+            data = None
+            logger.error(e)
+            retry_count -= 1
+    
     return data.json()
 
 
@@ -72,12 +97,19 @@ def get_system_estimated_value(system_name):
     requestData = {
         "systemName": system_name
     }
-
-    data = requests.get("https://www.edsm.net/api-system-v1/estimated-value", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
-
+    
+    retry_count = 10
+    data = None
+    while not data and retry_count:
+        try:
+            data = requests.get("https://www.edsm.net/api-system-v1/estimated-value", requestData, headers=headers)
+            if data.status_code != 200:
+                raise ("request returned bad response code %d" % (data.status_code))
+        except Exception as e:
+            data = None
+            logger.error(e)
+            retry_count -= 1
+    
     return data.json()
 
 
