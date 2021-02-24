@@ -98,17 +98,20 @@ class EDScout:
         # { "timestamp":"2020-07-17T21:48:48Z", "event":"Location", "Docked":false, "StarSystem":"Mel 111 Sector HH-V c2-1", "SystemAddress":358663590610, "StarPos":[-60.71875,318.40625,5.03125], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Mel 111 Sector HH-V c2-1", "BodyID":0, "BodyType":"Star" }
         # { "timestamp":"2020-07-17T21:50:36Z", "event":"FSDJump", "StarSystem":"HIP 64420", "SystemAddress":560233253227, "StarPos":[-49.87500,317.75000,-0.56250], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"HIP 64420", "BodyID":0, "BodyType":"Star", "JumpDist":12.219, "FuelUsed":0.947167, "FuelLevel":12.835925 }
 
+        edsmUplinkValid = None
         system_name = EDScout.identify_system_name(journal_entry)
         if "StarClass" in journal_entry:
             star_class = journal_entry["StarClass"]
         else:
             # Rely on edsm to fill this in
+            edsmUplinkValid = True
             try:
                 system = EDSMInterface.get_system(system_name)
                 logger.debug(system)
             except (EDSMInterface.EDSMApiAccessException, requests.exceptions.ConnectionError):
-                logger.exception("Failed to get systm info to identify star type")
+                logger.exception("Failed to get system info to identify star type")
                 system = None
+                edsmUplinkValid = False
 
             if system and system["primaryStar"]:
                 star_class = system["primaryStar"]["type"].split(maxsplit=1)[0]
@@ -120,6 +123,9 @@ class EDScout:
             'SystemAddress': journal_entry["SystemAddress"],
             'StarClass': star_class
         }
+
+        if edsmUplinkValid != None:
+            additional_info['EdsmUplinkValid'] = edsmUplinkValid
 
         # print(f"SystemName={systemName}")
         edsm_info = EDScout.get_edsm_system_report(system_name, journal_entry['event'])
@@ -183,11 +189,6 @@ class EDScout:
             #     with requests_cache.disabled():
             #         logger.info(f"BODY INFO: {EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))}")
 
-    @staticmethod
-    def check_system_content(new_entry):
-        bodies = EDSMInterface.get_bodies(EDScout.identify_system_name(new_entry))
-        logger.info("Body check: ", bodies)
-
     def on_journal_change(self, altered_journal):
         entries = self.journal_change_processor.process_journal_change(altered_journal)
 
@@ -209,8 +210,9 @@ class EDScout:
 
         try:
             estimated_value = EDSMInterface.get_system_estimated_value(star_system)
+            estimated_value['EdsmUplinkValid'] = True
         except (EDSMInterface.EDSMApiAccessException, requests.exceptions.ConnectionError):
-            estimated_value = []
+            estimated_value = {'EdsmUplinkValid': False}
             logger.exception("Failed to get estimated system value")
 
         # IC 2602 Sector GC-T b4-8 (M) Charted:
