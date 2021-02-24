@@ -32,10 +32,19 @@ def set_current_version(version):
 
 
 def make_request(url, request_data):
-    data = requests.get(url, request_data, headers=headers)
 
-    if data.status_code != 200:
-        raise EDSMApiAccessException("Request returned bad response code %d" % data.status_code)
+    attempts = 0
+    data = None
+    while data is None:
+        attempts += 1
+        try:
+            data = requests.get(url, request_data, headers=headers)
+            if data.status_code != 200:
+                raise EDSMApiAccessException("Request returned bad response code %d" % data.status_code)
+        except Exception:
+            if attempts == 3:
+                # We're out of chances so let this propagate.
+                raise
 
     return data.json()
 
