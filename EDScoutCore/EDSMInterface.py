@@ -7,7 +7,7 @@ import platform
 
 # Setup the cache directory in the user area.
 osname = platform.system()
-if  osname == 'Windows':
+if osname == 'Windows':
     cache_path = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout')
 elif osname == 'Linux':
     cache_path = os.path.join(os.path.expanduser('~'), '.local', 'share', 'EDScout')
@@ -32,7 +32,6 @@ def set_current_version(version):
 
 
 def make_request(url, request_data):
-
     attempts = 0
     data = None
     while data is None:

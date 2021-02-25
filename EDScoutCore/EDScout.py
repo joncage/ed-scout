@@ -98,20 +98,20 @@ class EDScout:
         # { "timestamp":"2020-07-17T21:48:48Z", "event":"Location", "Docked":false, "StarSystem":"Mel 111 Sector HH-V c2-1", "SystemAddress":358663590610, "StarPos":[-60.71875,318.40625,5.03125], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"Mel 111 Sector HH-V c2-1", "BodyID":0, "BodyType":"Star" }
         # { "timestamp":"2020-07-17T21:50:36Z", "event":"FSDJump", "StarSystem":"HIP 64420", "SystemAddress":560233253227, "StarPos":[-49.87500,317.75000,-0.56250], "SystemAllegiance":"", "SystemEconomy":"$economy_None;", "SystemEconomy_Localised":"None", "SystemSecondEconomy":"$economy_None;", "SystemSecondEconomy_Localised":"None", "SystemGovernment":"$government_None;", "SystemGovernment_Localised":"None", "SystemSecurity":"$GAlAXY_MAP_INFO_state_anarchy;", "SystemSecurity_Localised":"Anarchy", "Population":0, "Body":"HIP 64420", "BodyID":0, "BodyType":"Star", "JumpDist":12.219, "FuelUsed":0.947167, "FuelLevel":12.835925 }
 
-        edsmUplinkValid = None
+        edsm_uplink_valid = None
         system_name = EDScout.identify_system_name(journal_entry)
         if "StarClass" in journal_entry:
             star_class = journal_entry["StarClass"]
         else:
             # Rely on edsm to fill this in
-            edsmUplinkValid = True
+            edsm_uplink_valid = True
             try:
                 system = EDSMInterface.get_system(system_name)
                 logger.debug(system)
             except (EDSMInterface.EDSMApiAccessException, requests.exceptions.ConnectionError):
                 logger.exception("Failed to get system info to identify star type")
                 system = None
-                edsmUplinkValid = False
+                edsm_uplink_valid = False
 
             if system and system["primaryStar"]:
                 star_class = system["primaryStar"]["type"].split(maxsplit=1)[0]
@@ -124,8 +124,8 @@ class EDScout:
             'StarClass': star_class
         }
 
-        if edsmUplinkValid != None:
-            additional_info['EdsmUplinkValid'] = edsmUplinkValid
+        if edsm_uplink_valid is not None:
+            additional_info['EdsmUplinkValid'] = edsm_uplink_valid
 
         # print(f"SystemName={systemName}")
         edsm_info = EDScout.get_edsm_system_report(system_name, journal_entry['event'])
