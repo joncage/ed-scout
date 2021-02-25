@@ -486,6 +486,7 @@
 
     function postData(payload) {
         console.log(payload);
+        connectivityReport(payload)
         let payloadContent = payload.data;
         if (payloadContent.type === 'NewRoute') {
             console.log('Clearing');
@@ -581,6 +582,8 @@
     }
 
     let enableBackendConnections = true;
+
+    let prevEdsmUplinkValid = true;
 
     function WrapWithEventType(type, entryContent) {
         let wrap = {'data': {'type': type}};
@@ -742,6 +745,20 @@
 
             let alertDiv = document.getElementById('new-version-alert-wrapper')
             alertDiv.hidden = false;
+        }
+    }
+
+    function connectivityReport(event) {
+        data = event.data
+        if ('EdsmUplinkValid' in data) {
+            let edsmUplinkValid = data['EdsmUplinkValid']
+            if (edsmUplinkValid != prevEdsmUplinkValid)
+            {
+                let alertDiv = document.getElementById('edsm-uplink-alert-wrapper')
+                alertDiv.hidden = edsmUplinkValid;
+                prevEdsmUplinkValid = edsmUplinkValid;
+            }
+
         }
     }
 
