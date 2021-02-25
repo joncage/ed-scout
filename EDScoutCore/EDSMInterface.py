@@ -7,7 +7,7 @@ import platform
 
 # Setup the cache directory in the user area.
 osname = platform.system()
-if  osname == 'Windows':
+if osname == 'Windows':
     cache_path = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'EDScout')
 elif osname == 'Linux':
     cache_path = os.path.join(os.path.expanduser('~'), '.local', 'share', 'EDScout')
@@ -23,62 +23,65 @@ headers = {
 }
 
 
+class EDSMApiAccessException(Exception) :
+    pass
+
+
 def set_current_version(version):
     headers['User-Agent'] = f"EDScout {version}"
 
 
+def make_request(url, request_data):
+    attempts = 0
+    data = None
+    while data is None:
+        attempts += 1
+        try:
+            data = requests.get(url, request_data, headers=headers)
+            if data.status_code != 200:
+                raise EDSMApiAccessException("Request returned bad response code %d" % data.status_code)
+        except Exception:
+            if attempts == 3:
+                # We're out of chances so let this propagate.
+                raise
+
+    return data.json()
+
+
 def get_system(system_name):
-    requestData = {
+    request_data = {
         "systemName": system_name,
         "showID": 1,
         "showCoordinates": 1,
         "showPrimaryStar": 1
     }
 
-    data = requests.get("https://www.edsm.net/api-v1/system", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
-    return data.json()
+    return make_request("https://www.edsm.net/api-v1/system", request_data)
 
 
 def get_systems(system_name, radius):
-    requestData = {
+    request_data = {
         "systemName": system_name,
         "radius": radius
     }
 
-    data = requests.get("https://www.edsm.net/api-v1/sphere-systems", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
-    return data.json()
+    return make_request("https://www.edsm.net/api-v1/sphere-systems", request_data)
 
 
 def get_bodies(system_name):
-    requestData = {
+    request_data = {
         "systemName": system_name
     }
 
-    data = requests.get("https://www.edsm.net/api-system-v1/bodies", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
-
-    return data.json()
+    return make_request("https://www.edsm.net/api-system-v1/bodies", request_data)
 
 
 def get_system_estimated_value(system_name):
-    requestData = {
+    request_data = {
         "systemName": system_name
     }
 
-    data = requests.get("https://www.edsm.net/api-system-v1/estimated-value", requestData, headers=headers)
-
-    if data.status_code != 200:
-        raise ("request returned bad response code %d" % (data.status_code))
-
-    return data.json()
+    return make_request("https://www.edsm.net/api-system-v1/estimated-value", request_data)
 
 
 def search_systems(system_name, radius):
