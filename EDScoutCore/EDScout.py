@@ -222,8 +222,7 @@ class EDScout:
 
         report_content = {'type': 'System-' + association}
         report_content.update(estimated_value)
-        is_uncharted = (not estimated_value) | (not estimated_value['EdsmUplinkValid']) # If there's an uplink error it's probably best to indicate it's uncharted as we don't know any better
-        report_content['charted'] = not is_uncharted
+        report_content['charted'] = 'estimatedValue' in estimated_value
         # print(f"report_content['charted']={report_content['charted']}, is_uncharted={is_uncharted}")
 
         return report_content
