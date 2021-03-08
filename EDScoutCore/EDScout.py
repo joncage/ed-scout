@@ -147,8 +147,7 @@ class EDScout:
         new_entry["StarClass"] = self.lookup_star_class(new_entry)
 
         edsm_report = EDScout.get_edsm_system_report(new_entry['StarSystem'], 'FSDJump')
-        new_entry["valuableBodies"] = edsm_report["valuableBodies"]
-        new_entry["estimatedValueMapped"] = edsm_report["estimatedValueMapped"]
+        new_entry.update(edsm_report)
 
         return new_entry
 
