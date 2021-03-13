@@ -190,7 +190,12 @@ class JournalWatcher:
 
     def _on_journal_change(self, altered_file):
         self.set_current_journal(altered_file)  # Make sure we keep the prompter pointed at the current file.
-        self.report_journal_change(altered_file)
+        try:
+            self.report_journal_change(altered_file)
+        except Exception as e:
+            # Capture and report.
+            # Hopefully this will prevent the background watcher from going down permanently.
+            logger.exception(e)
 
     def _configure_watchers(self):
         if not os.path.exists(self.journal_path):

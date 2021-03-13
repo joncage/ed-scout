@@ -570,9 +570,13 @@
                         addNewSystemToContainer(payloadContent, container);
                     }
                 }
-                else if ((payloadContent.type === 'System-Location') || // Update the system recorded in 'current system'
-                    (payloadContent.type === 'System-FSDJump')) // Happens at the end of the jump so update the current system.
+                else if (payloadContent.type === 'System-Location')
                 {
+                    addNewSystemToContainer(payloadContent, document.getElementById('location'));
+                }
+                else if (payloadContent.type === 'System-FSDJump') // Happens at the end of the jump so update the current system.
+                {
+                    finishJump(payloadContent);
                     addNewSystemToContainer(payloadContent, document.getElementById('location'));
                 }
 
