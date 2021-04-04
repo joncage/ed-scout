@@ -15,7 +15,7 @@ Enjoy this tool? Consider..
 * [Donating to EDSM](https://www.edsm.net/en_GB/donation)
 * [Buying me a coffee](https://ko-fi.com/S6S8424WV)
 
-..to the scout can keep flying :-) 
+..to keep the scout flying :-) 
 
 ## Usage
  
