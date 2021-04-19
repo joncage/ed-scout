@@ -368,7 +368,7 @@
         if (distance > 0) {
             let systemDistance = document.createElement('div');
             systemDistance.classList.add("col-1", "system", chartedSpecificStyle, "text-right");
-            systemDistance.innerText = distance.toFixed(2);
+            systemDistance.innerText = Math.round(distance);
             row.innerHTML = systemDistance.outerHTML;
         }
         
