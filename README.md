@@ -10,7 +10,12 @@ I got sick of jumping into system after system trying to find unexplored worlds 
 
 Note that many systems out there have already been discovered by commanders who weren't running EDDiscovery / EDSM. Consequently there's no guarantee that the system you're about to leap into is _definitely_ new, but it certainly improves the chances. Conversely, if you're looking for guarantees that systems you're jumping to will make some money with a bit of scanning, this _will_ quickly show you some profitable route options (along the lines of the road to riches but with less typing).
 
-Enjoy this tool? Consider [donating to EDSM](https://www.edsm.net/en_GB/donation) so the scout can keep flying :-) 
+Enjoy this tool? Consider..
+
+* [Donating to EDSM](https://www.edsm.net/en_GB/donation)
+* [Buying me a coffee](https://ko-fi.com/S6S8424WV)
+
+..to keep the scout flying :-) 
 
 ## Usage
  

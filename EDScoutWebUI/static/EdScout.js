@@ -34,6 +34,7 @@
         let locationElement = document.getElementById('location');
         clearCurrentLocation();
         locationElement.setAttribute('data-currentSystem', systemId);
+        locationElement.setAttribute('data-currentPosition', systemInfo.StarPos);
     }
 
     function getCurrentSystem() {
@@ -43,6 +44,20 @@
         }
         else {
             return null;
+        }
+    }
+
+    function getDistanceFromCurrentSystem(systemInfo) {
+        let locationElement = document.getElementById('location');
+        if (locationElement.hasAttribute('data-currentPosition')) {
+            let currentPos = locationElement.getAttribute('data-currentPosition').split(',');
+            let dx = systemInfo.StarPos[0] - currentPos[0];
+            let dy = systemInfo.StarPos[1] - currentPos[1];
+            let dz = systemInfo.StarPos[2] - currentPos[2];
+            return Math.sqrt((dx*dx) + (dy*dy) + (dz*dz));
+        }
+        else {
+            return 0;
         }
     }
 
@@ -349,6 +364,14 @@
         row.id = systemInfo.SystemAddress;
         let chartedSpecificStyle = systemInfo.charted?"charted":"uncharted";
 
+        distance = getDistanceFromCurrentSystem(systemInfo);
+        if (distance > 0) {
+            let systemDistance = document.createElement('div');
+            systemDistance.classList.add("col-1", "system", chartedSpecificStyle, "text-right");
+            systemDistance.innerText = Math.round(distance);
+            row.innerHTML = systemDistance.outerHTML;
+        }
+        
         let systemName = document.createElement('div');
         systemName.classList.add("col", "system", chartedSpecificStyle);
         let starClass = "["+(systemInfo.StarClass?systemInfo.StarClass:"?")+"]";
@@ -359,7 +382,7 @@
         let mappedValue = systemInfo.charted?systemInfo.estimatedValueMapped:"?";
         systemValue.innerText = numberWithCommas(mappedValue);
 
-        row.innerHTML = systemName.outerHTML+systemValue.outerHTML;
+        row.innerHTML += systemName.outerHTML+systemValue.outerHTML;
 
         return row;
     }
@@ -369,7 +392,7 @@
     function createBodyEntry(body, system_id) {
 
         let spacer = document.createElement('div');
-        spacer.classList.add("col-1", "system");
+        spacer.classList.add("col-2", "system");
 
         let bodyName = document.createElement('div');
         bodyName.classList.add("col", "system", "charted");
