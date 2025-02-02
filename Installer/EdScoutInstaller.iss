@@ -31,46 +31,73 @@ Name: "{autodesktop}\EDScout"; Filename: "{app}\EDScout.exe"
 Filename: {app}\EDScout.exe; Description: Run EDScout now; Flags: postinstall nowait skipifsilent
 
 [Code]
-const
-  SHCONTCH_NOPROGRESSBOX = 4;
-  SHCONTCH_RESPONDYESTOALL = 16;
+var
+  DownloadPage: TDownloadWizardPage;
 
-procedure dw(ZipPath, TargetPath: string); 
+function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+begin
+  if Progress = ProgressMax then
+    Log(Format('Successfully downloaded file to {tmp}: %s', [FileName]));
+  Result := True;
+end;
+
+procedure InitializeWizard;
+begin
+  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+  DownloadPage.ShowBaseNameInsteadOfUrl := True;
+end;
+
+const
+  NO_PROGRESS_BOX = 4;
+  RESPOND_YES_TO_ALL = 16;
+
+procedure UnZip(ZipPath, FileName, TargetPath: string); 
 var
   Shell: Variant;
   ZipFile: Variant;
+  Item: Variant;
   TargetFolder: Variant;
 begin
   Shell := CreateOleObject('Shell.Application');
 
   ZipFile := Shell.NameSpace(ZipPath);
   if VarIsClear(ZipFile) then
-    RaiseException(Format('ZIP file "%s" does not exist or cannot be opened', [ZipPath]));
+    RaiseException(Format('Cannot open ZIP file "%s" or does not exist', [ZipPath]));
+
+  Item := ZipFile.ParseName(FileName);
+  if VarIsClear(Item) then
+    RaiseException(Format('Cannot find "%s" in "%s" ZIP file', [FileName, ZipPath]));
 
   TargetFolder := Shell.NameSpace(TargetPath);
   if VarIsClear(TargetFolder) then
     RaiseException(Format('Target path "%s" does not exist', [TargetPath]));
 
-  TargetFolder.CopyHere(ZipFile.Items, SHCONTCH_NOPROGRESSBOX or SHCONTCH_RESPONDYESTOALL);
+  TargetFolder.CopyHere(Item, NO_PROGRESS_BOX or RESPOND_YES_TO_ALL);
 end;
 
-function OnDownloadProgress(const Url, Filename: string; const Progress, ProgressMax: Int64): Boolean;
+function NextButtonClick(CurPageID: Integer): Boolean;
 begin
-  if ProgressMax <> 0 then
-    Log(Format('  %d of %d bytes done.', [Progress, ProgressMax]))
-  else
-    Log(Format('  %d bytes done.', [Progress]));
-  Result := True;
-end;
-
-function InitializeSetup: Boolean;
-begin
-  try
-    DownloadTemporaryFile('https://www.cufonfonts.com/download/rf/eurostile', 'eurostile-cufonfonts.zip', '', @OnDownloadProgress);
-    dw(ExpandConstant('{tmp}')+'\eurostile-cufonfonts.zip', ExpandConstant('{tmp}'));
+  if CurPageID = wpReady then begin
+    DownloadPage.Clear;
+    // Use AddEx to specify a username and password
+    DownloadPage.Add('https://font.download/dl/font/eurostile-2.zip', 'eurostile-font.zip', '');
+    DownloadPage.Show;
+    try
+      try
+        DownloadPage.Download; // This downloads the files to {tmp}
+        UnZip(ExpandConstant('{tmp}\eurostile-font.zip'), 'eurostile.TTF', ExpandConstant('{tmp}'));
+        Result := True;
+      except
+        if DownloadPage.AbortedByUser then
+          Log('Aborted by user.')
+        else
+          SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+        Result := False;
+      end;
+    finally
+      DownloadPage.Hide;
+    end;
+  end else
     Result := True;
-  except
-    Log(GetExceptionMessage);
-    Result := False;
-  end;
 end;
+
