@@ -2,7 +2,7 @@ import json
 import os
 import platform
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class OutputRecorder:
@@ -18,14 +18,14 @@ class OutputRecorder:
 
         if not os.path.isdir(recording_dir):
             Path(recording_dir).mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+        timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d-%H-%M-%S')
         file_name = file_name_prefix + '-' + timestamp + ".json"
         file_path = os.path.join(recording_dir, file_name)
         self.output = open(file_path, "w")
 
     def record(self, stream_point, new_entry):
         new_record = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'stream_point': stream_point,
             'entry': new_entry
         }

@@ -23,6 +23,7 @@ pipenv run pyinstaller ^
     --hidden-import=dns.update ^
     --hidden-import=dns.version ^
     --hidden-import=dns.zone ^
+    --hidden-import=dns.versioned ^
     --hidden-import=engineio.async_drivers ^
     --hidden-import=engineio.async_drivers.eventlet ^
     --hidden-import=engineio.server ^
