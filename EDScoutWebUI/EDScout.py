@@ -7,11 +7,8 @@ import tempfile
 import platform
 import psutil
 import time
-import threading
-import requests
-import re
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import Flask, render_template, send_from_directory
@@ -196,7 +193,7 @@ def receive_and_forward(scout):
 def index():
     return render_template('index.html',
                            version=__version__,
-                           timestamp=str(datetime.now(datetime.UTC)),
+                           timestamp=str(datetime.now(timezone.utc)),
                            disable_nav_route=args.disable_nav_route)
 
 
