@@ -96,7 +96,7 @@ def configure_logger(logger_to_configure, log_path, log_level_override=None):
 def version_check(current_version):
     version_check_response = check_version()
     if version_check_response:
-        socketio.emit('version', version_check_response, broadcast=True)
+        socketio.emit('version', version_check_response)
 
 
 # Work out where to stick the logs and make sure it exists
@@ -109,7 +109,7 @@ else:
     raise Exception(f"EDScout does not support {osname}")
 if not os.path.isdir(logging_dir):
     Path(logging_dir).mkdir(parents=True, exist_ok=True)
-timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 logging_path = os.path.join(logging_dir, f"EDScout-{timestamp}.log")
 
 # Configure logging
@@ -160,7 +160,7 @@ if not is_deployed:
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
 if args.run_as_app:
-    ui = FlaskUI(app, socketio=socketio, host=args.host, port=args.port)
+    ui = FlaskUI(app=app, socketio=socketio, port=args.port, server="flask_socketio")
 else:
     ui = None
 
@@ -187,7 +187,7 @@ def receive_and_forward(scout):
             log.debug("Received:   '" + message + "'")
             content = dict(data=json.loads(message))
             log.debug("Forwarding: '" + str(content) + "'")
-            socketio.emit('log', content, broadcast=True)
+            socketio.emit('log', content)
         except Exception as pass_on_failure:
             log.exception(pass_on_failure)
 
@@ -196,7 +196,7 @@ def receive_and_forward(scout):
 def index():
     return render_template('index.html',
                            version=__version__,
-                           timestamp=str(datetime.utcnow()),
+                           timestamp=str(datetime.now(datetime.UTC)),
                            disable_nav_route=args.disable_nav_route)
 
 
