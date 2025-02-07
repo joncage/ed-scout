@@ -157,7 +157,11 @@ if not is_deployed:
 # Configure socketIO and the WebUI we use to encapsulate the window
 socketio = SocketIO(app)
 if args.run_as_app:
-    ui = FlaskUI(app=app, socketio=socketio, port=args.port, server="flask_socketio")
+    browser_path = config.get_option('browser_path').lower() # Enable any users that only have browsers installed in non-traditional paths that FlaskWebGui won't find.
+    if browser_path == '':
+        browser_path = None
+    ui = FlaskUI(app=app, socketio=socketio, port=args.port, server="flask_socketio", browser_path=browser_path)
+
 else:
     ui = None
 
